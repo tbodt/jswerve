@@ -30,6 +30,8 @@ public class JSwerver {
      * @param args the command line arguments
      */
     public static void main(String[] args) throws IOException {
+        System.setProperty("line.separator", "\r\n"); // that's how HTTP does it
+        
         ExecutorService pool = Executors.newWorkStealingPool();
         ServerSocket ss = new ServerSocket(8888);
         while (true) {            

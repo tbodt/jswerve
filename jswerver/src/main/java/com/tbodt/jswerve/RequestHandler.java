@@ -32,13 +32,13 @@ public class RequestHandler implements Runnable {
 
     public void run() {
         try {
-            StatusCode status = null;
+            StatusCode status = StatusCode.OK;
             Request request = null;
             try {
                 request = Request.readRequest(socket.getInputStream());
             } catch (StatusCodeException ex) {
                 status = ex.getStatusCode();
-            } catch (Exception ex) {
+            } catch (RuntimeException ex) {
                 status = StatusCode.BAD_REQUEST;
             }
             Response response = new Response(status, request.getHttpVersion());
