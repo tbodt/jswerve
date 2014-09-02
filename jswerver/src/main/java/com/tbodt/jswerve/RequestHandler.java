@@ -34,14 +34,18 @@ public class RequestHandler implements Runnable {
         try {
             StatusCode status = StatusCode.OK;
             Request request = null;
+            String httpVersion;
             try {
                 request = Request.readRequest(socket.getInputStream());
+                httpVersion = request.getHttpVersion();
             } catch (StatusCodeException ex) {
                 status = ex.getStatusCode();
+                httpVersion = "HTTP/1.1";
             } catch (RuntimeException ex) {
                 status = StatusCode.BAD_REQUEST;
+                httpVersion = "HTTP/1.1";
             }
-            Response response = new Response(status, request.getHttpVersion());
+            Response response = new Response(status, httpVersion);
             response.writeResponse(socket.getOutputStream());
             socket.close();
         } catch (IOException ex) {

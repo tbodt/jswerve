@@ -42,9 +42,17 @@ public abstract class Request {
         
         // Second, process the request.
         String[] requestLine = lines.remove().split(" ");
+        if (requestLine.length > 3)
+            throw new IllegalArgumentException();
         String method = requestLine[0];
         String requestUri = requestLine[1];
-        String httpVersion = requestLine[2];
+        String httpVersion;
+        if (requestLine.length < 3)
+            httpVersion = "HTTP/1.0";
+        else
+            httpVersion = requestLine[2];
+        if (!httpVersion.matches("HTTP/\\d+\\.\\d+"))
+            throw new IllegalArgumentException();
         Map<String, String> headers = new HashMap<String, String>();
         String header;
         while ((header = lines.poll()) != null) {

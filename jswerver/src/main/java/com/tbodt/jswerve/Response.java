@@ -16,8 +16,7 @@
  */
 package com.tbodt.jswerve;
 
-import java.io.OutputStream;
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,33 +29,39 @@ public class Response {
     private final String httpVersion;
     private final Map<String, String> headers;
     private final byte[] body;
-    
+
     public static final Map<String, String> DEFAULT_HEADERS = new HashMap<String, String>();
+
     static {
         DEFAULT_HEADERS.put("Connection", "close");
     }
 
     public Response(StatusCode status, String httpVersion) {
-        this(status, httpVersion, null);
+        this(status, httpVersion, null, null);
     }
-    
-    public Response(StatusCode status, String httpVersion, byte[] body) {
+
+    public Response(StatusCode status, String httpVersion, byte[] body, String contentType) {
         this.status = status;
         this.httpVersion = httpVersion;
         this.headers = new HashMap<String, String>(DEFAULT_HEADERS);
+        headers.put("Content-Type", contentType);
         this.body = body;
     }
-    
+
     public Map<String, String> getHeaders() {
         return headers;
     }
-    
-    public void writeResponse(OutputStream out) {
+
+    public void writeResponse(OutputStream out) throws IOException {
         PrintWriter writer = new PrintWriter(out);
-        
+
         writer.println(httpVersion + " " + status);
         for (Map.Entry<String, String> entry : headers.entrySet())
             writer.println(entry.getKey() + ": " + entry.getValue());
+        writer.println();
         writer.flush();
+        
+        out.write(body);
+        out.flush();
     }
 }
