@@ -53,7 +53,7 @@ public enum StatusCode {
     METHOD_NOT_ALLOWED              (405, "Method Not Allowed"),
     NOT_ACCEPTABLE                  (406, "Not Acceptable"),
     PROXY_AUTHENTICATION_REQUIRED   (407, "Proxy Authentication Required"),
-    REQUEST_TIMEOUT                 (408, "Request Timeout"),
+    REQUEST_TIMEOUT                 (408, "Request Time-out"),
     CONFLICT                        (409, "Conflict"),
     GONE                            (410, "Gone"),
     LENGTH_REQUIRED                 (411, "Length Required"),
@@ -69,7 +69,7 @@ public enum StatusCode {
     NOT_IMPLEMENTED                 (501, "Not Implemented"),
     BAD_GATEWAY                     (502, "Bad Gateway"),
     SERVICE_UNAVAILABLE             (503, "Service Unavailable"),
-    GATEWAY_TIMEOUT                 (504, "Gateway Timeout"),
+    GATEWAY_TIMEOUT                 (504, "Gateway Time-out"),
     HTTP_VERSION_NOT_SUPPORTED      (505, "HTTP Version Not Supported");
 
     private final int code;

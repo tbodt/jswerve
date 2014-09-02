@@ -21,8 +21,14 @@ package com.tbodt.jswerve;
  * @author Theodore Dubois
  */
 public class StatusCodeException extends Exception {
+    private final StatusCode code;
     
     public StatusCodeException(StatusCode code) {
         super(code.toString());
+        this.code = code;
+    }
+
+    public StatusCode getStatusCode() {
+        return code;
     }
 }

@@ -26,8 +26,7 @@ import java.util.*;
  * @author Theodore Dubois
  */
 public abstract class Request {
-    private int httpMajorVersion;
-    private int httpMinorVersion;
+    private String httpVersion;
     private Map<String, String> headers;
     
     public static Request readRequest(InputStream input) throws IOException, StatusCodeException {
@@ -60,8 +59,17 @@ public abstract class Request {
             request = new GetRequest(requestUri);
         else
             throw new StatusCodeException(StatusCode.NOT_IMPLEMENTED);
+        request.httpVersion = httpVersion;
         
         System.out.println(request);
         return request;
+    }
+
+    public String getHttpVersion() {
+        return httpVersion;
+    }
+
+    public Map<String, String> getHeaders() {
+        return Collections.unmodifiableMap(headers);
     }
 }
