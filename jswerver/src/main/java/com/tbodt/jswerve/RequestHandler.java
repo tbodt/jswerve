@@ -32,7 +32,7 @@ public class RequestHandler implements Runnable {
 
     public void run() {
         try {
-            StatusCode status = StatusCode.OK;
+            StatusCode status = StatusCode.INTERNAL_SERVER_ERROR;
             Request request = null;
             String httpVersion;
             try {
@@ -45,11 +45,16 @@ public class RequestHandler implements Runnable {
                 status = StatusCode.BAD_REQUEST;
                 httpVersion = "HTTP/1.1";
             }
-            Response response = new Response(status, httpVersion);
+            Response response = funResponse();
             response.writeResponse(socket.getOutputStream());
             socket.close();
         } catch (IOException ex) {
             // we can't really do anything about that
         }
+    }
+    
+    private static Response funResponse() {
+        String body = "Hello, world!";
+        return new Response(StatusCode.OK, "HTTP/1.1", body.getBytes(), "text/html");
     }
 }

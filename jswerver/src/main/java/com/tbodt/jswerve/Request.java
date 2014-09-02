@@ -68,8 +68,7 @@ public abstract class Request {
         else
             throw new StatusCodeException(StatusCode.NOT_IMPLEMENTED);
         request.httpVersion = httpVersion;
-        
-        System.out.println(request);
+
         return request;
     }
 
