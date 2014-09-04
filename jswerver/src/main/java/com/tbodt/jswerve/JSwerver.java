@@ -32,7 +32,7 @@ public class JSwerver {
     public static void main(String[] args) throws IOException {
         System.setProperty("line.separator", "\r\n"); // that's how HTTP does it
         
-        ExecutorService pool = Executors.newWorkStealingPool();
+        ExecutorService pool = Executors.newCachedThreadPool();
         ServerSocket ss = new ServerSocket(8888);
         while (true) {            
             Socket socket = ss.accept();
