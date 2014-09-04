@@ -39,20 +39,15 @@ public abstract class Request {
         // Remove initial blank lines, as reccomended by specification.
         while (lines.peek() != null && lines.peek().equals(""))
             lines.remove();
+        ensure(!lines.isEmpty());
         
         // Second, process the request.
         String[] requestLine = lines.remove().split(" ");
-        if (requestLine.length > 3)
-            throw new IllegalArgumentException();
+        ensure(requestLine.length == 3);
         String method = requestLine[0];
         String requestUri = requestLine[1];
-        String httpVersion;
-        if (requestLine.length < 3)
-            httpVersion = "HTTP/1.0";
-        else
-            httpVersion = requestLine[2];
-        if (!httpVersion.matches("HTTP/\\d+\\.\\d+"))
-            throw new IllegalArgumentException();
+        String httpVersion = requestLine[2];
+        ensure(httpVersion.matches("HTTP/\\d+\\.\\d+"));
         Map<String, String> headers = new HashMap<String, String>();
         String header;
         while ((header = lines.poll()) != null) {
@@ -62,6 +57,8 @@ public abstract class Request {
             headers.put(keyAndValue[0], keyAndValue[1]);
         }
         
+        // TODO implement request bodies
+        
         Request request;
         if (method.equals("GET"))
             request = new GetRequest(requestUri);
@@ -70,6 +67,16 @@ public abstract class Request {
         request.httpVersion = httpVersion;
 
         return request;
+    }
+    
+    private static void ensure(boolean what) throws StatusCodeException {
+        if (!what)
+            throw new BadRequestException();
+    }
+    
+    private static void ensure(boolean what, String httpVersion) throws BadRequestException {
+        if (!what)
+            throw new BadRequestException(httpVersion);
     }
 
     public String getHttpVersion() {

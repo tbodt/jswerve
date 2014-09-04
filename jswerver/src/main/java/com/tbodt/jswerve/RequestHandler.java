@@ -40,19 +40,23 @@ public class RequestHandler implements Runnable {
                 httpVersion = request.getHttpVersion();
             } catch (StatusCodeException ex) {
                 status = ex.getStatusCode();
-                httpVersion = "HTTP/1.1";
-            } catch (RuntimeException ex) {
-                status = StatusCode.BAD_REQUEST;
-                httpVersion = "HTTP/1.1";
+                if (ex instanceof BadRequestException)
+                    httpVersion = ((BadRequestException) ex).getHttpVersion();
+                else
+                    httpVersion = "HTTP/1.1";
             }
-            Response response = funResponse();
+            Response response;
+            if (request != null)
+                response = new Response(status, httpVersion);
+            else
+                response = funResponse();
             response.writeResponse(socket.getOutputStream());
             socket.close();
         } catch (IOException ex) {
             // we can't really do anything about that
         }
     }
-    
+
     private static Response funResponse() {
         String body = "Hello, world!";
         return new Response(StatusCode.OK, "HTTP/1.1", body.getBytes(), "text/html");
