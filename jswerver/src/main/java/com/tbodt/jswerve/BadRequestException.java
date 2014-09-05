@@ -33,7 +33,7 @@ public class BadRequestException extends StatusCodeException {
     }
     
     public BadRequestException() {
-        this("HTTP/1.1");
+        this(Constants.DEFAULT_HTTP_VERSION);
     }
 
     public String getHttpVersion() {
