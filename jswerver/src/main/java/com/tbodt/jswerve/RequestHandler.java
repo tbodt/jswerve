@@ -46,7 +46,7 @@ public class RequestHandler implements Runnable {
                     httpVersion = "HTTP/1.1";
             }
             Response response;
-            if (request != null)
+            if (request == null)
                 response = new Response(status, httpVersion);
             else
                 response = funResponse();
