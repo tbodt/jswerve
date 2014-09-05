@@ -19,12 +19,18 @@
                 <executions>
                     <execution>
                         <goals>
-                            <goal>java</goal>
+                            <goal>exec</goal>
                         </goals>
                     </execution>
                 </executions>
                 <configuration>
-                    <mainClass>com.tbodt.jswerve.JSwerver</mainClass>
+                    <executable>java</executable>
+                    <arguments>
+                        <argument>-server</argument>
+                        <argument>-cp</argument>
+                        <classpath />
+                        <argument>com.tbodt.jswerve.JSwerver</argument>
+                    </arguments>
                 </configuration>
             </plugin>
         </plugins>
