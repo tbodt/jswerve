@@ -60,8 +60,10 @@ public class Response {
             writer.println(entry.getKey() + ": " + entry.getValue());
         writer.println();
         writer.flush();
-        
-        out.write(body);
-        out.flush();
+
+        if (body != null) {
+            out.write(body);
+            out.flush();
+        }
     }
 }
