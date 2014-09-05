@@ -49,16 +49,11 @@ public class RequestHandler implements Runnable {
             if (request == null)
                 response = new Response(status, httpVersion);
             else
-                response = funResponse();
+                response = request.service();
             response.writeResponse(socket.getOutputStream());
             socket.close();
         } catch (IOException ex) {
             // we can't really do anything about that
         }
-    }
-
-    private static Response funResponse() {
-        String body = "Hello, world!";
-        return new Response(StatusCode.OK, "HTTP/1.1", body.getBytes(), "text/html");
     }
 }

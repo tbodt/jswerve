@@ -28,4 +28,10 @@ public class GetRequest extends Request {
     public GetRequest(String requestUri) {
         uri = URI.create(requestUri);
     }
+
+    @Override
+    public Response service() {
+        String body = "Hello, world!";
+        return new Response(StatusCode.OK, "HTTP/1.1", body.getBytes(), "text/html");
+    }
 }
