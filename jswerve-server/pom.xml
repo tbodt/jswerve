@@ -7,7 +7,7 @@
         <artifactId>jswerve</artifactId>
         <version>0.1-SNAPSHOT</version>
     </parent>
-    <artifactId>jswerver</artifactId>
+    <artifactId>jswerve-server</artifactId>
     <packaging>jar</packaging>
 
     <build>
@@ -39,4 +39,5 @@
         <maven.compiler.source>1.5</maven.compiler.source>
         <maven.compiler.target>1.5</maven.compiler.target>
     </properties>
+    <name>jswerve-server</name>
 </project>
