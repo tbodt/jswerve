@@ -47,10 +47,10 @@ public class RequestHandler implements Runnable {
             }
             Response response;
             if (request == null)
-                response = new Response(status, httpVersion);
+                response = new Response(status);
             else
                 response = request.service();
-            response.writeResponse(socket.getOutputStream());
+            response.writeResponse(socket.getOutputStream(), httpVersion);
             socket.close();
         } catch (IOException ex) {
             // we can't really do anything about that

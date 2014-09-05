@@ -26,7 +26,6 @@ import java.util.Map;
  */
 public class Response {
     private final StatusCode status;
-    private final String httpVersion;
     private final Map<String, String> headers;
     private final byte[] body;
 
@@ -36,13 +35,12 @@ public class Response {
         DEFAULT_HEADERS.put("Connection", "close");
     }
 
-    public Response(StatusCode status, String httpVersion) {
-        this(status, httpVersion, null, null);
+    public Response(StatusCode status) {
+        this(status, null, null);
     }
 
-    public Response(StatusCode status, String httpVersion, byte[] body, String contentType) {
+    public Response(StatusCode status, byte[] body, String contentType) {
         this.status = status;
-        this.httpVersion = httpVersion;
         this.headers = new HashMap<String, String>(DEFAULT_HEADERS);
         headers.put("Content-Type", contentType);
         this.body = body;
@@ -52,7 +50,7 @@ public class Response {
         return headers;
     }
 
-    public void writeResponse(OutputStream out) throws IOException {
+    public void writeResponse(OutputStream out, String httpVersion) throws IOException {
         PrintWriter writer = new PrintWriter(out);
 
         writer.println(httpVersion + " " + status);

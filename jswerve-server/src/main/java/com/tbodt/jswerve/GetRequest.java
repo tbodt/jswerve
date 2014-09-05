@@ -32,6 +32,6 @@ public class GetRequest extends Request {
     @Override
     public Response service() {
         String body = "Hello, world!";
-        return new Response(StatusCode.OK, "HTTP/1.1", body.getBytes(), "text/html");
+        return new Response(StatusCode.OK, body.getBytes(), "text/html");
     }
 }
