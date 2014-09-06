@@ -16,22 +16,20 @@
  */
 package com.tbodt.jswerve;
 
-import java.net.URI;
-
 /**
  *
  * @author Theodore Dubois
  */
-public class GetRequest extends Request {
-    private final URI uri;
+public abstract class Website {
+    private static Website currentWebsite = new WelcomeWebsite();
 
-    public GetRequest(String requestUri) {
-        uri = URI.create(requestUri);
+    public static Website getCurrentWebsite() {
+        return currentWebsite;
+    }
+    
+    public static void setCurrentWebsite(Website website) {
+        currentWebsite = website;
     }
 
-    @Override
-    public Response service() {
-        String body = "Hello, world!";
-        return new Response(StatusCode.OK, body.getBytes(), "text/html");
-    }
+    public abstract Response service(Request request);
 }

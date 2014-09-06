@@ -25,11 +25,25 @@ import java.util.*;
  * @see RFC-2616 section 5
  * @author Theodore Dubois
  */
-public abstract class Request {
-    private String httpVersion;
-    private Map<String, String> headers;
+public final class Request {
+    private final Request.Method method;
+    private final String uri;
+    private final String httpVersion;
+    private final Map<String, String> headers;
+
+    public enum Method {
+        GET;
+        
+        public static Method forName(String name) throws StatusCodeException {
+            try {
+                return valueOf(name);
+            } catch (IllegalArgumentException e) {
+                throw new StatusCodeException(StatusCode.NOT_IMPLEMENTED);
+            }
+        }
+    }
     
-    public static Request readRequest(InputStream input) throws IOException, StatusCodeException {
+    public Request(InputStream input) throws IOException, StatusCodeException {
         // First, slurp up the request (using the ASCII encoding).
         BufferedReader reader = new BufferedReader(new InputStreamReader(input, "ASCII"));
         Queue<String> lines = new ArrayDeque<String>();
@@ -44,36 +58,27 @@ public abstract class Request {
         // Second, process the request.
         String[] requestLine = lines.remove().split(" ");
         ensure(requestLine.length == 3);
-        String method = requestLine[0];
-        String requestUri = requestLine[1];
-        String httpVersion = requestLine[2];
+        method = Method.forName(requestLine[0]);
+        uri = requestLine[1];
+        httpVersion = requestLine[2];
         ensure(httpVersion.matches("HTTP/\\d+\\.\\d+"));
+        
         Map<String, String> headers = new HashMap<String, String>();
         String header;
         while ((header = lines.poll()) != null) {
             String[] keyAndValue = header.split(":[ \t]*", 2);
+            ensure(keyAndValue.length == 2, httpVersion);
             while (lines.peek() != null && (lines.peek().startsWith(" ") || lines.peek().startsWith("\t")))
-                keyAndValue[1] += lines.poll().substring(1);
+                keyAndValue[1] += lines.remove().substring(1);
             headers.put(keyAndValue[0], keyAndValue[1]);
         }
-        
+        this.headers = Collections.unmodifiableMap(headers); 
         // TODO implement request bodies
-        
-        Request request;
-        if (method.equals("GET"))
-            request = new GetRequest(requestUri);
-        else
-            throw new StatusCodeException(StatusCode.NOT_IMPLEMENTED);
-        request.httpVersion = httpVersion;
-
-        return request;
     }
-    
-    private static void ensure(boolean what) throws StatusCodeException {
+    private static void ensure(boolean what) throws BadRequestException {
         if (!what)
             throw new BadRequestException();
     }
-    
     private static void ensure(boolean what, String httpVersion) throws BadRequestException {
         if (!what)
             throw new BadRequestException(httpVersion);
@@ -86,6 +91,4 @@ public abstract class Request {
     public Map<String, String> getHeaders() {
         return Collections.unmodifiableMap(headers);
     }
-    
-    public abstract Response service();
 }

@@ -32,24 +32,22 @@ public class RequestHandler implements Runnable {
 
     public void run() {
         try {
-            StatusCode status = StatusCode.INTERNAL_SERVER_ERROR;
-            Request request = null;
+            StatusCode status;
+            Request request;
+            Response response;
             String httpVersion;
             try {
-                request = Request.readRequest(socket.getInputStream());
+                request = new Request(socket.getInputStream());
                 httpVersion = request.getHttpVersion();
+                response = Website.getCurrentWebsite().service(request);
             } catch (StatusCodeException ex) {
                 status = ex.getStatusCode();
                 if (ex instanceof BadRequestException)
                     httpVersion = ((BadRequestException) ex).getHttpVersion();
                 else
                     httpVersion = "HTTP/1.1";
-            }
-            Response response;
-            if (request == null)
                 response = new Response(status);
-            else
-                response = request.service();
+            }
             response.writeResponse(socket.getOutputStream(), httpVersion);
             socket.close();
         } catch (IOException ex) {
