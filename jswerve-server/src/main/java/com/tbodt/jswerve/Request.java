@@ -82,7 +82,7 @@ public final class Request {
         headers = Collections.unmodifiableMap(theHeaders);
         
         if (headers.containsKey("Host"))
-            uri = unresolvedUri.resolve("http://" + headers.get("Host"));
+            uri = URI.create("http://" + headers.get("Host")).resolve(unresolvedUri);
         else
             uri = unresolvedUri;
         // TODO implement request bodies

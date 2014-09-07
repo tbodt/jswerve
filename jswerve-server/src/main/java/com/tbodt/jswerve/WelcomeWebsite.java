@@ -17,7 +17,6 @@
 package com.tbodt.jswerve;
 
 import java.io.*;
-import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -43,15 +42,14 @@ public class WelcomeWebsite extends Website {
             if (contentTypes.containsKey(extension))
                 contentType = contentTypes.get(extension);
         }
-        contentType += ";charset=UTF-8";
         System.out.println(contentType);
         System.out.println(path);
         
-        Reader pageIn = new InputStreamReader(WelcomeWebsite.class.getResourceAsStream(path));
-        StringBuilder b = new StringBuilder();
-        int c;
-        while ((c = pageIn.read()) != -1)
-            b.append((char) c);
-        return new Response(StatusCode.OK, b.toString().getBytes(Charset.forName("UTF-8")), contentType);
+        InputStream pageIn = WelcomeWebsite.class.getResourceAsStream(path);
+        ByteArrayOutputStream buf = new ByteArrayOutputStream();
+        int b;
+        while ((b = pageIn.read()) != -1)
+            buf.write(b);
+        return new Response(StatusCode.OK, buf.toByteArray(), contentType);
     }
 }
