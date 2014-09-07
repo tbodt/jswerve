@@ -17,23 +17,25 @@
 package com.tbodt.jswerve;
 
 import java.io.*;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.*;
 
 /**
- * An RFC-2616 compliant HTTP request. 
- * 
+ * An RFC-2616 compliant HTTP request.
+ *
  * @see RFC-2616 section 5
  * @author Theodore Dubois
  */
 public final class Request {
     private final Request.Method method;
-    private final String uri;
+    private final URI uri;
     private final String httpVersion;
     private final Map<String, String> headers;
 
     public enum Method {
         GET;
-        
+
         public static Method forName(String name) throws StatusCodeException {
             try {
                 return valueOf(name);
@@ -42,7 +44,7 @@ public final class Request {
             }
         }
     }
-    
+
     public Request(InputStream input) throws IOException, StatusCodeException {
         // First, slurp up the request (using the ASCII encoding).
         BufferedReader reader = new BufferedReader(new InputStreamReader(input, "ASCII"));
@@ -54,31 +56,43 @@ public final class Request {
         while (lines.peek() != null && lines.peek().equals(""))
             lines.remove();
         ensure(!lines.isEmpty());
-        
+
         // Second, process the request.
         String[] requestLine = lines.remove().split(" ");
         ensure(requestLine.length == 3);
         method = Method.forName(requestLine[0]);
-        uri = requestLine[1];
         httpVersion = requestLine[2];
         ensure(httpVersion.matches("HTTP/\\d+\\.\\d+"));
-        
-        Map<String, String> headers = new HashMap<String, String>();
+        URI unresolvedUri;
+        try {
+            unresolvedUri = new URI(requestLine[1]);
+        } catch (URISyntaxException ex) {
+            throw new BadRequestException();
+        }
+
+        Map<String, String> theHeaders = new HashMap<String, String>();
         String header;
         while ((header = lines.poll()) != null) {
             String[] keyAndValue = header.split(":[ \t]*", 2);
             ensure(keyAndValue.length == 2, httpVersion);
             while (lines.peek() != null && (lines.peek().startsWith(" ") || lines.peek().startsWith("\t")))
                 keyAndValue[1] += lines.remove().substring(1);
-            headers.put(keyAndValue[0], keyAndValue[1]);
+            theHeaders.put(keyAndValue[0], keyAndValue[1]);
         }
-        this.headers = Collections.unmodifiableMap(headers); 
+        headers = Collections.unmodifiableMap(theHeaders);
+        
+        if (headers.containsKey("Host"))
+            uri = unresolvedUri.resolve("http://" + headers.get("Host"));
+        else
+            uri = unresolvedUri;
         // TODO implement request bodies
     }
+
     private static void ensure(boolean what) throws BadRequestException {
         if (!what)
             throw new BadRequestException();
     }
+
     private static void ensure(boolean what, String httpVersion) throws BadRequestException {
         if (!what)
             throw new BadRequestException(httpVersion);
@@ -86,6 +100,14 @@ public final class Request {
 
     public String getHttpVersion() {
         return httpVersion;
+    }
+
+    public Method getMethod() {
+        return method;
+    }
+
+    public URI getUri() {
+        return uri;
     }
 
     public Map<String, String> getHeaders() {

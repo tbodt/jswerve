@@ -19,18 +19,24 @@
                 <executions>
                     <execution>
                         <goals>
-                            <goal>exec</goal>
+                            <goal>java</goal>
                         </goals>
                     </execution>
                 </executions>
                 <configuration>
-                    <executable>java</executable>
-                    <arguments>
-                        <argument>-server</argument>
-                        <argument>-cp</argument>
-                        <classpath />
-                        <argument>com.tbodt.jswerve.JSwerver</argument>
-                    </arguments>
+                    <mainClass>com.tbodt.jswerve.JSwerver</mainClass>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.5</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <mainClass>com.tbodt.jswerve.JSwerver</mainClass>
+                        </manifest>
+                    </archive>
                 </configuration>
             </plugin>
         </plugins>

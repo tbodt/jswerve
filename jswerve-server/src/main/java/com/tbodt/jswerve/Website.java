@@ -16,6 +16,8 @@
  */
 package com.tbodt.jswerve;
 
+import java.io.IOException;
+
 /**
  *
  * @author Theodore Dubois
@@ -31,5 +33,13 @@ public abstract class Website {
         currentWebsite = website;
     }
 
-    public abstract Response service(Request request);
+    public final Response service(Request request) {
+        try {
+            return serviceRequest(request);
+        } catch (IOException e) {
+            throw new StatusCodeException(StatusCode.INTERNAL_SERVER_ERROR, e);
+        }
+    }
+    
+    protected abstract Response serviceRequest(Request request) throws IOException;
 }

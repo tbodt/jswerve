@@ -16,14 +16,42 @@
  */
 package com.tbodt.jswerve;
 
+import java.io.*;
+import java.nio.charset.Charset;
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  *
  * @author Theodore Dubois
  */
 public class WelcomeWebsite extends Website {
+    private static final Map<String, String> contentTypes = new HashMap<String, String>();
+    static {
+        contentTypes.put("html", "text/html");
+        contentTypes.put("png", "image/png");
+    }
+    
     @Override
-    public Response service(Request request) {
-        String body = "Hello, world!";
-        return new Response(StatusCode.OK, body.getBytes(), "text/html");
+    public Response serviceRequest(Request request) throws IOException {
+        String path = "/com/tbodt/jswerve/welcome/" + request.getUri().getPath();
+        if (path.endsWith("/"))
+            path += "index.html";
+        String contentType = "text/plain";
+        if (path.lastIndexOf('.') != -1) {
+            String extension = path.substring(path.lastIndexOf('.') + 1);
+            if (contentTypes.containsKey(extension))
+                contentType = contentTypes.get(extension);
+        }
+        contentType += ";charset=UTF-8";
+        System.out.println(contentType);
+        System.out.println(path);
+        
+        Reader pageIn = new InputStreamReader(WelcomeWebsite.class.getResourceAsStream(path));
+        StringBuilder b = new StringBuilder();
+        int c;
+        while ((c = pageIn.read()) != -1)
+            b.append((char) c);
+        return new Response(StatusCode.OK, b.toString().getBytes(Charset.forName("UTF-8")), contentType);
     }
 }

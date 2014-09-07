@@ -46,6 +46,8 @@ public class RequestHandler implements Runnable {
                     httpVersion = ((BadRequestException) ex).getHttpVersion();
                 else
                     httpVersion = "HTTP/1.1";
+                if (ex.getCause() != null)
+                    ex.getCause().printStackTrace(System.err);
                 response = new Response(status);
             }
             response.writeResponse(socket.getOutputStream(), httpVersion);
