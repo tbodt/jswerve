@@ -42,10 +42,10 @@ public class WelcomeWebsite extends Website {
             if (contentTypes.containsKey(extension))
                 contentType = contentTypes.get(extension);
         }
-        System.out.println(contentType);
-        System.out.println(path);
         
         InputStream pageIn = WelcomeWebsite.class.getResourceAsStream(path);
+        if (pageIn == null)
+            return new Response(StatusCode.NOT_FOUND);
         ByteArrayOutputStream buf = new ByteArrayOutputStream();
         int b;
         while ((b = pageIn.read()) != -1)
