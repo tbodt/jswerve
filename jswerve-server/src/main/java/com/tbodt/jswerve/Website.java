@@ -16,15 +16,59 @@
  */
 package com.tbodt.jswerve;
 
-import java.io.IOException;
+import java.io.*;
+import java.util.*;
 
 /**
  *
  * @author Theodore Dubois
  */
-public abstract class Website {
-    private static Website currentWebsite = new WelcomeWebsite();
+public class Website {
+    private static Website currentWebsite = new Website("hello");
+    private static final Map<String, String> contentTypes = new HashMap<String, String>();
+    static {
+        contentTypes.put("html", "text/html");
+        contentTypes.put("png", "image/png");
+    }
 
+    private final String name;
+    private final File root;
+
+    public Website(String name) {
+        this.name = name;
+        this.root = new File(JSwerver.home, name);
+    }
+
+    public final Response service(Request request) {
+        try {
+            return serviceRequest(request);
+        } catch (Exception e) {
+            throw new StatusCodeException(StatusCode.INTERNAL_SERVER_ERROR, e);
+        }
+    }
+    
+    public Response serviceRequest(Request request) throws IOException {
+        String path = request.getUri().getPath();
+        if (path.endsWith("/"))
+            path += "index.html";
+        String contentType = "text/plain";
+        if (path.lastIndexOf('.') != -1) {
+            String extension = path.substring(path.lastIndexOf('.') + 1);
+            if (contentTypes.containsKey(extension))
+                contentType = contentTypes.get(extension);
+        }
+        
+        File file = new File(root, path);
+        if (!file.exists())
+            return new Response(StatusCode.NOT_FOUND);
+        InputStream pageIn = new FileInputStream(file);
+        ByteArrayOutputStream buf = new ByteArrayOutputStream();
+        int b;
+        while ((b = pageIn.read()) != -1)
+            buf.write(b);
+        return new Response(StatusCode.OK, buf.toByteArray(), contentType);
+    }
+    
     public static Website getCurrentWebsite() {
         return currentWebsite;
     }
@@ -32,14 +76,4 @@ public abstract class Website {
     public static void setCurrentWebsite(Website website) {
         currentWebsite = website;
     }
-
-    public final Response service(Request request) {
-        try {
-            return serviceRequest(request);
-        } catch (IOException e) {
-            throw new StatusCodeException(StatusCode.INTERNAL_SERVER_ERROR, e);
-        }
-    }
-    
-    protected abstract Response serviceRequest(Request request) throws IOException;
 }

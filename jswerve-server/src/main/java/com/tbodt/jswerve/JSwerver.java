@@ -16,6 +16,7 @@
  */
 package com.tbodt.jswerve;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -26,11 +27,15 @@ import java.util.concurrent.*;
  * @author Theodore Dubois
  */
 public class JSwerver {
+    public static File home;
+
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) throws IOException {
         System.setProperty("line.separator", "\r\n"); // that's how HTTP does it
+        home = new File(args[0]);
+        Website.setCurrentWebsite(new Website("hello"));
         
         ExecutorService pool = Executors.newCachedThreadPool();
         ServerSocket ss = new ServerSocket(Constants.PORT);

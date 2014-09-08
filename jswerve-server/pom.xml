@@ -25,6 +25,9 @@
                 </executions>
                 <configuration>
                     <mainClass>com.tbodt.jswerve.JSwerver</mainClass>
+                    <arguments>
+                        <argument>${project.parent.basedir}/jswerve-home</argument>
+                    </arguments>
                 </configuration>
             </plugin>
             <plugin>
