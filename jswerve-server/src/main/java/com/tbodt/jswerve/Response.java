@@ -42,7 +42,8 @@ public class Response {
     public Response(StatusCode status, byte[] body, String contentType) {
         this.status = status;
         this.headers = new HashMap<String, String>(DEFAULT_HEADERS);
-        headers.put("Content-Type", contentType);
+        if (contentType != null)
+            headers.put("Content-Type", contentType);
         this.body = body;
     }
 
