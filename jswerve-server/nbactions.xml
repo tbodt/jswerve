@@ -11,6 +11,7 @@
             </goals>
             <properties>
                 <exec.mainClass>com.tbodt.jswerve.JSwerver</exec.mainClass>
+                <exec.arguments>${project.parent.basedir}/jswerve-home</exec.arguments>
             </properties>
         </action>
         <action>
@@ -23,7 +24,7 @@
                 <goal>org.codehaus.mojo:exec-maven-plugin:1.2.1:exec</goal>
             </goals>
             <properties>
-                <exec.args>-Xdebug -Xrunjdwp:transport=dt_socket,server=n,address=${jpda.address} -classpath %classpath com.tbodt.jswerve.JSwerver</exec.args>
+                <exec.args>-Xdebug -Xrunjdwp:transport=dt_socket,server=n,address=${jpda.address} -classpath %classpath com.tbodt.jswerve.JSwerver ${project.parent.basedir}/jswerve-home</exec.args>
                 <exec.executable>java</exec.executable>
                 <jpda.listen>true</jpda.listen>
             </properties>

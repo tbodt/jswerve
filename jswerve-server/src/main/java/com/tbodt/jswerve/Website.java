@@ -26,6 +26,7 @@ import java.util.*;
 public class Website {
     private static Website currentWebsite = new Website("hello");
     private static final Map<String, String> contentTypes = new HashMap<String, String>();
+    private static final File SITES = new File(JSwerver.home, "sites");
 
     static {
         contentTypes.put("html", "text/html");
@@ -37,7 +38,7 @@ public class Website {
 
     public Website(String name) {
         this.name = name;
-        this.root = new File(JSwerver.home, name);
+        this.root = new File(SITES, name);
     }
 
     public final Response service(Request request) {
