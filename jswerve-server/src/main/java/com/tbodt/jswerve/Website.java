@@ -26,7 +26,7 @@ import java.util.*;
 public class Website {
     private static Website currentWebsite = new Website("hello");
     private static final Map<String, String> contentTypes = new HashMap<String, String>();
-    private static final File SITES = new File(JSwerver.home, "sites");
+    private static final File SITES = new File(JSwerver.HOME, "sites");
 
     static {
         contentTypes.put("html", "text/html");

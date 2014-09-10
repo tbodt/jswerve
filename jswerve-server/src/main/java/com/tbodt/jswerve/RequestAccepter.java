@@ -29,22 +29,26 @@ import java.util.concurrent.Executors;
  */
 public class RequestAccepter implements Runnable {
     private static Thread theThread;
+    private static ExecutorService pool;
 
     public static void start() {
-        if (theThread == null)
-            theThread = new Thread(new RequestAccepter());
+        pool = Executors.newCachedThreadPool();
+        theThread = new Thread(new RequestAccepter());
         theThread.start();
     }
     
     public static void stop() {
-        theThread.interrupt();
-        theThread = null;
+        if (theThread != null) {
+            theThread.interrupt();
+            theThread = null;
+            pool.shutdown();
+            pool = null;
+        }
     }
     
     @Override
     public void run() {
         try {
-            ExecutorService pool = Executors.newCachedThreadPool();
             ServerSocket ss = new ServerSocket(Constants.PORT);
             while (!Thread.interrupted()) {
                 Socket socket = ss.accept();

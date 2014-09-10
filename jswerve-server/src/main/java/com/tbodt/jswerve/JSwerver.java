@@ -23,25 +23,46 @@ import java.net.Socket;
 import java.util.concurrent.*;
 
 /**
+ * A class with static methods that control the server. It's also the main class.
  *
  * @author Theodore Dubois
  */
 public class JSwerver {
-    public static File home;
+    /**
+     * The home directory for the server.
+     */
+    public static File HOME;
+
+    /**
+     * Starts the server.
+     */
+    public static void start() {
+        RequestAccepter.start();
+    }
+
+    /**
+     * Stops the server.
+     */
+    public static void stop() {
+        RequestAccepter.stop();
+    }
+
+    /**
+     * Deploys a different website into the server.
+     */
+    public static void deploy(String name) {
+        stop();
+        Website.setCurrentWebsite(new Website(name));
+        start();
+    }
 
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) throws IOException {
         System.setProperty("line.separator", "\r\n"); // that's how HTTP does it
-        home = new File(args[0]);
-        Website.setCurrentWebsite(new Website("hello"));
-        
-        ExecutorService pool = Executors.newCachedThreadPool();
-        ServerSocket ss = new ServerSocket(Constants.PORT);
-        while (true) {            
-            Socket socket = ss.accept();
-            pool.execute(new RequestHandler(socket));
-        }
+        HOME = new File(args[0]);
+
+        deploy("hello");
     }
 }
