@@ -16,7 +16,9 @@
  */
 package com.tbodt.jswerve;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.InputStreamReader;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -64,5 +66,20 @@ public class JSwerver {
         HOME = new File(args[0]);
 
         deploy("hello");
+
+        // now read commands from the console
+        BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+        String line;
+        while ((line = in.readLine()) != null) {
+            if (line.equals("start"))
+                start();
+            else if (line.equals("stop"))
+                stop();
+            else if (line.equals("deploy"))
+                deploy(in.readLine());
+            else
+                System.out.print("no such command ");
+            System.out.println(line);
+        }
     }
 }

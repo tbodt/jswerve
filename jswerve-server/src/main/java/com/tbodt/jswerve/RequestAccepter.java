@@ -48,15 +48,23 @@ public class RequestAccepter implements Runnable {
     
     @Override
     public void run() {
+        ServerSocket serverSocket = null;
         try {
-            ServerSocket ss = new ServerSocket(Constants.PORT);
+            serverSocket = new ServerSocket(Constants.PORT);
             while (!Thread.interrupted()) {
-                Socket socket = ss.accept();
+                Socket socket = serverSocket.accept();
                 pool.execute(new RequestHandler(socket));
             }
         } catch (InterruptedIOException ex) {
         } catch (IOException ex) {
             throw new RuntimeException(ex);
+        } finally {
+            try {
+                if (serverSocket != null)
+                    serverSocket.close();
+            } catch (IOException ex) {
+                // What can we do now?
+            }
         }
     }
 }
