@@ -8,6 +8,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>jswerve-server</module>
+        <module>hello-website</module>
     </modules>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
