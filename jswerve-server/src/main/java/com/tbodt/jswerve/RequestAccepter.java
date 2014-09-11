@@ -19,7 +19,6 @@ package com.tbodt.jswerve;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.net.ServerSocket;
-import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -30,6 +29,14 @@ import java.util.concurrent.Executors;
 public class RequestAccepter implements Runnable {
     private static Thread theThread;
     private static ExecutorService pool;
+    private static ServerSocket serverSocket;
+    static {
+        try {
+            serverSocket = new ServerSocket(JSwerver.PORT);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     public static void start() {
         pool = Executors.newCachedThreadPool();
@@ -48,23 +55,12 @@ public class RequestAccepter implements Runnable {
     
     @Override
     public void run() {
-        ServerSocket serverSocket = null;
         try {
-            serverSocket = new ServerSocket(JSwerver.PORT);
-            while (!Thread.interrupted()) {
-                Socket socket = serverSocket.accept();
-                pool.execute(new RequestHandler(socket));
-            }
+            while (!Thread.interrupted())
+                pool.execute(new RequestHandler(serverSocket.accept()));
         } catch (InterruptedIOException ex) {
         } catch (IOException ex) {
             throw new RuntimeException(ex);
-        } finally {
-            try {
-                if (serverSocket != null)
-                    serverSocket.close();
-            } catch (IOException ex) {
-                // What can we do now?
-            }
         }
     }
 }
