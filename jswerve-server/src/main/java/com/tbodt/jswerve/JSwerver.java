@@ -16,13 +16,7 @@
  */
 package com.tbodt.jswerve;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.InputStreamReader;
-import java.io.IOException;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.util.concurrent.*;
+import java.io.*;
 
 /**
  * A class with static methods that control the server. It's also the main class.
@@ -34,6 +28,14 @@ public class JSwerver {
      * The home directory for the server.
      */
     public static File HOME;
+    /**
+     * The default port for the server.
+     */
+    public static final int PORT = 8888;
+    /**
+     * If no HTTP version is specified by the client, this is used.
+     */
+    public static final String DEFAULT_HTTP_VERSION = "HTTP/1.1";
 
     /**
      * Starts the server.

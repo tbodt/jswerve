@@ -50,7 +50,7 @@ public class RequestAccepter implements Runnable {
     public void run() {
         ServerSocket serverSocket = null;
         try {
-            serverSocket = new ServerSocket(Constants.PORT);
+            serverSocket = new ServerSocket(JSwerver.PORT);
             while (!Thread.interrupted()) {
                 Socket socket = serverSocket.accept();
                 pool.execute(new RequestHandler(socket));
