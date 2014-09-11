@@ -17,7 +17,6 @@
 package com.tbodt.jswerve;
 
 import java.io.*;
-import java.util.*;
 
 /**
  *
@@ -25,16 +24,11 @@ import java.util.*;
  */
 public class Website {
     private static Website currentWebsite = new Website("hello");
-    private static final Map<String, String> contentTypes = new HashMap<String, String>();
     private static final File SITES = new File(JSwerver.HOME, "sites");
-
-    static {
-        contentTypes.put("html", "text/html");
-        contentTypes.put("png", "image/png");
-    }
 
     private final String name;
     private final File root;
+    private final Index index;
 
     public Website(String name) {
         this.name = name;
