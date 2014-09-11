@@ -53,6 +53,8 @@ public class JSwerver {
 
     /**
      * Deploys a different website into the server.
+     * 
+     * @param name the name of the website
      */
     public static void deploy(String name) {
         stop();
