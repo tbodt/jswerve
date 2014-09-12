@@ -9,7 +9,15 @@
     </parent>
     <artifactId>jswerve-server</artifactId>
     <packaging>jar</packaging>
-
+    
+    <dependencies>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>18.0</version>
+        </dependency>
+    </dependencies>
+    
     <build>
         <plugins>
             <plugin>
@@ -49,4 +57,5 @@
         <maven.compiler.target>1.5</maven.compiler.target>
     </properties>
     <name>jswerve-server</name>
+
 </project>
