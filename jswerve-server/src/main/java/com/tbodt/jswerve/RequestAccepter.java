@@ -19,6 +19,7 @@ package com.tbodt.jswerve;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -28,8 +29,10 @@ import java.util.concurrent.Executors;
  */
 public class RequestAccepter implements Runnable {
     private static Thread theThread;
+    private static Website website = Website.getCurrentWebsite();
     private static ExecutorService pool;
     private static ServerSocket serverSocket;
+
     static {
         try {
             serverSocket = new ServerSocket(JSwerver.PORT);
@@ -39,11 +42,13 @@ public class RequestAccepter implements Runnable {
     }
 
     public static void start() {
+        website = Website.getCurrentWebsite();
         pool = Executors.newCachedThreadPool();
         theThread = new Thread(new RequestAccepter());
+        theThread.setContextClassLoader(website.getClassLoader());
         theThread.start();
     }
-    
+
     public static void stop() {
         if (theThread != null) {
             theThread.interrupt();
@@ -56,8 +61,37 @@ public class RequestAccepter implements Runnable {
     @Override
     public void run() {
         try {
-            while (!Thread.interrupted())
-                pool.execute(new RequestHandler(serverSocket.accept()));
+            while (!Thread.interrupted()) {
+                final Socket socket = serverSocket.accept();
+                pool.execute(new Runnable() {
+                    public void run() {
+                        try {
+                            StatusCode status;
+                            Request request;
+                            Response response;
+                            String httpVersion;
+                            try {
+                                request = new Request(socket.getInputStream());
+                                httpVersion = request.getHttpVersion();
+                                response = Website.getCurrentWebsite().service(request);
+                            } catch (StatusCodeException ex) {
+                                status = ex.getStatusCode();
+                                if (ex instanceof BadRequestException)
+                                    httpVersion = ((BadRequestException) ex).getHttpVersion();
+                                else
+                                    httpVersion = "HTTP/1.1";
+                                if (ex.getCause() != null)
+                                    ex.getCause().printStackTrace(System.err);
+                                response = new Response(status);
+                            }
+                            response.writeResponse(socket.getOutputStream(), httpVersion);
+                            socket.close();
+                        } catch (IOException ex) {
+                            // we can't really do anything about that
+                        }
+                    }
+                });
+            }
         } catch (InterruptedIOException ex) {
         } catch (IOException ex) {
             throw new RuntimeException(ex);

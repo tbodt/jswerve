@@ -19,6 +19,8 @@ package com.tbodt.jswerve;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import java.io.*;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -32,6 +34,7 @@ public class Website {
     private static Website currentWebsite = new Website("hello");
 
     private final String name;
+    private final WebsiteClassLoader classLoader = new WebsiteClassLoader();
     private final ZipFile archive;
     private final Multimap<Request.Method, Page> entries = HashMultimap.create();
 
@@ -63,8 +66,9 @@ public class Website {
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
+
     }
-    
+
     public Response service(Request request) {
         String uri = request.getUri().toString();
         Request.Method method = request.getMethod();
@@ -94,6 +98,8 @@ public class Website {
 
         public StaticPage(Pattern pattern, String path, String contentType) {
             super(pattern);
+            if (path.startsWith("/"))
+                path = path.substring(1);
             this.path = path;
             this.contentType = contentType;
         }
@@ -101,16 +107,12 @@ public class Website {
         @Override
         public Response serve(Request request) {
             try {
-                ZipEntry entry = archive.getEntry(path.substring(1));
-                InputStream pageIn = archive.getInputStream(entry);
-                ByteArrayOutputStream buf = new ByteArrayOutputStream();
-                int b;
-                while ((b = pageIn.read()) != -1)
-                    buf.write(b);
-                return new Response(StatusCode.OK, buf.toByteArray(), contentType);
+                InputStream is = classLoader.getResourceAsStream(path);
+                return new Response(StatusCode.OK, readAll(is), contentType);
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
             }
+
         }
 
         public String getPath() {
@@ -118,6 +120,34 @@ public class Website {
         }
     }
 
+    public ClassLoader getClassLoader() {
+        return classLoader;
+    }
+
+    private final class WebsiteClassLoader extends ClassLoader {
+        @Override
+        protected Class<?> findClass(String name) throws ClassNotFoundException {
+            try {
+                ZipEntry entry = archive.getEntry(name.replace(".", "/") + ".class");
+                if (entry == null)
+                    throw new ClassNotFoundException(name);
+                InputStream in = archive.getInputStream(entry);
+                byte[] bytes = readAll(in);
+                return defineClass(name, bytes, 0, bytes.length);
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        }
+
+        @Override
+        protected URL findResource(String name) {
+            try {
+                return new URL("jar:" + new File(archive.getName()).toURI().toURL() + "!/" + name);
+            } catch (MalformedURLException ex) {
+                throw new RuntimeException(ex);
+            }
+        }
+    }
 
     public static Website getCurrentWebsite() {
         return currentWebsite;
@@ -130,5 +160,14 @@ public class Website {
     private static void ensure(boolean condition) {
         if (!condition)
             throw new IllegalArgumentException("invalid syntax in index");
+    }
+
+    private static byte[] readAll(InputStream in) throws IOException {
+        ByteArrayOutputStream buf = new ByteArrayOutputStream();
+        byte[] b = new byte[1024];
+        int n;
+        while ((n = in.read(b)) != -1)
+            buf.write(b, 0, n);
+        return buf.toByteArray();
     }
 }
