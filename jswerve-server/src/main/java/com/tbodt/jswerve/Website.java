@@ -54,7 +54,7 @@ public class Website {
 
                 String response = mappingsReader.readLine();
                 ensure(response != null); // null means EOF
-                String[] typePath = requestPattern.split(":", 2);
+                String[] typePath = response.split(":", 2);
                 ensure(typePath.length == 2);
                 String contentType = typePath[0];
                 String path = typePath[1];
