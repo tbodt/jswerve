@@ -101,7 +101,7 @@ public class Website {
         @Override
         public Response serve(Request request) {
             try {
-                ZipEntry entry = archive.getEntry(path);
+                ZipEntry entry = archive.getEntry(path.substring(1));
                 InputStream pageIn = archive.getInputStream(entry);
                 ByteArrayOutputStream buf = new ByteArrayOutputStream();
                 int b;
