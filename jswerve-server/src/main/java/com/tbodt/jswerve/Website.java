@@ -28,8 +28,8 @@ import java.util.zip.ZipFile;
  * @author Theodore Dubois
  */
 public class Website {
-    private static Website currentWebsite = new Website("hello");
     private static final File SITES = new File(JSwerver.HOME, "sites");
+    private static Website currentWebsite = new Website("hello");
 
     private final String name;
     private final ZipFile archive;

@@ -1,4 +1,4 @@
-GET *://*/
+GET .*://.*/
 text/html:/com/tbodt/jswerve/hello/index.html
-GET *://*/smile.png
+GET .*://.*/smile.png
 image/png:/com/tbodt/jswerve/hello/smile.png
