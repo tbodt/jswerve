@@ -32,7 +32,6 @@ public class RequestAccepter implements Runnable {
     private static Website website = Website.getCurrentWebsite();
     private static ExecutorService pool;
     private static ServerSocket serverSocket;
-
     static {
         try {
             serverSocket = new ServerSocket(JSwerver.PORT);
