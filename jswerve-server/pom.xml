@@ -34,7 +34,7 @@
                 <configuration>
                     <mainClass>com.tbodt.jswerve.JSwerver</mainClass>
                     <arguments>
-                        <argument>${project.parent.basedir}/jswerve-home</argument>
+                        <argument>${project.parent.basedir}/distribution/target/distribution-0.1-SNAPSHOT-home</argument>
                     </arguments>
                 </configuration>
             </plugin>

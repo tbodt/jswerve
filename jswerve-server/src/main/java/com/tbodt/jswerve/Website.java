@@ -31,7 +31,7 @@ import java.util.zip.ZipFile;
  */
 public class Website {
     private static final File SITES = new File(JSwerver.HOME, "sites");
-    private static Website currentWebsite = new Website("hello");
+    private static Website currentWebsite;
 
     private final String name;
     private final WebsiteClassLoader classLoader = new WebsiteClassLoader();

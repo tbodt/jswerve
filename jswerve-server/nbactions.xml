@@ -11,7 +11,7 @@
             </goals>
             <properties>
                 <exec.mainClass>com.tbodt.jswerve.JSwerver</exec.mainClass>
-                <exec.arguments>${project.parent.basedir}/jswerve-home</exec.arguments>
+                <exec.arguments>${project.parent.basedir}/distribution/target/distribution-0.1-SNAPSHOT-home</exec.arguments>
             </properties>
         </action>
         <action>

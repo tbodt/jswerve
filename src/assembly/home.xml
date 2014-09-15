@@ -7,6 +7,7 @@
         <format>tar.gz</format>
     </formats>
     <includeBaseDirectory>false</includeBaseDirectory>
+    <baseDirectory>home</baseDirectory>
     <moduleSets>
         <moduleSet>
             <useAllReactorProjects>true</useAllReactorProjects>
@@ -15,6 +16,17 @@
             </includes>
             <binaries>
                 <outputDirectory>lib</outputDirectory>
+                <unpack>false</unpack>
+            </binaries>
+        </moduleSet>
+        <moduleSet>
+            <useAllReactorProjects>true</useAllReactorProjects>
+            <includes>
+                <include>com.tbodt:hello-website</include>
+            </includes>
+            <binaries>
+                <outputDirectory>sites</outputDirectory>
+                <outputFileNameMapping>${module.artifactId}${dashClassifier?}.${module.extension}</outputFileNameMapping>
                 <unpack>false</unpack>
             </binaries>
         </moduleSet>

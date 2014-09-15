@@ -69,7 +69,7 @@ public class JSwerver {
         System.setProperty("line.separator", "\r\n"); // that's how HTTP does it
         HOME = new File(args[0]);
 
-        deploy("hello");
+        deploy("hello-website");
 
         // now read commands from the console
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
