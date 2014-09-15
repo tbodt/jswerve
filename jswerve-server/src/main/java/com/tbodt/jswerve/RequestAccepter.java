@@ -43,7 +43,7 @@ public class RequestAccepter implements Runnable {
     public static void start() {
         website = Website.getCurrentWebsite();
         pool = Executors.newCachedThreadPool();
-        theThread = new Thread(new RequestAccepter());
+        theThread = new Thread(new RequestAccepter(), "Request Accepter");
         theThread.setContextClassLoader(website.getClassLoader());
         theThread.start();
     }

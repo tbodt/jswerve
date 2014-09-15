@@ -38,28 +38,14 @@ public class JSwerver {
     public static final String DEFAULT_HTTP_VERSION = "HTTP/1.1";
 
     /**
-     * Starts the server.
-     */
-    public static void start() {
-        RequestAccepter.start();
-    }
-
-    /**
-     * Stops the server.
-     */
-    public static void stop() {
-        RequestAccepter.stop();
-    }
-
-    /**
      * Deploys a different website into the server.
      * 
      * @param name the name of the website
      */
     public static void deploy(String name) {
-        stop();
+        RequestAccepter.stop();
         Website.setCurrentWebsite(new Website(name));
-        start();
+        RequestAccepter.start();
     }
 
     /**
@@ -76,9 +62,9 @@ public class JSwerver {
         String line;
         while ((line = in.readLine()) != null) {
             if (line.equals("start"))
-                start();
+                RequestAccepter.start();
             else if (line.equals("stop"))
-                stop();
+                RequestAccepter.stop();
             else if (line.equals("deploy"))
                 deploy(in.readLine());
             else
