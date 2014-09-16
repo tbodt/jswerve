@@ -25,14 +25,18 @@ import java.util.Arrays;
  * @author Theodore Dubois
  */
 public final class RemoteControl {
-    static {
-        new Thread(new Runnable() {
-            public void run() {
-                RemoteControl.run();
-            }
-        }, "Remote Control").start();
+    private static boolean activated;
+
+    public static void activate() {
+        if (!activated)
+            new Thread(new Runnable() {
+                public void run() {
+                    RemoteControl.run();
+                }
+            }, "Remote Control").start();
+        activated = true;
     }
-    
+
     private static DatagramSocket socket;
     private static final byte START_CODE = 0;
     private static final byte STOP_CODE = 1;
@@ -43,12 +47,14 @@ public final class RemoteControl {
         } catch (SocketException ex) {
             throw new RuntimeException(ex);
         }
-        while (true) {
+        while (true)
             try {
                 byte[] buf = new byte[32];
                 DatagramPacket packet = new DatagramPacket(buf, buf.length);
                 socket.receive(packet);
-                
+                if (!packet.equals(InetAddress.getLocalHost()))
+                    continue; // ignore requests from everyone else
+
                 switch (buf[0]) {
                     case STOP_CODE:
                         respond(packet, STOP_CODE, true);
@@ -58,7 +64,6 @@ public final class RemoteControl {
             } catch (IOException ex) {
                 // continue
             }
-        }
     }
 
     private static void respond(DatagramPacket packet, byte code, boolean success) throws IOException {
@@ -69,7 +74,7 @@ public final class RemoteControl {
             code |= 1 << 6;
         byte[] responseBytes = new byte[32];
         Arrays.fill(responseBytes, code);
-        DatagramPacket response = new DatagramPacket(responseBytes, code, packet.getAddress(), packet.getPort());
+        DatagramPacket response = new DatagramPacket(responseBytes, responseBytes.length, packet.getAddress(), packet.getPort());
         socket.send(response);
     }
 }

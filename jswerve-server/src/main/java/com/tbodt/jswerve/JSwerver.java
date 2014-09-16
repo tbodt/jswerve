@@ -54,6 +54,7 @@ public class JSwerver {
     public static void main(String[] args) throws IOException {
         System.setProperty("line.separator", "\r\n"); // that's how HTTP does it
         HOME = new File(args[0]);
+        RemoteControl.activate();
 
         deploy("hello-website");
 
