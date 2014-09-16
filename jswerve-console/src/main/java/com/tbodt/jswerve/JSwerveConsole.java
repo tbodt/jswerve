@@ -16,6 +16,7 @@
  */
 package com.tbodt.jswerve;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.*;
 import java.util.Arrays;
@@ -28,17 +29,17 @@ public class JSwerveConsole {
     private enum Command {
         START(0),
         STOP(1);
-        
+
         private final int code;
 
         private Command(int code) {
             this.code = code;
         }
-        
+
         public byte getCode() {
             return (byte) code;
         }
-        
+
         public static boolean isSuccess(byte code) {
             return (code & (1 << 6)) == 0;
         }
@@ -53,8 +54,26 @@ public class JSwerveConsole {
         Command cmd = Command.valueOf(args[0].toUpperCase());
         DatagramSocket socket = new DatagramSocket();
         byte[] buf = new byte[32];
-        Arrays.fill(buf, cmd.getCode());
-        socket.send(new DatagramPacket(buf, buf.length, InetAddress.getLocalHost(), 9999));
+        if (cmd == Command.START) {
+            if (System.getProperty("jswerve.home") == null)
+                error("Please specify the home");
+            File home = new File(System.getProperty("jswerve.home"));
+            File[] jars = new File(home, "lib").listFiles();
+            if (jars == null)
+                error(home + " must be a directory");
+            new ProcessBuilder(
+                    "java",
+                    "-server",
+                    "-classpath", getClasspath(jars),
+                    "-Djswerve.home=" + System.getProperty("jswerve.home"),
+                    "com.tbodt.jswerve.JSwerver")
+                    .redirectOutput(new File(home, "jswerve.log"))
+                    .redirectError(new File(home, "jswerve.log"))
+                    .start();
+        } else {
+            Arrays.fill(buf, cmd.getCode());
+            socket.send(new DatagramPacket(buf, buf.length, InetAddress.getLocalHost(), 9999));
+        }
         DatagramPacket result = new DatagramPacket(buf, buf.length);
         socket.receive(result);
         if (Command.isSuccess(buf[0]))
@@ -63,6 +82,16 @@ public class JSwerveConsole {
             System.out.println("FAILURE");
     }
     
+    private static String getClasspath(File[] jars) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < jars.length - 1; i++) {
+            sb.append(jars[i].getAbsolutePath());
+            sb.append(File.pathSeparator);
+        }
+        sb.append(jars[jars.length - 1].getAbsolutePath());
+        return sb.toString();
+    }
+
     private static void error(String msg) {
         System.out.println(msg);
         System.out.println("usage: jswerve command");

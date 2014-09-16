@@ -53,24 +53,11 @@ public class JSwerver {
      */
     public static void main(String[] args) throws IOException {
         System.setProperty("line.separator", "\r\n"); // that's how HTTP does it
-        HOME = new File(args[0]);
+        if (System.getProperty("jswerve.home") == null)
+            System.setProperty("jswerve.home", args[0]);
+        HOME = new File(System.getProperty("jswerve.home"));
         RemoteControl.activate();
 
         deploy("hello-website");
-
-        // now read commands from the console
-        BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-        String line;
-        while ((line = in.readLine()) != null) {
-            if (line.equals("start"))
-                RequestAccepter.start();
-            else if (line.equals("stop"))
-                RequestAccepter.stop();
-            else if (line.equals("deploy"))
-                deploy(in.readLine());
-            else
-                System.out.print("no such command ");
-            System.out.println(line);
-        }
     }
 }
