@@ -30,7 +30,7 @@ import java.util.zip.ZipFile;
  * @author Theodore Dubois
  */
 public class Website {
-    private static final File SITES = new File(JSwerver.HOME, "sites");
+    private static final File SITES = new File(JSwerve.HOME, "sites");
     private static Website currentWebsite;
 
     private final String name;

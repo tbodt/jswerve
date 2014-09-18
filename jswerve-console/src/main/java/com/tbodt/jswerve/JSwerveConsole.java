@@ -67,8 +67,6 @@ public class JSwerveConsole {
                     "-classpath", getClasspath(jars),
                     "-Djswerve.home=" + System.getProperty("jswerve.home"),
                     "com.tbodt.jswerve.JSwerver")
-                    .redirectOutput(new File(home, "jswerve.log"))
-                    .redirectError(new File(home, "jswerve.log"))
                     .start();
         } else {
             Arrays.fill(buf, cmd.getCode());

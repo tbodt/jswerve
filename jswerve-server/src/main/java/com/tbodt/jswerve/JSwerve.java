@@ -24,7 +24,7 @@ import java.util.logging.*;
  *
  * @author Theodore Dubois
  */
-public class JSwerver {
+public class JSwerve {
     /**
      * The home directory for the server.
      */
@@ -37,6 +37,7 @@ public class JSwerver {
      * If no HTTP version is specified by the client, this is used.
      */
     public static final String DEFAULT_HTTP_VERSION = "HTTP/1.1";
+    public static final Logger LOGGER = Logger.getLogger("com.tbodt.jswerve");
 
     /**
      * Deploys a different website into the server.
@@ -45,8 +46,13 @@ public class JSwerver {
      */
     public static void deploy(String name) {
         RequestAccepter.stop();
-        Website.setCurrentWebsite(new Website(name));
+        try {
+            Website.setCurrentWebsite(new Website(name));
+        } catch (RuntimeException ex) {
+            LOGGER.log(Level.SEVERE, "start FAILED", ex);
+        }
         RequestAccepter.start();
+        JSwerve.LOGGER.info("deploy SUCCEEDED");
     }
 
     /**
@@ -68,12 +74,12 @@ public class JSwerver {
         Logger appLogger = Logger.getLogger("com.tbodt.jswerve");
         appLogger.setUseParentHandlers(false); // no globally inherited console handler
         appLogger.setLevel(Level.ALL);
-        
-        Handler logHandler = new FileHandler(HOME.getAbsolutePath() + "jswerve.log");
+
+        Handler logHandler = new FileHandler(HOME.getAbsolutePath() + File.separator + "jswerve.log");
         logHandler.setLevel(Level.ALL);
         appLogger.addHandler(logHandler);
-        
-        Handler outHandler = new FileHandler(HOME.getAbsolutePath() + "jswerve.out");
+
+        Handler outHandler = new FileHandler(HOME.getAbsolutePath() + File.separator + "jswerve.out");
         logHandler.setLevel(Level.INFO);
         appLogger.addHandler(logHandler);
     }

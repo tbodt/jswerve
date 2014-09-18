@@ -22,6 +22,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.logging.Level;
 
 /**
  *
@@ -32,31 +33,44 @@ public class RequestAccepter implements Runnable {
     private static Website website = Website.getCurrentWebsite();
     private static ExecutorService pool;
     private static ServerSocket serverSocket;
+
     static {
         try {
-            serverSocket = new ServerSocket(JSwerver.PORT);
+            serverSocket = new ServerSocket(JSwerve.PORT);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
     public static void start() {
-        website = Website.getCurrentWebsite();
-        pool = Executors.newCachedThreadPool();
-        theThread = new Thread(new RequestAccepter(), "Request Accepter");
-        theThread.setContextClassLoader(website.getClassLoader());
-        theThread.start();
+        try {
+            website = Website.getCurrentWebsite();
+            pool = Executors.newCachedThreadPool();
+            theThread = new Thread(new RequestAccepter(), "Request Accepter");
+            theThread.setContextClassLoader(website.getClassLoader());
+            theThread.start();
+        } catch (RuntimeException ex) {
+            JSwerve.LOGGER.log(Level.SEVERE, "start FAILED", ex);
+            throw ex;
+        }
+        JSwerve.LOGGER.info("start SUCCEEDED");
     }
 
     public static void stop() {
-        if (theThread != null) {
-            theThread.interrupt();
-            theThread = null;
-            pool.shutdown();
-            pool = null;
+        try {
+            if (theThread != null) {
+                theThread.interrupt();
+                theThread = null;
+                pool.shutdown();
+                pool = null;
+            }
+        } catch (RuntimeException ex) {
+            JSwerve.LOGGER.log(Level.SEVERE, "stop FAILED", ex);
+            throw ex;
         }
+        JSwerve.LOGGER.info("stop SUCCEEDED");
     }
-    
+
     @Override
     public void run() {
         try {
