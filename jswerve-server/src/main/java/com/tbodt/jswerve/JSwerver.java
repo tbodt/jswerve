@@ -52,19 +52,12 @@ public class JSwerver {
      * @param args the command line arguments
      */
     public static void main(String[] args) throws IOException {
-        try {
-            System.setProperty("line.separator", "\r\n"); // that's how HTTP does it
-            if (System.getProperty("jswerve.home") == null)
-                System.setProperty("jswerve.home", args[0]);
-            HOME = new File(System.getProperty("jswerve.home"));
-            RemoteControl.activate();
-            
-            deploy("hello-website");
-            
-            RemoteControl.respondStart(true);
-        } catch (Exception e) {
-            e.printStackTrace(System.err);
-            RemoteControl.respondStart(false);
-        }
+        System.setProperty("line.separator", "\r\n"); // that's how HTTP does it
+        if (System.getProperty("jswerve.home") == null)
+            System.setProperty("jswerve.home", args[0]);
+        HOME = new File(System.getProperty("jswerve.home"));
+        RemoteControl.activate();
+
+        deploy("hello-website");
     }
 }

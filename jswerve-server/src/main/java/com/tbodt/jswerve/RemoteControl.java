@@ -19,8 +19,6 @@ package com.tbodt.jswerve;
 import java.io.IOException;
 import java.net.*;
 import java.util.Arrays;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -59,7 +57,7 @@ public final class RemoteControl {
 
                 switch (buf[0]) {
                     case STOP_CODE:
-                        respond(packet.getAddress(), packet.getPort(), STOP_CODE, true);
+                        respond(packet, STOP_CODE, true);
                         System.exit(0);
                         break;
                 }
@@ -68,7 +66,7 @@ public final class RemoteControl {
             }
     }
 
-    private static void respond(InetAddress addr, int port, byte code, boolean success) throws IOException {
+    private static void respond(DatagramPacket packet, byte code, boolean success) throws IOException {
         // High bit indicates whether it's a request or response.
         // Next bit is whether it was successful. 1 if successful, 0 otherwise.
         code |= 1 << 7;
@@ -76,15 +74,7 @@ public final class RemoteControl {
             code |= 1 << 6;
         byte[] responseBytes = new byte[32];
         Arrays.fill(responseBytes, code);
-        DatagramPacket response = new DatagramPacket(responseBytes, responseBytes.length, addr, port);
+        DatagramPacket response = new DatagramPacket(responseBytes, responseBytes.length, packet.getAddress(), packet.getPort());
         socket.send(response);
-    }
-
-    public static void respondStart(boolean success) {
-        try {
-            respond(InetAddress.getLocalHost(), 8470, START_CODE, success);
-        } catch (IOException ex) {
-            System.exit(1); // by now it's hopeless
-        }
     }
 }

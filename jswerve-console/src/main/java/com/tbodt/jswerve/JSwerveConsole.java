@@ -52,7 +52,7 @@ public class JSwerveConsole {
         if (args.length != 1)
             error("one argument required");
         Command cmd = Command.valueOf(args[0].toUpperCase());
-        DatagramSocket socket = new DatagramSocket(8470);
+        DatagramSocket socket = new DatagramSocket();
         byte[] buf = new byte[32];
         if (cmd == Command.START) {
             if (System.getProperty("jswerve.home") == null)
