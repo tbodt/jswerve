@@ -17,6 +17,7 @@
 package com.tbodt.jswerve;
 
 import java.io.*;
+import java.util.logging.*;
 
 /**
  * A class with static methods that control the server. It's also the main class.
@@ -39,7 +40,7 @@ public class JSwerver {
 
     /**
      * Deploys a different website into the server.
-     * 
+     *
      * @param name the name of the website
      */
     public static void deploy(String name) {
@@ -56,8 +57,37 @@ public class JSwerver {
         if (System.getProperty("jswerve.home") == null)
             System.setProperty("jswerve.home", args[0]);
         HOME = new File(System.getProperty("jswerve.home"));
+        destroyIO(); // Don't use System.out, err, or in. We have loggers.
+        initLogging();
         RemoteControl.activate();
 
         deploy("hello-website");
+    }
+
+    private static void initLogging() throws IOException {
+        Logger appLogger = Logger.getLogger("com.tbodt.jswerve");
+        appLogger.setUseParentHandlers(false); // no globally inherited console handler
+        appLogger.setLevel(Level.ALL);
+        
+        Handler logHandler = new FileHandler(HOME.getAbsolutePath() + "jswerve.log");
+        logHandler.setLevel(Level.ALL);
+        appLogger.addHandler(logHandler);
+        
+        Handler outHandler = new FileHandler(HOME.getAbsolutePath() + "jswerve.out");
+        logHandler.setLevel(Level.INFO);
+        appLogger.addHandler(logHandler);
+    }
+
+    private static void destroyIO() throws IOException {
+        PrintStream out = new PrintStream(new FileOutputStream(new File(HOME, "jswerve.out")));
+        InputStream in = new InputStream() {
+            @Override
+            public int read() throws IOException {
+                return -1;
+            }
+        };
+        System.setOut(out);
+        System.setErr(out);
+        System.setIn(in);
     }
 }
