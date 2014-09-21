@@ -34,26 +34,19 @@ public class RequestAccepter implements Runnable {
     private static ExecutorService pool;
     private static ServerSocket serverSocket;
 
-    static {
-        try {
-            serverSocket = new ServerSocket(JSwerve.PORT);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     public static void start() {
         try {
+            if (serverSocket == null)
+                serverSocket = new ServerSocket(JSwerve.PORT);
             website = Website.getCurrentWebsite();
             pool = Executors.newCachedThreadPool();
             theThread = new Thread(new RequestAccepter(), "Request Accepter");
             theThread.setContextClassLoader(website.getClassLoader());
             theThread.start();
-        } catch (RuntimeException ex) {
-            JSwerve.LOGGER.log(Level.SEVERE, "start FAILED", ex);
-            throw ex;
+            Logging.LOG.info("Successfully started server");
+        } catch (Exception ex) {
+            Logging.LOG.log(Level.SEVERE, "Error starting server", ex);
         }
-        JSwerve.LOGGER.info("start SUCCEEDED");
     }
 
     public static void stop() {
@@ -64,11 +57,10 @@ public class RequestAccepter implements Runnable {
                 pool.shutdown();
                 pool = null;
             }
+            Logging.LOG.info("Successfully stopped server");
         } catch (RuntimeException ex) {
-            JSwerve.LOGGER.log(Level.SEVERE, "stop FAILED", ex);
-            throw ex;
+            Logging.LOG.log(Level.SEVERE, "Error stopping server", ex);
         }
-        JSwerve.LOGGER.info("stop SUCCEEDED");
     }
 
     @Override
