@@ -16,14 +16,16 @@
  */
 package com.tbodt.jswerve;
 
+import com.tbodt.jswerve.Logging;
 import java.io.*;
+import java.util.logging.*;
 
 /**
  * A class with static methods that control the server. It's also the main class.
  *
  * @author Theodore Dubois
  */
-public class JSwerver {
+public class JSwerve {
     /**
      * The home directory for the server.
      */
@@ -39,13 +41,18 @@ public class JSwerver {
 
     /**
      * Deploys a different website into the server.
-     * 
+     *
      * @param name the name of the website
      */
     public static void deploy(String name) {
         RequestAccepter.stop();
-        Website.setCurrentWebsite(new Website(name));
+        try {
+            Website.setCurrentWebsite(new Website(name));
+        } catch (RuntimeException ex) {
+            Logging.LOG.log(Level.SEVERE, "Error starting server", ex);
+        }
         RequestAccepter.start();
+        Logging.LOG.info("Successfully deployed something");
     }
 
     /**
@@ -56,6 +63,7 @@ public class JSwerver {
         if (System.getProperty("jswerve.home") == null)
             System.setProperty("jswerve.home", args[0]);
         HOME = new File(System.getProperty("jswerve.home"));
+        Logging.initialize();
         RemoteControl.activate();
 
         deploy("hello-website");

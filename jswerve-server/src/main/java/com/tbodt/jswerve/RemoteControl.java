@@ -16,9 +16,10 @@
  */
 package com.tbodt.jswerve;
 
-import java.io.IOException;
+import java.io.*;
 import java.net.*;
 import java.util.Arrays;
+import java.util.logging.*;
 
 /**
  *
@@ -40,6 +41,7 @@ public final class RemoteControl {
     private static DatagramSocket socket;
     private static final byte START_CODE = 0;
     private static final byte STOP_CODE = 1;
+    private static final byte DEPLOY_CODE = 2;
 
     private static void run() {
         try {
@@ -52,12 +54,19 @@ public final class RemoteControl {
                 byte[] buf = new byte[32];
                 DatagramPacket packet = new DatagramPacket(buf, buf.length);
                 socket.receive(packet);
-                if (!packet.equals(InetAddress.getLocalHost()))
+                if (!packet.getAddress().equals(InetAddress.getLocalHost()))
                     continue; // ignore requests from everyone else
 
+                Logging.LOG.addHandler(new DatagramHandler(packet));
                 switch (buf[0]) {
+                    case START_CODE:
+                        RequestAccepter.start();
+                        break;
+                    case DEPLOY_CODE:
+                        JSwerve.deploy("hello-website");
+                        break;
                     case STOP_CODE:
-                        respond(packet, STOP_CODE, true);
+                        RequestAccepter.stop();
                         System.exit(0);
                         break;
                 }
@@ -66,15 +75,57 @@ public final class RemoteControl {
             }
     }
 
-    private static void respond(DatagramPacket packet, byte code, boolean success) throws IOException {
-        // High bit indicates whether it's a request or response.
-        // Next bit is whether it was successful. 1 if successful, 0 otherwise.
-        code |= 1 << 7;
-        if (!success)
-            code |= 1 << 6;
-        byte[] responseBytes = new byte[32];
-        Arrays.fill(responseBytes, code);
-        DatagramPacket response = new DatagramPacket(responseBytes, responseBytes.length, packet.getAddress(), packet.getPort());
-        socket.send(response);
+    private static class DatagramHandler extends Handler {
+        private final InetAddress addr;
+        private final int port;
+        private boolean closed;
+
+        private DatagramHandler(DatagramPacket packet) {
+            addr = packet.getAddress();
+            port = packet.getPort();
+        }
+
+        @Override
+        public void publish(LogRecord record) {
+            if (closed)
+                throw new IllegalStateException("handler is closed");
+            if (record.getMessage().contains("Successfully") || record.getMessage().contains("Error"))
+                Logging.LOG.removeHandler(this);
+
+            String recordString;
+            if (getFormatter() == null) {
+                recordString = "[" + record.getLevel() + "] " + record.getMessage();
+                if (record.getParameters() != null)
+                    recordString += Arrays.toString(record.getParameters());
+                if (record.getThrown() != null) {
+                    StringWriter stackTraceWriter = new StringWriter();
+                    record.getThrown().printStackTrace(new PrintWriter(stackTraceWriter));
+                    recordString += stackTraceWriter.toString();
+                }
+            } else
+                recordString = getFormatter().format(record);
+
+            try {
+                respond(addr, port, recordString);
+            } catch (IOException ex) {
+                getErrorManager().error(null, ex, ErrorManager.GENERIC_FAILURE);
+            }
+        }
+
+        private static void respond(InetAddress addr, int port, String message) throws IOException {
+            byte[] responseBytes = message.getBytes();
+            DatagramPacket response = new DatagramPacket(responseBytes, responseBytes.length, addr, port);
+            socket.send(response);
+        }
+
+        @Override
+        public void flush() {
+        }
+
+        @Override
+        public void close() throws SecurityException {
+            closed = true;
+        }
     }
+
 }

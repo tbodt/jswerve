@@ -33,7 +33,7 @@ public class BadRequestException extends StatusCodeException {
     }
     
     public BadRequestException() {
-        this(JSwerver.DEFAULT_HTTP_VERSION);
+        this(JSwerve.DEFAULT_HTTP_VERSION);
     }
 
     public String getHttpVersion() {

@@ -48,12 +48,11 @@ public class JSwerveConsole {
     /**
      * @param args the command line arguments
      */
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, InterruptedException {
         if (args.length != 1)
             error("one argument required");
         Command cmd = Command.valueOf(args[0].toUpperCase());
         DatagramSocket socket = new DatagramSocket();
-        byte[] buf = new byte[32];
         if (cmd == Command.START) {
             if (System.getProperty("jswerve.home") == null)
                 error("Please specify the home");
@@ -66,22 +65,26 @@ public class JSwerveConsole {
                     "-server",
                     "-classpath", getClasspath(jars),
                     "-Djswerve.home=" + System.getProperty("jswerve.home"),
-                    "com.tbodt.jswerve.JSwerver")
-                    .redirectOutput(new File(home, "jswerve.log"))
-                    .redirectError(new File(home, "jswerve.log"))
+                    "com.tbodt.jswerve.JSwerve")
+                    .inheritIO()
                     .start();
-        } else {
-            Arrays.fill(buf, cmd.getCode());
-            socket.send(new DatagramPacket(buf, buf.length, InetAddress.getLocalHost(), 9999));
+            Thread.sleep(2000); // we have to wait until the process starts before asking it
+                                // to do anything. if there's anything else I can do, let me know.
         }
-        DatagramPacket result = new DatagramPacket(buf, buf.length);
-        socket.receive(result);
-        if (Command.isSuccess(buf[0]))
-            System.out.println("Success!");
-        else
-            System.out.println("FAILURE");
+        byte[] buf = new byte[32];
+        Arrays.fill(buf, cmd.getCode());
+        socket.send(new DatagramPacket(buf, buf.length, InetAddress.getLocalHost(), 9999));
+        
+        buf = new byte[1024];
+        DatagramPacket response = new DatagramPacket(buf, buf.length);
+        String responseString;
+        do {
+            socket.receive(response);
+            responseString = new String(buf);
+            System.out.println(responseString);
+        } while (!responseString.contains("Successfully") && !responseString.contains("Error"));
     }
-    
+
     private static String getClasspath(File[] jars) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < jars.length - 1; i++) {

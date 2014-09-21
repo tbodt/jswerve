@@ -22,6 +22,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.logging.Level;
 
 /**
  *
@@ -32,31 +33,36 @@ public class RequestAccepter implements Runnable {
     private static Website website = Website.getCurrentWebsite();
     private static ExecutorService pool;
     private static ServerSocket serverSocket;
-    static {
-        try {
-            serverSocket = new ServerSocket(JSwerver.PORT);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
     public static void start() {
-        website = Website.getCurrentWebsite();
-        pool = Executors.newCachedThreadPool();
-        theThread = new Thread(new RequestAccepter(), "Request Accepter");
-        theThread.setContextClassLoader(website.getClassLoader());
-        theThread.start();
+        try {
+            if (serverSocket == null)
+                serverSocket = new ServerSocket(JSwerve.PORT);
+            website = Website.getCurrentWebsite();
+            pool = Executors.newCachedThreadPool();
+            theThread = new Thread(new RequestAccepter(), "Request Accepter");
+            theThread.setContextClassLoader(website.getClassLoader());
+            theThread.start();
+            Logging.LOG.info("Successfully started server");
+        } catch (Exception ex) {
+            Logging.LOG.log(Level.SEVERE, "Error starting server", ex);
+        }
     }
 
     public static void stop() {
-        if (theThread != null) {
-            theThread.interrupt();
-            theThread = null;
-            pool.shutdown();
-            pool = null;
+        try {
+            if (theThread != null) {
+                theThread.interrupt();
+                theThread = null;
+                pool.shutdown();
+                pool = null;
+            }
+            Logging.LOG.info("Successfully stopped server");
+        } catch (RuntimeException ex) {
+            Logging.LOG.log(Level.SEVERE, "Error stopping server", ex);
         }
     }
-    
+
     @Override
     public void run() {
         try {
