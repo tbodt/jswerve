@@ -66,7 +66,6 @@ public class JSwerveConsole {
                     "-classpath", getClasspath(jars),
                     "-Djswerve.home=" + System.getProperty("jswerve.home"),
                     "com.tbodt.jswerve.JSwerve")
-                    .inheritIO()
                     .start();
             Thread.sleep(2000); // we have to wait until the process starts before asking it
                                 // to do anything. if there's anything else I can do, let me know.
