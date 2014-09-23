@@ -12,7 +12,8 @@
         <module>hello-website</module>
         <module>distribution</module>
         <module>jswerve-console</module>
-    </modules>
+    <module>jswerve-maven-plugin</module>
+  </modules>
     
     <build>
         <pluginManagement>
