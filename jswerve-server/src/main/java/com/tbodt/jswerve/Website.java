@@ -33,15 +33,17 @@ public class Website {
     private static final File SITES = new File(JSwerve.HOME, "sites");
     private static Website currentWebsite;
 
-    private final String name;
     private final WebsiteClassLoader classLoader = new WebsiteClassLoader();
     private final ZipFile archive;
     private final Multimap<Request.Method, Page> entries = HashMultimap.create();
 
     public Website(String name) {
-        this.name = name;
+        this(new File(SITES, name + ".jar"));
+    }
+    
+    public Website(File site) {
         try {
-            this.archive = new ZipFile(new File(SITES, name + ".jar"));
+            this.archive = new ZipFile(site);
             ZipEntry mappings = archive.getEntry("META-INF/index");
             BufferedReader mappingsReader = new BufferedReader(new InputStreamReader(archive.getInputStream(mappings)));
 
@@ -66,7 +68,6 @@ public class Website {
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
-
     }
 
     public Response service(Request request) {
