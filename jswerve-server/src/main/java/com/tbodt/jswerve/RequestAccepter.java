@@ -102,4 +102,8 @@ public class RequestAccepter implements Runnable {
             throw new RuntimeException(ex);
         }
     }
+
+    public static void join() throws InterruptedException {
+        theThread.join();
+    }
 }

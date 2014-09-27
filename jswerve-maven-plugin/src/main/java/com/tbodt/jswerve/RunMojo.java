@@ -17,25 +17,65 @@ package com.tbodt.jswerve;
  */
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
-
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
-
 import java.io.File;
+import java.util.logging.*;
+import org.apache.maven.plugin.logging.Log;
 
 /**
  * A mojo that runs JSwerve with the artifact.
  *
  * @author Theodore Dubois
  */
-@Mojo(name = "run")
+@Mojo(name = "run", requiresDirectInvocation = true)
 public class RunMojo extends AbstractMojo {
     /**
      * Location of the archive.
      */
-    @Parameter(defaultValue = "${project.build.directory}/${project.build.finalName}.{project.packaging}", required = true)
+    @Parameter(defaultValue = "${project.build.directory}/${project.build.finalName}.jar", required = true)
     private File archive;
 
     public void execute() throws MojoExecutionException {
+        final Log mavenLog = getLog();
+        Logger log = Logger.getLogger("com.tbodt.jswerve");
+        log.setUseParentHandlers(false);
+        log.addHandler(new Handler() {
+            @Override
+            public void publish(LogRecord record) {
+                Level level;
+                if (record.getLevel() == Level.CONFIG
+                        || record.getLevel() == Level.FINE
+                        || record.getLevel() == Level.FINER
+                        || record.getLevel() == Level.FINEST)
+                    level = Level.FINE;
+                else
+                    level = record.getLevel();
+                
+                if (level == Level.FINE)
+                    mavenLog.debug(record.getMessage());
+                else if (level == Level.INFO)
+                    mavenLog.info(record.getMessage());
+                else if (level == Level.WARNING)
+                    mavenLog.warn(record.getMessage());
+                else if (level == Level.WARNING)
+                    mavenLog.warn(record.getMessage());
+            }
+
+            @Override
+            public void flush() {
+            }
+
+            @Override
+            public void close() throws SecurityException {
+            }
+        });
+        Website.setCurrentWebsite(new Website(archive));
+        RequestAccepter.start();
+        try {
+            RequestAccepter.join();
+        } catch (InterruptedException ex) {
+            throw new MojoExecutionException("Interrupted rudely", ex);
+        }
     }
 }
