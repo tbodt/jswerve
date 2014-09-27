@@ -12,7 +12,7 @@
         <moduleSet>
             <useAllReactorProjects>true</useAllReactorProjects>
             <includes>
-                <include>com.tbodt:jswerve-server</include>
+                <include>com.tbodt.jswerve:jswerve-server</include>
             </includes>
             <binaries>
                 <outputDirectory>lib</outputDirectory>
@@ -22,7 +22,7 @@
         <moduleSet>
             <useAllReactorProjects>true</useAllReactorProjects>
             <includes>
-                <include>com.tbodt:hello-website</include>
+                <include>com.tbodt.jswerve:hello-website</include>
             </includes>
             <binaries>
                 <outputDirectory>sites</outputDirectory>

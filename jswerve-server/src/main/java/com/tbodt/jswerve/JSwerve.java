@@ -16,14 +16,16 @@
  */
 package com.tbodt.jswerve;
 
+import com.tbodt.jswerve.Logging;
 import java.io.*;
+import java.util.logging.*;
 
 /**
  * A class with static methods that control the server. It's also the main class.
  *
  * @author Theodore Dubois
  */
-public class JSwerver {
+public class JSwerve {
     /**
      * The home directory for the server.
      */
@@ -38,28 +40,19 @@ public class JSwerver {
     public static final String DEFAULT_HTTP_VERSION = "HTTP/1.1";
 
     /**
-     * Starts the server.
-     */
-    public static void start() {
-        RequestAccepter.start();
-    }
-
-    /**
-     * Stops the server.
-     */
-    public static void stop() {
-        RequestAccepter.stop();
-    }
-
-    /**
      * Deploys a different website into the server.
-     * 
+     *
      * @param name the name of the website
      */
     public static void deploy(String name) {
-        stop();
-        Website.setCurrentWebsite(new Website(name));
-        start();
+        RequestAccepter.stop();
+        try {
+            Website.setCurrentWebsite(new Website(name));
+        } catch (RuntimeException ex) {
+            Logging.LOG.log(Level.SEVERE, "Error starting server", ex);
+        }
+        RequestAccepter.start();
+        Logging.LOG.info("Successfully deployed something");
     }
 
     /**
@@ -67,23 +60,12 @@ public class JSwerver {
      */
     public static void main(String[] args) throws IOException {
         System.setProperty("line.separator", "\r\n"); // that's how HTTP does it
-        HOME = new File(args[0]);
+        if (System.getProperty("jswerve.home") == null)
+            System.setProperty("jswerve.home", args[0]);
+        HOME = new File(System.getProperty("jswerve.home"));
+        Logging.initialize();
+        RemoteControl.activate();
 
         deploy("hello-website");
-
-        // now read commands from the console
-        BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-        String line;
-        while ((line = in.readLine()) != null) {
-            if (line.equals("start"))
-                start();
-            else if (line.equals("stop"))
-                stop();
-            else if (line.equals("deploy"))
-                deploy(in.readLine());
-            else
-                System.out.print("no such command ");
-            System.out.println(line);
-        }
     }
 }
