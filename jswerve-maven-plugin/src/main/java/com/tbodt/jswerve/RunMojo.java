@@ -20,6 +20,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import java.io.File;
+import java.io.IOException;
 import java.util.logging.*;
 import org.apache.maven.plugin.logging.Log;
 
@@ -51,7 +52,7 @@ public class RunMojo extends AbstractMojo {
                     level = Level.FINE;
                 else
                     level = record.getLevel();
-                
+
                 if (level == Level.FINE)
                     mavenLog.debug(record.getMessage());
                 else if (level == Level.INFO)
@@ -70,12 +71,15 @@ public class RunMojo extends AbstractMojo {
             public void close() throws SecurityException {
             }
         });
-        Website.setCurrentWebsite(new Website(archive));
-        Server.start();
+        Server server;
         try {
-            Server.join();
+            server = new Server(new Website(archive));
+            server.start();
+            server.join();
         } catch (InterruptedException ex) {
             throw new MojoExecutionException("Interrupted rudely", ex);
+        } catch (IOException ex) {
+            throw new MojoExecutionException("Failed to create website", ex);
         }
     }
 }
