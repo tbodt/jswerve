@@ -16,9 +16,7 @@
  */
 package com.tbodt.jswerve;
 
-import com.tbodt.jswerve.Logging;
 import java.io.*;
-import java.util.logging.*;
 
 /**
  * A class with static methods that control the server. It's also the main class.
@@ -40,22 +38,6 @@ public class JSwerve {
     public static final String DEFAULT_HTTP_VERSION = "HTTP/1.1";
 
     /**
-     * Deploys a different website into the server.
-     *
-     * @param name the name of the website
-     */
-    public static void deploy(String name) {
-        RequestAccepter.stop();
-        try {
-            Website.setCurrentWebsite(new Website(name));
-        } catch (RuntimeException ex) {
-            Logging.LOG.log(Level.SEVERE, "Error starting server", ex);
-        }
-        RequestAccepter.start();
-        Logging.LOG.info("Successfully deployed something");
-    }
-
-    /**
      * @param args the command line arguments
      */
     public static void main(String[] args) throws IOException {
@@ -63,9 +45,12 @@ public class JSwerve {
         if (System.getProperty("jswerve.home") == null)
             System.setProperty("jswerve.home", args[0]);
         HOME = new File(System.getProperty("jswerve.home"));
+        if (!HOME.exists()) {
+            System.err.println("That home doesn't exist");
+            System.exit(1);
+        }
         Logging.initialize();
-        RemoteControl.activate();
-
-        deploy("hello-website");
+        Server server = new Server(new Website("hello-website"));
+        server.start();
     }
 }

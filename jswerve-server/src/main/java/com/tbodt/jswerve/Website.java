@@ -21,6 +21,7 @@ import com.google.common.collect.Multimap;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.logging.Level;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -31,8 +32,7 @@ import java.util.zip.ZipFile;
  */
 public class Website {
     private static final File SITES = new File(JSwerve.HOME, "sites");
-    private static Website currentWebsite;
-
+    
     private final WebsiteClassLoader classLoader = new WebsiteClassLoader();
     private final ZipFile archive;
     private final Multimap<Request.Method, Page> entries = HashMultimap.create();
@@ -65,7 +65,9 @@ public class Website {
                 String path = typePath[1];
                 entries.put(method, new StaticPage(pattern, path, contentType));
             }
+            Logging.LOG.log(Level.INFO, "Successfully created website at {0}", site);
         } catch (IOException ex) {
+            Logging.LOG.log(Level.SEVERE, "Error creating website at " + site, ex);
             throw new RuntimeException(ex);
         }
     }
@@ -149,15 +151,6 @@ public class Website {
             }
         }
     }
-
-    public static Website getCurrentWebsite() {
-        return currentWebsite;
-    }
-
-    public static void setCurrentWebsite(Website website) {
-        currentWebsite = website;
-    }
-
     private static void ensure(boolean condition) {
         if (!condition)
             throw new IllegalArgumentException("invalid syntax in index");

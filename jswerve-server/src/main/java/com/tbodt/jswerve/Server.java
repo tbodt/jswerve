@@ -28,19 +28,21 @@ import java.util.logging.Level;
  *
  * @author Theodore Dubois
  */
-public class RequestAccepter implements Runnable {
-    private static Thread theThread;
-    private static Website website = Website.getCurrentWebsite();
-    private static ExecutorService pool;
-    private static ServerSocket serverSocket;
+public class Server implements Runnable {
+    private Thread theThread;
+    private Website website;
+    private final ExecutorService pool = Executors.newCachedThreadPool();
+    private ServerSocket serverSocket;
 
-    public static void start() {
+    public Server(Website website) throws IOException {
+        this.website = website;
+    }
+
+    public void start() {
         try {
             if (serverSocket == null)
-                serverSocket = new ServerSocket(JSwerve.PORT);
-            website = Website.getCurrentWebsite();
-            pool = Executors.newCachedThreadPool();
-            theThread = new Thread(new RequestAccepter(), "Request Accepter");
+                this.serverSocket = new ServerSocket(JSwerve.PORT);
+            theThread = new Thread(this, "Server");
             theThread.setContextClassLoader(website.getClassLoader());
             theThread.start();
             Logging.LOG.info("Successfully started server");
@@ -49,18 +51,24 @@ public class RequestAccepter implements Runnable {
         }
     }
 
-    public static void stop() {
+    public void stop() {
         try {
             if (theThread != null) {
                 theThread.interrupt();
                 theThread = null;
                 pool.shutdown();
-                pool = null;
             }
             Logging.LOG.info("Successfully stopped server");
         } catch (RuntimeException ex) {
             Logging.LOG.log(Level.SEVERE, "Error stopping server", ex);
         }
+    }
+
+    public void deploy(Website website) {
+        stop();
+        this.website = website;
+        start();
+        Logging.LOG.info("Successfully deployed something");
     }
 
     @Override
@@ -78,7 +86,7 @@ public class RequestAccepter implements Runnable {
                             try {
                                 request = new Request(socket.getInputStream());
                                 httpVersion = request.getHttpVersion();
-                                response = Website.getCurrentWebsite().service(request);
+                                response = website.service(request);
                             } catch (StatusCodeException ex) {
                                 status = ex.getStatusCode();
                                 if (ex instanceof BadRequestException)
@@ -102,8 +110,35 @@ public class RequestAccepter implements Runnable {
             throw new RuntimeException(ex);
         }
     }
-
-    public static void join() throws InterruptedException {
-        theThread.join();
-    }
+    /*
+     public void start() {
+     try {
+     if (serverSocket == null)
+     serverSocket = new ServerSocket(JSwerve.PORT);
+     website = Website.getCurrentWebsite();
+     pool = Executors.newCachedThreadPool();
+     theThread = new Thread(new Server(), "Request Accepter");
+     theThread.setContextClassLoader(website.getClassLoader());
+     theThread.start();
+     Logging.LOG.info("Successfully started server");
+     } catch (Exception ex) {
+     Logging.LOG.log(Level.SEVERE, "Error starting server", ex);
+     }
+     }
+     */
+    /*
+     public void stop() {
+     try {
+     if (theThread != null) {
+     theThread.interrupt();
+     theThread = null;
+     pool.shutdown();
+     pool = null;
+     }
+     Logging.LOG.info("Successfully stopped server");
+     } catch (RuntimeException ex) {
+     Logging.LOG.log(Level.SEVERE, "Error stopping server", ex);
+     }
+     }
+     */
 }

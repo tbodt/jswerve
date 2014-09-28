@@ -38,6 +38,7 @@ public final class RemoteControl {
         activated = true;
     }
 
+    private static Server server;
     private static DatagramSocket socket;
     private static final byte START_CODE = 0;
     private static final byte STOP_CODE = 1;
@@ -60,13 +61,15 @@ public final class RemoteControl {
                 Logging.LOG.addHandler(new DatagramHandler(packet));
                 switch (buf[0]) {
                     case START_CODE:
-                        RequestAccepter.start();
+                        if (server == null)
+                            server = new Server(new Website("hello-website"));
+                        server.start();
                         break;
                     case DEPLOY_CODE:
-                        JSwerve.deploy("hello-website");
+                        server.deploy(new Website("hello-website"));
                         break;
                     case STOP_CODE:
-                        RequestAccepter.stop();
+                        server.stop();
                         System.exit(0);
                         break;
                 }
