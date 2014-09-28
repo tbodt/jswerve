@@ -71,9 +71,9 @@ public class RunMojo extends AbstractMojo {
             }
         });
         Website.setCurrentWebsite(new Website(archive));
-        RequestAccepter.start();
+        Server.start();
         try {
-            RequestAccepter.join();
+            Server.join();
         } catch (InterruptedException ex) {
             throw new MojoExecutionException("Interrupted rudely", ex);
         }

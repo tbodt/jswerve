@@ -17,7 +17,6 @@
 package com.tbodt.jswerve;
 
 import java.io.*;
-import java.net.ServerSocket;
 import java.util.logging.*;
 
 /**
@@ -27,10 +26,6 @@ import java.util.logging.*;
  */
 public final class Logging {
     public static final Logger LOG = Logger.getLogger("com.tbodt.jswerve");
-    /**
-     * Socket for the log server, which sends logs to clients.
-     */
-    private static ServerSocket socket;
 
     public static void initialize() throws IOException {
         PrintStream out = new PrintStream(new OutputStream() {
@@ -68,10 +63,16 @@ public final class Logging {
         LOG.setUseParentHandlers(false);
 
         Handler logHandler = new FileHandler(JSwerve.HOME.getAbsolutePath() + File.separator + "jswerve.log");
+        logHandler.setFormatter(new Formatter() {
+            @Override
+            public String format(LogRecord record) {
+                return "[" + record.getLevel() + "] " + formatMessage(record) + "\n";
+            }
+        });
         logHandler.setLevel(Level.ALL);
         LOG.addHandler(logHandler);
     }
-    
+
     private Logging() {
     }
 }
