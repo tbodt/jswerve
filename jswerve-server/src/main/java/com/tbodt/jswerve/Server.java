@@ -70,6 +70,11 @@ public class Server implements Runnable {
         start();
         Logging.LOG.info("Successfully deployed something");
     }
+    
+    public void join() throws InterruptedException {
+        if (theThread != null)
+            theThread.join();
+    }
 
     @Override
     public void run() {
