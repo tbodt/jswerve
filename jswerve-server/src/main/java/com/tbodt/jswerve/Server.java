@@ -40,7 +40,7 @@ public class Server implements Runnable {
     public Server(Website website) throws IOException {
         this.website = website;
         selector = Selector.open();
-        
+
         channel = ServerSocketChannel.open();
         channel.configureBlocking(false);
         channel.socket().bind(new InetSocketAddress((InetAddress) null, JSwerve.PORT));
@@ -88,21 +88,31 @@ public class Server implements Runnable {
         try {
             while (!Thread.interrupted()) {
                 selector.select();
-                
+
                 Set<SelectionKey> keys = selector.selectedKeys();
                 for (SelectionKey key : keys) {
                     if (!key.isValid()) {
                         Logging.LOG.fine("Skipping invalid selector key");
                         continue;
                     }
-                    if (key.isConnectable()) {
-                        SocketChannel sc = (SocketChannel) key.channel();
-                        sc.finishConnect();
-                    }
                     if (key.isAcceptable()) {
                         ServerSocketChannel ssc = (ServerSocketChannel) key.channel();
                         SocketChannel sc = ssc.accept();
                         handleAccept(sc);
+                    }
+                    if (key.isReadable()) {
+                        ByteBuffer buffer = ByteBuffer.allocate(1024);
+                        SocketChannel sc = (SocketChannel) key.channel();
+                        int count = sc.read(buffer);
+                        if (count == -1) {
+                            // Connection shut down.
+                            sc.close();
+                            key.cancel();
+                            continue;
+                        }
+                        buffer.flip();
+                        Connection conn = (Connection) key.attachment();
+                        conn.handleRead(buffer, key);
                     }
                     if (key.isWritable()) {
                         SocketChannel sc = (SocketChannel) key.channel();
@@ -117,41 +127,43 @@ public class Server implements Runnable {
             throw new RuntimeException(ex);
         }
     }
-    
+
     private void handleAccept(SocketChannel sc) throws IOException {
+        sc.configureBlocking(false);
         sc.socket().setTcpNoDelay(true);
-        sc.register(selector, SelectionKey.OP_WRITE);
+        SelectionKey key = sc.register(selector, SelectionKey.OP_READ);
+        key.attach(new Connection());
     }
     /*
-    final Socket socket = channel.accept();
-                pool.execute(new Runnable() {
-                    public void run() {
-                        try {
-                            StatusCode status;
-                            Request request;
-                            Response response;
-                            String httpVersion;
-                            try {
-                                request = new Request(socket.getInputStream());
-                                httpVersion = request.getHttpVersion();
-                                response = website.service(request);
-                            } catch (StatusCodeException ex) {
-                                status = ex.getStatusCode();
-                                if (ex instanceof BadRequestException)
-                                    httpVersion = ((BadRequestException) ex).getHttpVersion();
-                                else
-                                    httpVersion = "HTTP/1.1";
-                                if (ex.getCause() != null)
-                                    ex.getCause().printStackTrace(System.err);
-                                response = new Response(status);
-                            }
-                            response.writeResponse(socket.getOutputStream(), httpVersion);
-                            socket.close();
-                        } catch (IOException ex) {
-                            // we can't really do anything about that
-                        }
-                    }
-                });
-    */
+     final Socket socket = channel.accept();
+     pool.execute(new Runnable() {
+     public void run() {
+     try {
+     StatusCode status;
+     Request request;
+     Response response;
+     String httpVersion;
+     try {
+     request = new Request(socket.getInputStream());
+     httpVersion = request.getHttpVersion();
+     response = website.service(request);
+     } catch (StatusCodeException ex) {
+     status = ex.getStatusCode();
+     if (ex instanceof BadRequestException)
+     httpVersion = ((BadRequestException) ex).getHttpVersion();
+     else
+     httpVersion = "HTTP/1.1";
+     if (ex.getCause() != null)
+     ex.getCause().printStackTrace(System.err);
+     response = new Response(status);
+     }
+     response.writeResponse(socket.getOutputStream(), httpVersion);
+     socket.close();
+     } catch (IOException ex) {
+     // we can't really do anything about that
+     }
+     }
+     });
+     */
 
 }
