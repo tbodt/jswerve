@@ -26,13 +26,63 @@ import java.nio.ByteBuffer;
  * @author Theodore Dubois
  */
 public class RequestParser {
+    private State state = State.LINE;
+    private boolean cr;
+    private RuntimeException error;
+
+    private enum State {
+        LINE, HEADERS, DONE;
+    }
+
+    public void parseNext(ByteBuffer data) {
+        if (error != null)
+            return; // just hang out until eof
+        try {
+            switch (state) {
+                case LINE:
+                    parseLine(data);
+                    break;
+                default:
+                    throw new BadRequestException();
+            }
+        } catch (StatusCodeException sce) {
+            error = sce;
+        } 
+    }
+
     /**
      * Parse the next chunk of data.
      *
      * @param data the data
      */
-    public void update(ByteBuffer data) {
+    @SuppressWarnings("empty-statement")
+    public void parseLine(ByteBuffer data) {
+        byte ch;
+        // Ignore empty lines at the beginning.
+        while ((ch = next(data)) == '\n')
+            ; // do nothing
 
+    }
+
+    private byte next(ByteBuffer data) {
+        byte ch = data.get();
+        if (cr) {
+            if (ch != '\n')
+                throw new BadRequestException();
+            cr = false;
+            return ch;
+        }
+
+        if (ch == '\r')
+            if (data.hasRemaining()) {
+                ch = data.get();
+                if (ch != '\n')
+                    throw new BadRequestException();
+            } else {
+                cr = true;
+                return 0;
+            }
+        return ch;
     }
 
     /**
@@ -41,7 +91,9 @@ public class RequestParser {
      * @return the parsed request
      * @throws StatusCodeException if there's an error in the request
      */
-    public Request end() throws StatusCodeException {
+    public Request end() {
+        if (error != null)
+            throw error;
         return null;
     }
 }
