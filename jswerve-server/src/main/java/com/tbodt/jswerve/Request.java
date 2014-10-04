@@ -61,6 +61,7 @@ public final class Request {
 
         private Request.Method method;
         private URI uri;
+        private String httpVersion;
 
         private enum State {
             START {
@@ -89,6 +90,12 @@ public final class Request {
                     } catch (URISyntaxException ex) {
                         throw new BadRequestException();
                     }
+                    return State.VERSION;
+                }
+            }, VERSION {
+                @Override
+                public State parse(Parser p) {
+                    p.httpVersion = p.readLastChunk();
                     return State.END;
                 }
             }, END {
