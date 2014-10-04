@@ -17,6 +17,7 @@
 package com.tbodt.jswerve;
 
 import java.net.URI;
+import java.nio.ByteBuffer;
 import java.util.*;
 
 /**
@@ -42,12 +43,112 @@ public final class Request {
             }
         }
     }
-    
-    Request(Request.Method method, URI uri, String httpVersion, Map<String, String> headers) {
+
+    private Request(Request.Method method, URI uri, String httpVersion, Map<String, String> headers) {
         this.method = method;
         this.uri = uri;
         this.httpVersion = httpVersion;
         this.headers = headers;
+    }
+
+    public static class Parser {
+        private ByteBuffer data;
+        private State state = State.START;
+        private StringBuilder string = new StringBuilder();
+        private boolean cr;
+        private RuntimeException error;
+
+        private Request.Method method;
+
+        private enum State {
+            START {
+                @Override
+                public State parse(Parser p) {
+                    char ch;
+                    // Ignore empty lines at the beginning.
+                    do
+                        ch = p.next();
+                    while (ch < ' ');
+                    p.string = new StringBuilder();
+                    p.string.append(ch);
+                    return State.METHOD;
+                }
+            }, METHOD {
+                @Override
+                public State parse(Parser p) {
+                    p.method = Request.Method.forName(p.readUntil(' '));
+                    return State.END;
+                }
+            }, END {
+                @Override
+                public State parse(Parser p) {
+                    p.data.position(0).limit(0);
+                    return State.END;
+                }
+            };
+
+            public abstract State parse(Parser parser);
+        }
+
+        private char next() {
+            if (!data.hasRemaining())
+                throw new NeedMoreInputException();
+            char ch = (char) data.get();
+            if (cr) {
+                if (ch != '\n')
+                    throw new BadRequestException();
+                cr = false;
+                return (char) ch;
+            }
+
+            if (ch == '\r')
+                if (data.hasRemaining()) {
+                    ch = (char) data.get();
+                    if (ch != '\n')
+                        throw new BadRequestException();
+                } else {
+                    cr = true;
+                    throw new NeedMoreInputException();
+                }
+            return ch;
+        }
+
+        private String readUntil(char until) {
+            char ch;
+            while ((ch = next()) != until)
+                string.append(ch);
+            return string.toString();
+        }
+
+        /**
+         * Parse the next chunk of data.
+         *
+         * @param data the data
+         * @return whether parsing is done
+         */
+        public boolean parseNext(ByteBuffer data) {
+            this.data = data;
+            try {
+                while (data.hasRemaining())
+                    state = state.parse(this);
+            } catch (NeedMoreInputException ex) {
+                // just catch it, and exit
+            } catch (BadRequestException ex) {
+                error = ex;
+            }
+            this.data = null;
+            return state == State.END;
+        }
+
+        public Request getRequest() {
+            if (state == State.END && error != null)
+                throw error;
+            return new Request(method, null, null, null);
+        }
+
+        private static class NeedMoreInputException extends RuntimeException {
+            // No actual code is needed.
+        }
     }
 
     public String getHttpVersion() {

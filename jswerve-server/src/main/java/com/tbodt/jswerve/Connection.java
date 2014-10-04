@@ -25,7 +25,7 @@ import java.nio.channels.SelectionKey;
  * @author Theodore Dubois
  */
 public class Connection {
-    private final RequestParser parser = new RequestParser();
+    private final Request.Parser parser = new Request.Parser();
     /**
      * Do something about when we get data. Up to 1024 bytes of data is in the buffer, and the limit is at the end of the data.
      *
