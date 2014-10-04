@@ -174,8 +174,9 @@ public final class Request {
                     state = state.parse(this);
             } catch (NeedMoreInputException ex) {
                 // just catch it, and exit
-            } catch (BadRequestException ex) {
+            } catch (StatusCodeException ex) {
                 error = ex;
+                state = State.END;
             }
             this.data = null;
             return state == State.END;
