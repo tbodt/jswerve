@@ -158,7 +158,9 @@ public final class Request {
             char ch;
             while ((ch = next()) != '\n')
                 string.append(ch);
-            return string.toString();
+            String chunk = string.toString();
+            string.setLength(0);
+            return chunk;
         }
 
         /**
