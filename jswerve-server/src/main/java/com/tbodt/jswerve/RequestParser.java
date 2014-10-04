@@ -21,79 +21,104 @@ import java.nio.ByteBuffer;
 /**
  * An HTTP parser. Parses it one chunk/{@code ByteBuffer} at a time.
  *
- * NB: This doesn't work yet. I'm just figuring out the API. It will eventually, though.
- *
  * @author Theodore Dubois
  */
 public class RequestParser {
-    private State state = State.LINE;
+    private ByteBuffer data;
+    private State state = State.START;
+    private StringBuilder string = new StringBuilder();
     private boolean cr;
     private RuntimeException error;
+    
+    private Request.Method method;
 
     private enum State {
-        LINE, HEADERS, DONE;
+        START {
+            @Override
+            public State parse(RequestParser p) {
+                char ch;
+                // Ignore empty lines at the beginning.
+                do
+                    ch = p.next();
+                while (ch < ' ');
+                p.string = new StringBuilder();
+                p.string.append(ch);
+                return State.METHOD;
+            }
+        }, METHOD {
+            @Override
+            public State parse(RequestParser p) {
+                p.method = Request.Method.forName(p.readUntil(' '));
+                return State.END;
+            }
+        }, END {
+            @Override
+            public State parse(RequestParser p) {
+                p.data.position(0).limit(0);
+                return State.END;
+            }
+        };
+
+        public abstract State parse(RequestParser parser);
     }
 
-    public void parseNext(ByteBuffer data) {
-        if (error != null)
-            return; // just hang out until eof
-        try {
-            switch (state) {
-                case LINE:
-                    parseLine(data);
-                    break;
-                default:
+    private char next() {
+        if (!data.hasRemaining())
+            throw new NeedMoreInputException();
+        char ch = (char) data.get();
+        if (cr) {
+            if (ch != '\n')
+                throw new BadRequestException();
+            cr = false;
+            return (char) ch;
+        }
+
+        if (ch == '\r')
+            if (data.hasRemaining()) {
+                ch = (char) data.get();
+                if (ch != '\n')
                     throw new BadRequestException();
+            } else {
+                cr = true;
+                throw new NeedMoreInputException();
             }
-        } catch (StatusCodeException sce) {
-            error = sce;
-        } 
+        return ch;
+    }
+    
+    private String readUntil(char until) {
+        char ch;
+        while ((ch = next()) != until)
+            string.append(ch);
+        return string.toString();
     }
 
     /**
      * Parse the next chunk of data.
      *
      * @param data the data
+     * @return whether parsing is done
      */
-    @SuppressWarnings("empty-statement")
-    public void parseLine(ByteBuffer data) {
-        byte ch;
-        // Ignore empty lines at the beginning.
-        while ((ch = next(data)) == '\n')
-            ; // do nothing
-
-    }
-
-    private byte next(ByteBuffer data) {
-        byte ch = data.get();
-        if (cr) {
-            if (ch != '\n')
-                throw new BadRequestException();
-            cr = false;
-            return ch;
+    public boolean parseNext(ByteBuffer data) {
+        this.data = data;
+        try {
+            while (data.hasRemaining())
+                state = state.parse(this);
+        } catch (NeedMoreInputException ex) {
+            // just catch it, and exit
+        } catch (BadRequestException ex) {
+            error = ex;
         }
-
-        if (ch == '\r')
-            if (data.hasRemaining()) {
-                ch = data.get();
-                if (ch != '\n')
-                    throw new BadRequestException();
-            } else {
-                cr = true;
-                return 0;
-            }
-        return ch;
+        this.data = null;
+        return state == State.END;
+    }
+    
+    public Request getRequest() {
+        if (state == State.END && error != null)
+            throw error;
+        return new Request(method, null, null, null);
     }
 
-    /**
-     * Finish it off. Return the parsed request.
-     *
-     * @return the parsed request
-     * @throws StatusCodeException if there's an error in the request
-     */
-    public Request end() {
-        if (error != null)
-            throw error;
-        return null;
+    private static class NeedMoreInputException extends RuntimeException {
+        // No actual code is needed.
     }
 }

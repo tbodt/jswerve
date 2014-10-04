@@ -25,6 +25,7 @@ import java.nio.channels.SelectionKey;
  * @author Theodore Dubois
  */
 public class Connection {
+    private final RequestParser parser = new RequestParser();
     /**
      * Do something about when we get data. Up to 1024 bytes of data is in the buffer, and the limit is at the end of the data.
      *
@@ -32,7 +33,7 @@ public class Connection {
      * @param key the selection key, in case you need it
      */
     public void handleRead(ByteBuffer buffer, SelectionKey key) {
-        System.out.println("Data came in:");
-        System.out.println(new String(buffer.array(), buffer.arrayOffset(), buffer.remaining()));
+        if (parser.parseNext(buffer))
+            System.out.println("Done");
     }
 }

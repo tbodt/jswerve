@@ -16,9 +16,7 @@
  */
 package com.tbodt.jswerve;
 
-import java.io.*;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.*;
 
 /**
@@ -44,58 +42,12 @@ public final class Request {
             }
         }
     }
-
-    public Request(InputStream input) throws IOException, StatusCodeException {
-        // First, slurp up the request (using the ASCII encoding).
-        BufferedReader reader = new BufferedReader(new InputStreamReader(input, "ASCII"));
-        Queue<String> lines = new ArrayDeque<String>();
-        String line;
-        while (!(line = reader.readLine()).equals(""))
-            lines.add(line);
-        // Remove initial blank lines, as reccomended by specification.
-        while (lines.peek() != null && lines.peek().equals(""))
-            lines.remove();
-        ensure(!lines.isEmpty());
-
-        // Second, process the request.
-        String[] requestLine = lines.remove().split(" ");
-        ensure(requestLine.length == 3);
-        method = Method.forName(requestLine[0]);
-        httpVersion = requestLine[2];
-        ensure(httpVersion.matches("HTTP/\\d+\\.\\d+"));
-        URI unresolvedUri;
-        try {
-            unresolvedUri = new URI(requestLine[1]);
-        } catch (URISyntaxException ex) {
-            throw new BadRequestException();
-        }
-
-        Map<String, String> theHeaders = new HashMap<String, String>();
-        String header;
-        while ((header = lines.poll()) != null) {
-            String[] keyAndValue = header.split(":[ \t]*", 2);
-            ensure(keyAndValue.length == 2, httpVersion);
-            while (lines.peek() != null && (lines.peek().startsWith(" ") || lines.peek().startsWith("\t")))
-                keyAndValue[1] += lines.remove().substring(1);
-            theHeaders.put(keyAndValue[0], keyAndValue[1]);
-        }
-        headers = Collections.unmodifiableMap(theHeaders);
-        
-        if (headers.containsKey("Host"))
-            uri = URI.create("http://" + headers.get("Host")).resolve(unresolvedUri);
-        else
-            uri = unresolvedUri;
-        // TODO implement request bodies
-    }
-
-    private static void ensure(boolean what) throws BadRequestException {
-        if (!what)
-            throw new BadRequestException();
-    }
-
-    private static void ensure(boolean what, String httpVersion) throws BadRequestException {
-        if (!what)
-            throw new BadRequestException(httpVersion);
+    
+    Request(Request.Method method, URI uri, String httpVersion, Map<String, String> headers) {
+        this.method = method;
+        this.uri = uri;
+        this.httpVersion = httpVersion;
+        this.headers = headers;
     }
 
     public String getHttpVersion() {
