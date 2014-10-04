@@ -68,7 +68,7 @@ public final class Request {
                     // Ignore empty lines at the beginning.
                     do
                         ch = p.next();
-                    while (ch < ' ');
+                    while (ch == '\n');
                     p.string = new StringBuilder();
                     p.string.append(ch);
                     return State.METHOD;
@@ -76,7 +76,7 @@ public final class Request {
             }, METHOD {
                 @Override
                 public State parse(Parser p) {
-                    p.method = Request.Method.forName(p.readUntil(' '));
+                    p.method = Method.forName(p.readChunk());
                     return State.END;
                 }
             }, END {
@@ -90,6 +90,11 @@ public final class Request {
             public abstract State parse(Parser parser);
         }
 
+        /**
+         * Return the next character. Converts CRLFs to LFs.
+         * 
+         * @return the next character, converting CRLFs to LFs.
+         */
         private char next() {
             if (!data.hasRemaining())
                 throw new NeedMoreInputException();
@@ -113,9 +118,23 @@ public final class Request {
             return ch;
         }
 
-        private String readUntil(char until) {
+        /**
+         * Return the next chunk of data, such as a method or version number. It can't end a line.
+         * 
+         * @return just look up
+         */
+        private String readChunk() {
             char ch;
-            while ((ch = next()) != until)
+            while ((ch = next()) != ' ' && ch != '\n')
+                string.append(ch);
+            if (ch == '\n')
+                throw new BadRequestException();
+            return string.toString();
+        }
+        
+        private String readLastChunk() {
+            char ch;
+            while ((ch = next()) != '\n')
                 string.append(ch);
             return string.toString();
         }
@@ -139,7 +158,7 @@ public final class Request {
             this.data = null;
             return state == State.END;
         }
-
+        
         public Request getRequest() {
             if (state == State.END && error != null)
                 throw error;
@@ -149,6 +168,7 @@ public final class Request {
         private static class NeedMoreInputException extends RuntimeException {
             // No actual code is needed.
         }
+
     }
 
     public String getHttpVersion() {
