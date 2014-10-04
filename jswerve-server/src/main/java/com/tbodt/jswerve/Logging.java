@@ -28,6 +28,7 @@ public final class Logging {
     public static final Logger LOG = Logger.getLogger("com.tbodt.jswerve");
 
     public static void initialize() throws IOException {
+        /*
         PrintStream out = new PrintStream(new OutputStream() {
             private StringBuilder line = new StringBuilder();
 
@@ -45,14 +46,13 @@ public final class Logging {
                 }
             }
         });
+                */
         InputStream in = new InputStream() {
             @Override
             public int read() throws IOException {
                 return -1;
             }
         };
-        System.setOut(out);
-        System.setErr(out);
         System.setIn(in);
 
         LOG.setLevel(Level.ALL);
