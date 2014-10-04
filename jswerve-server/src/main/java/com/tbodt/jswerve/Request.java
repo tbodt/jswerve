@@ -17,6 +17,7 @@
 package com.tbodt.jswerve;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.util.*;
 
@@ -59,6 +60,7 @@ public final class Request {
         private RuntimeException error;
 
         private Request.Method method;
+        private URI uri;
 
         private enum State {
             START {
@@ -77,11 +79,22 @@ public final class Request {
                 @Override
                 public State parse(Parser p) {
                     p.method = Method.forName(p.readChunk());
+                    return State.URI;
+                }
+            }, URI {
+                @Override
+                public State parse(Parser p) {
+                    try {
+                        p.uri = new URI(p.readChunk());
+                    } catch (URISyntaxException ex) {
+                        throw new BadRequestException();
+                    }
                     return State.END;
                 }
             }, END {
                 @Override
                 public State parse(Parser p) {
+                    // We're done. Just absorb any more input.
                     p.data.position(0).limit(0);
                     return State.END;
                 }
@@ -129,7 +142,9 @@ public final class Request {
                 string.append(ch);
             if (ch == '\n')
                 throw new BadRequestException();
-            return string.toString();
+            String chunk = string.toString();
+            string.setLength(0);
+            return chunk;
         }
         
         private String readLastChunk() {
@@ -162,7 +177,7 @@ public final class Request {
         public Request getRequest() {
             if (state == State.END && error != null)
                 throw error;
-            return new Request(method, null, null, null);
+            return new Request(method, uri, null, null);
         }
 
         private static class NeedMoreInputException extends RuntimeException {
