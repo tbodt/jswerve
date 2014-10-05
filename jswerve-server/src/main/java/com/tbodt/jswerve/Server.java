@@ -35,7 +35,7 @@ public class Server implements Runnable {
     private Website website;
     private final ExecutorService pool = Executors.newCachedThreadPool();
     private final ServerSocketChannel channel;
-    private Selector selector;
+    private final Selector selector;
 
     public Server(Website website) throws IOException {
         this.website = website;
@@ -98,7 +98,8 @@ public class Server implements Runnable {
                     if (key.isAcceptable()) {
                         ServerSocketChannel ssc = (ServerSocketChannel) key.channel();
                         SocketChannel sc = ssc.accept();
-                        handleAccept(sc);
+                        sc.configureBlocking(false);
+                        sc.register(selector, SelectionKey.OP_READ, new Connection());
                     }
                     if (key.isReadable()) {
                         ByteBuffer buffer = ByteBuffer.allocate(1024);
@@ -126,13 +127,6 @@ public class Server implements Runnable {
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
-    }
-
-    private void handleAccept(SocketChannel sc) throws IOException {
-        sc.configureBlocking(false);
-        sc.socket().setTcpNoDelay(true);
-        SelectionKey key = sc.register(selector, SelectionKey.OP_READ);
-        key.attach(new Connection());
     }
     /*
      final Socket socket = channel.accept();
