@@ -56,6 +56,7 @@ public final class Request {
         private ByteBuffer data;
         private State state = State.START;
         private StringBuilder string = new StringBuilder();
+        private String headerName;
         private boolean cr;
         private boolean newline;
         private RuntimeException error;
@@ -63,6 +64,7 @@ public final class Request {
         private Request.Method method;
         private URI uri;
         private String httpVersion;
+        private Map<String, String> headers = new HashMap<String, String>();
 
         private enum State {
             START {
@@ -73,7 +75,7 @@ public final class Request {
                     do
                         ch = p.next();
                     while (ch == '\n');
-                    p.string = new StringBuilder();
+                    p.string.setLength(0);
                     p.string.append(ch);
                     return State.METHOD;
                 }
@@ -100,7 +102,32 @@ public final class Request {
                 @Override
                 public State parse(Parser p) {
                     p.httpVersion = p.readLastChunk();
-                    return State.DONE;
+                    return State.HEADER_NAME;
+                }
+            },
+            HEADER_NAME {
+                @Override
+                public State parse(Parser p) {
+                    p.headerName = p.readChunk();
+                    if (!p.headerName.endsWith(":"))
+                        throw new BadRequestException();
+                    p.headerName = p.headerName.substring(0, p.headerName.length() - 1);
+                    return State.HEADER_VALUE;
+                }
+            },
+            HEADER_VALUE {
+                @Override
+                public State parse(Parser p) {
+                    String headerValue = p.readLastChunk();
+                    p.headers.put(p.headerName, headerValue);
+                    char ch = p.next();
+                    if (ch == '\n')
+                        return State.DONE;
+                    else {
+                        p.string.setLength(0);
+                        p.string.append(ch);
+                        return State.HEADER_NAME;
+                    }
                 }
             },
             DONE {
@@ -122,7 +149,7 @@ public final class Request {
                 }
             };
 
-            public abstract State parse(Parser parser);
+            public abstract State parse(Parser p);
         }
 
         /**
@@ -206,7 +233,7 @@ public final class Request {
         public Request getRequest() {
             if (state == State.DONE && error != null)
                 throw error;
-            return new Request(method, uri, null, null);
+            return new Request(method, uri, httpVersion, headers);
         }
 
         private static class NeedMoreInputException extends RuntimeException {
