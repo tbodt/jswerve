@@ -127,7 +127,7 @@ public final class Request {
 
         /**
          * Return the next character. Converts CRLFs to LFs.
-         * 
+         *
          * @return the next character, converting CRLFs to LFs.
          */
         private char next() {
@@ -155,7 +155,7 @@ public final class Request {
 
         /**
          * Return the next chunk of data, such as a method or version number. It can't end a line.
-         * 
+         *
          * @return just look up
          */
         private String readChunk() {
@@ -170,7 +170,7 @@ public final class Request {
             string.setLength(0);
             return chunk;
         }
-        
+
         private String readLastChunk() {
             char ch;
             while ((ch = next()) != '\n')
@@ -189,20 +189,20 @@ public final class Request {
         public boolean parseNext(ByteBuffer data) {
             this.data = data;
             try {
-                try {
-                    while (data.hasRemaining())
+                while (data.hasRemaining())
+                    try {
                         state = state.parse(this);
-                }  catch (StatusCodeException ex) {
-                    error = ex;
-                    state = State.ERROR;
-                }
+                    } catch (StatusCodeException ex) {
+                        error = ex;
+                        state = State.ERROR;
+                    }
             } catch (NeedMoreInputException ex) {
                 // just catch it, and exit
             }
             this.data = null;
             return state == State.DONE;
         }
-        
+
         public Request getRequest() {
             if (state == State.DONE && error != null)
                 throw error;
