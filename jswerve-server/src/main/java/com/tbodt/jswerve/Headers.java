@@ -43,7 +43,7 @@ public final class Headers {
         }
         
         public Builder setHeader(String name, String value) {
-            headersMap.put(name, value);
+            headersMap.put(name.toLowerCase(), value);
             return this;
         }
         
@@ -56,7 +56,7 @@ public final class Headers {
     }
 
     public String get(String key) {
-        return headersMap.get(key);
+        return headersMap.get(key.toLowerCase());
     }
     
     public Map<String, String> asMap() {
