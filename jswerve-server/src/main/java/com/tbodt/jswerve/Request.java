@@ -57,6 +57,7 @@ public final class Request {
         private State state = State.START;
         private StringBuilder string = new StringBuilder();
         private boolean cr;
+        private boolean newline;
         private RuntimeException error;
 
         private Request.Method method;
@@ -76,13 +77,15 @@ public final class Request {
                     p.string.append(ch);
                     return State.METHOD;
                 }
-            }, METHOD {
+            },
+            METHOD {
                 @Override
                 public State parse(Parser p) {
                     p.method = Method.forName(p.readChunk());
                     return State.URI;
                 }
-            }, URI {
+            },
+            URI {
                 @Override
                 public State parse(Parser p) {
                     try {
@@ -92,18 +95,30 @@ public final class Request {
                     }
                     return State.VERSION;
                 }
-            }, VERSION {
+            },
+            VERSION {
                 @Override
                 public State parse(Parser p) {
                     p.httpVersion = p.readLastChunk();
-                    return State.END;
+                    return State.DONE;
                 }
-            }, END {
+            },
+            DONE {
                 @Override
                 public State parse(Parser p) {
                     // We're done. Just absorb any more input.
                     p.data.position(0).limit(0);
-                    return State.END;
+                    return State.DONE;
+                }
+            },
+            ERROR {
+                @Override
+                public State parse(Parser p) {
+                    do
+                        while (!p.newline)
+                            p.newline = p.next() == '\n';
+                    while (p.next() != '\n');
+                    return State.DONE;
                 }
             };
 
@@ -147,8 +162,10 @@ public final class Request {
             char ch;
             while ((ch = next()) != ' ' && ch != '\n')
                 string.append(ch);
-            if (ch == '\n')
+            if (ch == '\n') {
+                newline = true;
                 throw new BadRequestException();
+            }
             String chunk = string.toString();
             string.setLength(0);
             return chunk;
@@ -172,20 +189,22 @@ public final class Request {
         public boolean parseNext(ByteBuffer data) {
             this.data = data;
             try {
-                while (data.hasRemaining())
-                    state = state.parse(this);
+                try {
+                    while (data.hasRemaining())
+                        state = state.parse(this);
+                }  catch (StatusCodeException ex) {
+                    error = ex;
+                    state = State.ERROR;
+                }
             } catch (NeedMoreInputException ex) {
                 // just catch it, and exit
-            } catch (StatusCodeException ex) {
-                error = ex;
-                state = State.END;
             }
             this.data = null;
-            return state == State.END;
+            return state == State.DONE;
         }
         
         public Request getRequest() {
-            if (state == State.END && error != null)
+            if (state == State.DONE && error != null)
                 throw error;
             return new Request(method, uri, null, null);
         }
