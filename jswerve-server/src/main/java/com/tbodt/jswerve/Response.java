@@ -17,7 +17,6 @@
 package com.tbodt.jswerve;
 
 import java.io.*;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -26,14 +25,12 @@ import java.util.Map;
  */
 public class Response {
     private final StatusCode status;
-    private final Map<String, String> headers;
+    private final Headers headers;
     private final byte[] body;
 
-    public static final Map<String, String> DEFAULT_HEADERS = new HashMap<String, String>();
-
-    static {
-        DEFAULT_HEADERS.put("Connection", "close");
-    }
+    public static final Headers DEFAULT_HEADERS = new Headers.Builder()
+            .setHeader("Connection", "close")
+            .build();
 
     public Response(StatusCode status) {
         this(status, null, null);
@@ -41,13 +38,14 @@ public class Response {
 
     public Response(StatusCode status, byte[] body, String contentType) {
         this.status = status;
-        this.headers = new HashMap<String, String>(DEFAULT_HEADERS);
+        Headers.Builder builder = new Headers.Builder(DEFAULT_HEADERS);
         if (contentType != null)
-            headers.put("Content-Type", contentType);
+            builder.setHeader("Content-Type", contentType);
+        this.headers = builder.build();
         this.body = body;
     }
 
-    public Map<String, String> getHeaders() {
+    public Headers getHeaders() {
         return headers;
     }
 
@@ -55,7 +53,7 @@ public class Response {
         PrintWriter writer = new PrintWriter(out);
 
         writer.println(httpVersion + " " + status);
-        for (Map.Entry<String, String> entry : headers.entrySet())
+        for (Map.Entry<String, String> entry : headers.asMap().entrySet())
             writer.println(entry.getKey() + ": " + entry.getValue());
         writer.println();
         writer.flush();

@@ -19,7 +19,6 @@ package com.tbodt.jswerve;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
-import java.util.*;
 
 /**
  * An RFC-2616 compliant HTTP request.
@@ -31,7 +30,7 @@ public final class Request {
     private final Request.Method method;
     private final URI uri;
     private final String httpVersion;
-    private final Map<String, String> headers;
+    private final Headers headers;
 
     public enum Method {
         GET;
@@ -45,7 +44,7 @@ public final class Request {
         }
     }
 
-    private Request(Request.Method method, URI uri, String httpVersion, Map<String, String> headers) {
+    private Request(Request.Method method, URI uri, String httpVersion, Headers headers) {
         this.method = method;
         this.uri = uri;
         this.httpVersion = httpVersion;
@@ -64,7 +63,7 @@ public final class Request {
         private Request.Method method;
         private URI uri;
         private String httpVersion;
-        private Map<String, String> headers = new HashMap<String, String>();
+        private Headers.Builder headersBuilder = new Headers.Builder();
 
         private enum State {
             START {
@@ -119,7 +118,7 @@ public final class Request {
                 @Override
                 public State parse(Parser p) {
                     String headerValue = p.readLastChunk();
-                    p.headers.put(p.headerName, headerValue);
+                    p.headersBuilder.setHeader(p.headerName, headerValue);
                     char ch = p.next();
                     if (ch == '\n')
                         return State.DONE;
@@ -233,7 +232,7 @@ public final class Request {
         public Request getRequest() {
             if (state == State.DONE && error != null)
                 throw error;
-            return new Request(method, uri, httpVersion, headers);
+            return new Request(method, uri, httpVersion, headersBuilder.build());
         }
 
         private static class NeedMoreInputException extends RuntimeException {
@@ -254,7 +253,7 @@ public final class Request {
         return uri;
     }
 
-    public Map<String, String> getHeaders() {
-        return Collections.unmodifiableMap(headers);
+    public Headers getHeaders() {
+        return headers;
     }
 }
