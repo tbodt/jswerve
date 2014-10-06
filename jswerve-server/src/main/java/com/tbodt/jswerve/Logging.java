@@ -28,35 +28,31 @@ public final class Logging {
     public static final Logger LOG = Logger.getLogger("com.tbodt.jswerve");
 
     public static void initialize() throws IOException {
+        /*
         PrintStream out = new PrintStream(new OutputStream() {
             private StringBuilder line = new StringBuilder();
 
             @Override
             public void write(int b) throws IOException {
-                line.append(new String(new byte[] {(byte) b}));
-                if (line.toString().endsWith("\n")) {
-                    LOG.info(line.toString());
-                    line = new StringBuilder();
-                }
+                write(new byte[] {(byte) b}, 0, 1);
             }
 
             @Override
             public void write(byte[] b, int off, int len) throws IOException {
                 line.append(new String(b, off, len));
                 if (line.toString().endsWith("\n")) {
-                    LOG.info(line.toString());
+                    LOG.info(line.toString().substring(0, line.length() - 1));
                     line = new StringBuilder();
                 }
             }
         });
+                */
         InputStream in = new InputStream() {
             @Override
             public int read() throws IOException {
                 return -1;
             }
         };
-        System.setOut(out);
-        System.setErr(out);
         System.setIn(in);
 
         LOG.setLevel(Level.ALL);

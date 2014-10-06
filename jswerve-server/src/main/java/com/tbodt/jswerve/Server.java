@@ -18,8 +18,10 @@ package com.tbodt.jswerve;
 
 import java.io.IOException;
 import java.io.InterruptedIOException;
-import java.net.ServerSocket;
-import java.net.Socket;
+import java.net.*;
+import java.nio.ByteBuffer;
+import java.nio.channels.*;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
@@ -32,16 +34,21 @@ public class Server implements Runnable {
     private Thread theThread;
     private Website website;
     private final ExecutorService pool = Executors.newCachedThreadPool();
-    private ServerSocket serverSocket;
+    private final ServerSocketChannel channel;
+    private final Selector selector;
 
     public Server(Website website) throws IOException {
         this.website = website;
+        selector = Selector.open();
+
+        channel = ServerSocketChannel.open();
+        channel.configureBlocking(false);
+        channel.socket().bind(new InetSocketAddress((InetAddress) null, JSwerve.PORT));
+        channel.register(selector, SelectionKey.OP_ACCEPT);
     }
 
     public void start() {
         try {
-            if (serverSocket == null)
-                this.serverSocket = new ServerSocket(JSwerve.PORT);
             theThread = new Thread(this, "Server");
             theThread.setContextClassLoader(website.getClassLoader());
             theThread.start();
@@ -70,7 +77,7 @@ public class Server implements Runnable {
         start();
         Logging.LOG.info("Successfully deployed something");
     }
-    
+
     public void join() throws InterruptedException {
         if (theThread != null)
             theThread.join();
@@ -80,35 +87,41 @@ public class Server implements Runnable {
     public void run() {
         try {
             while (!Thread.interrupted()) {
-                final Socket socket = serverSocket.accept();
-                pool.execute(new Runnable() {
-                    public void run() {
-                        try {
-                            StatusCode status;
-                            Request request;
-                            Response response;
-                            String httpVersion;
-                            try {
-                                request = new Request(socket.getInputStream());
-                                httpVersion = request.getHttpVersion();
-                                response = website.service(request);
-                            } catch (StatusCodeException ex) {
-                                status = ex.getStatusCode();
-                                if (ex instanceof BadRequestException)
-                                    httpVersion = ((BadRequestException) ex).getHttpVersion();
-                                else
-                                    httpVersion = "HTTP/1.1";
-                                if (ex.getCause() != null)
-                                    ex.getCause().printStackTrace(System.err);
-                                response = new Response(status);
-                            }
-                            response.writeResponse(socket.getOutputStream(), httpVersion);
-                            socket.close();
-                        } catch (IOException ex) {
-                            // we can't really do anything about that
-                        }
+                selector.select();
+
+                Set<SelectionKey> keys = selector.selectedKeys();
+                for (SelectionKey key : keys) {
+                    if (!key.isValid()) {
+                        Logging.LOG.fine("Skipping invalid selector key");
+                        continue;
                     }
-                });
+                    if (key.isAcceptable()) {
+                        ServerSocketChannel ssc = (ServerSocketChannel) key.channel();
+                        SocketChannel sc = ssc.accept();
+                        sc.configureBlocking(false);
+                        sc.register(selector, SelectionKey.OP_READ, new Connection(website));
+                    }
+                    if (key.isReadable()) {
+                        ByteBuffer buffer = ByteBuffer.allocate(1024);
+                        SocketChannel sc = (SocketChannel) key.channel();
+                        int count = sc.read(buffer);
+                        if (count == -1) {
+                            // Connection shut down.
+                            sc.close();
+                            key.cancel();
+                            continue;
+                        }
+                        buffer.flip();
+                        Connection conn = (Connection) key.attachment();
+                        conn.handleRead(buffer, key);
+                    }
+                    if (key.isWritable()) {
+                        SocketChannel sc = (SocketChannel) key.channel();
+                        Connection conn = (Connection) key.attachment();
+                        conn.handleWrite(key);
+                    }
+                }
+                keys.clear();
             }
         } catch (InterruptedIOException ex) {
         } catch (IOException ex) {
@@ -116,34 +129,35 @@ public class Server implements Runnable {
         }
     }
     /*
-     public void start() {
+     final Socket socket = channel.accept();
+     pool.execute(new Runnable() {
+     public void run() {
      try {
-     if (serverSocket == null)
-     serverSocket = new ServerSocket(JSwerve.PORT);
-     website = Website.getCurrentWebsite();
-     pool = Executors.newCachedThreadPool();
-     theThread = new Thread(new Server(), "Request Accepter");
-     theThread.setContextClassLoader(website.getClassLoader());
-     theThread.start();
-     Logging.LOG.info("Successfully started server");
-     } catch (Exception ex) {
-     Logging.LOG.log(Level.SEVERE, "Error starting server", ex);
-     }
-     }
-     */
-    /*
-     public void stop() {
+     StatusCode status;
+     Request request;
+     Response response;
+     String httpVersion;
      try {
-     if (theThread != null) {
-     theThread.interrupt();
-     theThread = null;
-     pool.shutdown();
-     pool = null;
+     request = new Request(socket.getInputStream());
+     httpVersion = request.getHttpVersion();
+     response = website.service(request);
+     } catch (StatusCodeException ex) {
+     status = ex.getStatusCode();
+     if (ex instanceof BadRequestException)
+     httpVersion = ((BadRequestException) ex).getHttpVersion();
+     else
+     httpVersion = "HTTP/1.1";
+     if (ex.getCause() != null)
+     ex.getCause().printStackTrace(System.err);
+     response = new Response(status);
      }
-     Logging.LOG.info("Successfully stopped server");
-     } catch (RuntimeException ex) {
-     Logging.LOG.log(Level.SEVERE, "Error stopping server", ex);
+     response.writeResponse(socket.getOutputStream(), httpVersion);
+     socket.close();
+     } catch (IOException ex) {
+     // we can't really do anything about that
      }
      }
+     });
      */
+
 }
