@@ -54,7 +54,7 @@ public final class Request {
     public static class Parser {
         private ByteBuffer data;
         private State state = State.START;
-        private StringBuilder string = new StringBuilder();
+        private final StringBuilder string = new StringBuilder();
         private String headerName;
         private boolean cr;
         private boolean newline;
@@ -63,7 +63,7 @@ public final class Request {
         private Request.Method method;
         private URI uri;
         private String httpVersion;
-        private Headers.Builder headersBuilder = new Headers.Builder();
+        private final Headers.Builder headersBuilder = new Headers.Builder();
 
         private enum State {
             START {
@@ -101,7 +101,20 @@ public final class Request {
                 @Override
                 public State parse(Parser p) {
                     p.httpVersion = p.readLastChunk();
-                    return State.HEADER_NAME;
+                    return State.HEADER;
+                }
+            },
+            HEADER {
+                @Override
+                public State parse(Parser p) {
+                    char ch = p.next();
+                    if (ch == '\n')
+                        return State.DONE;
+                    else {
+                        p.string.setLength(0);
+                        p.string.append(ch);
+                        return State.HEADER_NAME;
+                    }
                 }
             },
             HEADER_NAME {
@@ -119,14 +132,7 @@ public final class Request {
                 public State parse(Parser p) {
                     String headerValue = p.readLastChunk();
                     p.headersBuilder.setHeader(p.headerName, headerValue);
-                    char ch = p.next();
-                    if (ch == '\n')
-                        return State.DONE;
-                    else {
-                        p.string.setLength(0);
-                        p.string.append(ch);
-                        return State.HEADER_NAME;
-                    }
+                    return State.HEADER;
                 }
             },
             DONE {

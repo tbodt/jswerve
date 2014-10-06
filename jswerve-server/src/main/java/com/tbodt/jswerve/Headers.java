@@ -23,7 +23,7 @@ import java.util.*;
  * 
  * @author Theodore Dubois
  */
-public final class Headers {
+public final class Headers implements Iterable<Map.Entry<String, String>> {
     private final Map<String, String> headersMap;
 
     private Headers(Map<String, String> headers) {
@@ -57,6 +57,10 @@ public final class Headers {
 
     public String get(String key) {
         return headersMap.get(key.toLowerCase());
+    }
+    
+    public Iterator<Map.Entry<String, String>> iterator() {
+        return headersMap.entrySet().iterator();
     }
     
     public Map<String, String> asMap() {

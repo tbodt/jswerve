@@ -19,8 +19,7 @@ package com.tbodt.jswerve;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import java.io.*;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.*;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
@@ -71,9 +70,14 @@ public class Website {
             throw new RuntimeException(ex);
         }
     }
+    private static void ensure(boolean condition) {
+        if (!condition)
+            throw new IllegalArgumentException("invalid syntax in index");
+    }
 
     public Response service(Request request) {
-        String uri = request.getUri().toString();
+        URI absoluteUri = URI.create("http://" + request.getHeaders().get("Host")).resolve(request.getUri());
+        String uri = absoluteUri.toString();
         Request.Method method = request.getMethod();
         for (Page page : entries.get(method))
             if (page.getPattern().matcher(uri).matches())
@@ -150,10 +154,6 @@ public class Website {
                 throw new RuntimeException(ex);
             }
         }
-    }
-    private static void ensure(boolean condition) {
-        if (!condition)
-            throw new IllegalArgumentException("invalid syntax in index");
     }
 
     private static byte[] readAll(InputStream in) throws IOException {

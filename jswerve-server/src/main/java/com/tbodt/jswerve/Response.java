@@ -17,6 +17,7 @@
 package com.tbodt.jswerve;
 
 import java.io.*;
+import java.nio.ByteBuffer;
 import java.util.Map;
 
 /**
@@ -47,6 +48,20 @@ public class Response {
 
     public Headers getHeaders() {
         return headers;
+    }
+
+    public ByteBufferList toBytes(String httpVersion) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(httpVersion).append(" ").append(status).append("\n");
+        for (Map.Entry<String, String> header : headers)
+            sb.append(header.getKey()).append(": ").append(header.getValue()).append("\n");
+        sb.append("\n");
+        ByteBuffer headerBytes = ByteBuffer.wrap(sb.toString().getBytes());
+
+        if (body == null)
+            return new ByteBufferList(headerBytes);
+        else
+            return new ByteBufferList(headerBytes, ByteBuffer.wrap(body));
     }
 
     public void writeResponse(OutputStream out, String httpVersion) throws IOException {

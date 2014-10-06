@@ -99,7 +99,7 @@ public class Server implements Runnable {
                         ServerSocketChannel ssc = (ServerSocketChannel) key.channel();
                         SocketChannel sc = ssc.accept();
                         sc.configureBlocking(false);
-                        sc.register(selector, SelectionKey.OP_READ, new Connection());
+                        sc.register(selector, SelectionKey.OP_READ, new Connection(website));
                     }
                     if (key.isReadable()) {
                         ByteBuffer buffer = ByteBuffer.allocate(1024);
@@ -117,8 +117,8 @@ public class Server implements Runnable {
                     }
                     if (key.isWritable()) {
                         SocketChannel sc = (SocketChannel) key.channel();
-                        sc.write(ByteBuffer.wrap("Hi!".getBytes()));
-                        key.interestOps(0);
+                        Connection conn = (Connection) key.attachment();
+                        conn.handleWrite(key);
                     }
                 }
                 keys.clear();
