@@ -50,7 +50,7 @@ public class Response {
         return headers;
     }
 
-    public ByteBufferList toBytes(String httpVersion) {
+    public ByteBuffer[] toBytes(String httpVersion) {
         StringBuilder sb = new StringBuilder();
         sb.append(httpVersion).append(" ").append(status).append("\n");
         for (Map.Entry<String, String> header : headers)
@@ -59,9 +59,9 @@ public class Response {
         ByteBuffer headerBytes = ByteBuffer.wrap(sb.toString().getBytes());
 
         if (body == null)
-            return new ByteBufferList(headerBytes);
+            return new ByteBuffer[] {headerBytes};
         else
-            return new ByteBufferList(headerBytes, ByteBuffer.wrap(body));
+            return new ByteBuffer[] {headerBytes, ByteBuffer.wrap(body)};
     }
 
     public void writeResponse(OutputStream out, String httpVersion) throws IOException {
