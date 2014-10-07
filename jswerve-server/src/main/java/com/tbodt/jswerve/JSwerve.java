@@ -50,7 +50,7 @@ public class JSwerve {
             System.exit(1);
         }
         Logging.initialize();
-        Server server = new Server(new Website("hello-website"));
+        Server server = new Server(new Website("hello-website"), new HttpProtocol());
         server.start();
     }
 }

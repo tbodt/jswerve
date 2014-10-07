@@ -14,26 +14,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package com.tbodt.jswerve;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.channels.SelectionKey;
+import java.nio.channels.SocketChannel;
 
 /**
  *
  * @author Theodore Dubois
  */
-public interface Connection {
+public interface Protocol {
+    /**
+     * Creates a new connection object for this protocol.
+     *
+     * @param website the website
+     * @param socket the socket
+     * @return a new connection object for this protocol
+     */
+    Connection newConnection(Website website, SocketChannel socket);
 
     /**
-     * Do something about when we get data. Up to 1024 bytes of data is in the buffer, and the limit is at the end of the data.
+     * Returns the port number for this protocol.
      *
-     * @param data the data
-     * @param key the selection key, in case you need it
+     * @return the port number for this protocol
      */
-    void handleRead(ByteBuffer data, SelectionKey key);
-
-    void handleWrite(SelectionKey key) throws IOException;
+    int getPort();
 }

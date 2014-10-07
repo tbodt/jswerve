@@ -62,7 +62,7 @@ public final class RemoteControl {
                 switch (buf[0]) {
                     case START_CODE:
                         if (server == null)
-                            server = new Server(new Website("hello-website"));
+                            server = new Server(new Website("hello-website"), null);
                         server.start();
                         break;
                     case DEPLOY_CODE:

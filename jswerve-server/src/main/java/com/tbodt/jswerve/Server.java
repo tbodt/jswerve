@@ -33,18 +33,21 @@ import java.util.logging.Level;
 public class Server implements Runnable {
     private Thread theThread;
     private Website website;
+    private final Protocol[] protocols;
     private final ExecutorService pool = Executors.newCachedThreadPool();
-    private final ServerSocketChannel channel;
     private final Selector selector;
 
-    public Server(Website website) throws IOException {
+    public Server(Website website, Protocol... protocols) throws IOException {
         this.website = website;
         selector = Selector.open();
+        this.protocols = protocols;
 
-        channel = ServerSocketChannel.open();
-        channel.configureBlocking(false);
-        channel.socket().bind(new InetSocketAddress((InetAddress) null, JSwerve.PORT));
-        channel.register(selector, SelectionKey.OP_ACCEPT);
+        for (Protocol protocol : protocols) {
+            ServerSocketChannel channel = ServerSocketChannel.open();
+            channel.configureBlocking(false);
+            channel.socket().bind(new InetSocketAddress((InetAddress) null, protocol.getPort()));
+            channel.register(selector, SelectionKey.OP_ACCEPT, protocol);
+        }
     }
 
     public void start() {
@@ -97,9 +100,10 @@ public class Server implements Runnable {
                     }
                     if (key.isAcceptable()) {
                         ServerSocketChannel ssc = (ServerSocketChannel) key.channel();
+                        Protocol protocol = (Protocol) key.attachment();
                         SocketChannel sc = ssc.accept();
                         sc.configureBlocking(false);
-                        sc.register(selector, SelectionKey.OP_READ, new Connection(website));
+                        sc.register(selector, SelectionKey.OP_READ, protocol.newConnection(website, sc));
                     }
                     if (key.isReadable()) {
                         ByteBuffer buffer = ByteBuffer.allocate(1024);
@@ -112,12 +116,12 @@ public class Server implements Runnable {
                             continue;
                         }
                         buffer.flip();
-                        Connection conn = (Connection) key.attachment();
+                        HttpConnection conn = (HttpConnection) key.attachment();
                         conn.handleRead(buffer, key);
                     }
                     if (key.isWritable()) {
                         SocketChannel sc = (SocketChannel) key.channel();
-                        Connection conn = (Connection) key.attachment();
+                        HttpConnection conn = (HttpConnection) key.attachment();
                         conn.handleWrite(key);
                     }
                 }

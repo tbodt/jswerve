@@ -14,26 +14,34 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package com.tbodt.jswerve;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.channels.SelectionKey;
+import java.nio.channels.*;
+import java.util.ArrayDeque;
+import java.util.Queue;
 
 /**
  *
  * @author Theodore Dubois
  */
-public interface Connection {
+public abstract class AbstractConnection implements Connection {
+    protected final SocketChannel socket;
+    protected final Website website;
+    protected final Queue<ByteBuffer> outputQueue = new ArrayDeque<ByteBuffer>();
 
-    /**
-     * Do something about when we get data. Up to 1024 bytes of data is in the buffer, and the limit is at the end of the data.
-     *
-     * @param data the data
-     * @param key the selection key, in case you need it
-     */
-    void handleRead(ByteBuffer data, SelectionKey key);
+    public AbstractConnection(Website website, SocketChannel socket) {
+        this.website = website;
+        this.socket = socket;
+    }
 
-    void handleWrite(SelectionKey key) throws IOException;
+    @Override
+    public void handleWrite(SelectionKey key) throws IOException {
+        int count = -1;
+        while (!outputQueue.isEmpty() && count != 0)
+            count = socket.write(outputQueue.poll());
+        if (outputQueue.isEmpty())
+            socket.close(); // done with output
+    }
 }
