@@ -15,6 +15,8 @@ package com.tbodt.jswerve;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import com.tbodt.jswerve.server.HttpProtocol;
+import com.tbodt.jswerve.server.Server;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;

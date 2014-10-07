@@ -14,23 +14,32 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.tbodt.jswerve;
+package com.tbodt.jswerve.server;
 
-import java.nio.channels.SocketChannel;
+import com.tbodt.jswerve.StatusCode;
+import com.tbodt.jswerve.StatusCodeException;
 
 /**
- * The HTTP protocol.
- * 
- * The default port number is 8888.
+ *
+ * @author Theodore Dubois
  */
-public class HttpProtocol extends Protocol {
-    @Override
-    public Connection newConnection(Website website, SocketChannel socket) {
-        return new HttpConnection(website, socket);
+public class BadRequestException extends StatusCodeException {
+    private final String httpVersion;
+    
+    public BadRequestException(StatusCode code, String httpVersion) {
+        super(code);
+        this.httpVersion = httpVersion;
+    }
+    
+    public BadRequestException(String httpVersion) {
+        this(StatusCode.BAD_REQUEST, httpVersion);
+    }
+    
+    public BadRequestException() {
+        this(JSwerve.DEFAULT_HTTP_VERSION);
     }
 
-    @Override
-    public int getDefaultPort() {
-        return 8888;
+    public String getHttpVersion() {
+        return httpVersion;
     }
 }

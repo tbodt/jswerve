@@ -16,7 +16,7 @@
  */
 package com.tbodt.jswerve.util;
 
-import com.tbodt.jswerve.JSwerve;
+import com.tbodt.jswerve.server.JSwerve;
 import java.io.*;
 import java.util.logging.*;
 
