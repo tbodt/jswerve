@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package com.tbodt.jswerve;
 
 import java.io.IOException;
@@ -26,14 +25,19 @@ import java.nio.channels.SelectionKey;
  * @author Theodore Dubois
  */
 public interface Connection {
-
     /**
-     * Do something about when we get data. Up to 1024 bytes of data is in the buffer, and the limit is at the end of the data.
+     * Do something when data arrives.
      *
      * @param data the data
-     * @param key the selection key, in case you need it
+     * @param key the selection key
      */
     void handleRead(ByteBuffer data, SelectionKey key);
 
+    /**
+     * Do something when the socket can handle data.
+     *
+     * @param key the selection key
+     * @throws IOException if an I/O error occurs
+     */
     void handleWrite(SelectionKey key) throws IOException;
 }
