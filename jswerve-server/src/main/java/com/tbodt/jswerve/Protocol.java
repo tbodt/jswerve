@@ -22,7 +22,9 @@ import java.nio.channels.SocketChannel;
  *
  * @author Theodore Dubois
  */
-public interface Protocol {
+public abstract class Protocol {
+    private int port = getDefaultPort();
+
     /**
      * Creates a new connection object for this protocol.
      *
@@ -30,12 +32,30 @@ public interface Protocol {
      * @param socket the socket
      * @return a new connection object for this protocol
      */
-    Connection newConnection(Website website, SocketChannel socket);
+    public abstract Connection newConnection(Website website, SocketChannel socket);
 
     /**
      * Returns the port number for this protocol.
      *
      * @return the port number for this protocol
      */
-    int getPort();
+    public int getPort() {
+        return port;
+    }
+
+    /**
+     * Set the port number for this protocol.
+     *
+     * @param port the new port number
+     */
+    public void setPort(int port) {
+        this.port = port;
+    }
+
+    /**
+     * Return the default port if none is specified via {@code setPort}.
+     *
+     * @return the default port
+     */
+    protected abstract int getDefaultPort();
 }

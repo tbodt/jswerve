@@ -19,16 +19,18 @@ package com.tbodt.jswerve;
 import java.nio.channels.SocketChannel;
 
 /**
- * An HTTP protocol.
+ * The HTTP protocol.
+ * 
+ * The default port number is 8888.
  */
-public class HttpProtocol implements Protocol {
+public class HttpProtocol extends Protocol {
     @Override
     public Connection newConnection(Website website, SocketChannel socket) {
         return new HttpConnection(website, socket);
     }
 
     @Override
-    public int getPort() {
+    public int getDefaultPort() {
         return 8888;
     }
 }
