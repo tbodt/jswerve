@@ -26,6 +26,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -87,8 +88,8 @@ public class Server implements Runnable {
 
     @Override
     public void run() {
-        try {
-            while (!Thread.interrupted()) {
+        while (!Thread.interrupted())
+            try {
                 selector.select();
 
                 Set<SelectionKey> keys = selector.selectedKeys();
@@ -101,9 +102,11 @@ public class Server implements Runnable {
                         if (key.isAcceptable()) {
                             ServerSocketChannel ssc = (ServerSocketChannel) key.channel();
                             Protocol protocol = (Protocol) key.attachment();
-                            SocketChannel sc = ssc.accept();
-                            sc.configureBlocking(false);
-                            sc.register(selector, SelectionKey.OP_READ, protocol.newConnection(website, sc));
+                            SocketChannel sc;
+                            while ((sc = ssc.accept()) != null) {
+                                sc.configureBlocking(false);
+                                sc.register(selector, SelectionKey.OP_READ, protocol.newConnection(website, sc));
+                            }
                         }
                         if (key.isReadable()) {
                             ByteBuffer buffer = ByteBuffer.allocate(1024);
@@ -124,14 +127,22 @@ public class Server implements Runnable {
                             HttpConnection conn = (HttpConnection) key.attachment();
                             conn.handleWrite(key);
                         }
+                    } catch (ClosedByInterruptException ex) {
+                        // We were interrupted. Close everything and stop the thread.
+                        try {
+                            selector.close();
+                        } catch (IOException damnedEx) {
+                            // Damn.
+                        } finally {
+                            return;
+                        }
                     } catch (IOException ex) {
                         // Not much can be done. Just close the socket and hope for the best.
                         key.channel().close();
                     }
                 keys.clear();
+            } catch (IOException ex) {
+                // Either select failed or something didn't close. All we can do is ignore it and hope it goes away.
             }
-        } catch (IOException ex) {
-            throw new RuntimeException(ex);
-        }
     }
 }
