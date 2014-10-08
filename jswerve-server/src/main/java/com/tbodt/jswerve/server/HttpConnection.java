@@ -68,7 +68,10 @@ public class HttpConnection extends AbstractConnection {
     @Override
     protected void queueEmpty() throws IOException {
         outputBuffer.clear();
-        responseIn.read(outputBuffer);
+        if (responseIn.read(outputBuffer) == -1) {
+            socket.close();
+            return;
+        }
         outputBuffer.flip();
         queue.add(outputBuffer);
     }
