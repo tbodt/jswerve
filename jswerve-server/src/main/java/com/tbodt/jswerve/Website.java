@@ -115,13 +115,7 @@ public class Website {
 
         @Override
         public Response serve(Request request) {
-            try {
-                InputStream is = classLoader.getResourceAsStream(path);
-                return new Response(StatusCode.OK, readAll(is), contentType);
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
-            }
-
+            return new Response(StatusCode.OK, classLoader.getResourceAsStream(path), contentType);
         }
 
         public String getPath() {

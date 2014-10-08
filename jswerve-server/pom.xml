@@ -34,7 +34,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <mainClass>com.tbodt.jswerve.JSwerve</mainClass>
+                    <mainClass>com.tbodt.jswerve.server.JSwerve</mainClass>
                     <arguments>
                         <argument>${project.parent.basedir}/distribution/target/distribution-0.1-SNAPSHOT-home</argument>
                     </arguments>

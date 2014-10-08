@@ -30,19 +30,26 @@ import java.util.Queue;
 public abstract class AbstractConnection implements Connection {
     protected final SocketChannel socket;
     protected final Website website;
-    protected final Queue<ByteBuffer> outputQueue = new ArrayDeque<ByteBuffer>();
+    protected final Queue<ByteBuffer> queue = new ArrayDeque<ByteBuffer>();
 
     public AbstractConnection(Website website, SocketChannel socket) {
         this.website = website;
         this.socket = socket;
     }
 
+    private static final ByteBuffer[] EMPTY_BYTE_BUFFER_ARRAY = new ByteBuffer[0];
+
     @Override
     public void handleWrite(SelectionKey key) throws IOException {
-        int count = -1;
-        while (!outputQueue.isEmpty() && count != 0)
-            count = socket.write(outputQueue.poll());
-        if (outputQueue.isEmpty())
-            socket.close(); // done with output
+        while (!queue.isEmpty()) {
+            ByteBuffer[] queueArray = queue.toArray(EMPTY_BYTE_BUFFER_ARRAY);
+            socket.write(queueArray);
+            while (!queue.isEmpty() && !queue.peek().hasRemaining())
+                queue.remove();
+            if (queue.isEmpty())
+                queueEmpty();
+        }
     }
+
+    protected abstract void queueEmpty() throws IOException;
 }

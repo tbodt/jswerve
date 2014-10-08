@@ -27,7 +27,7 @@ import java.util.Map;
 public class Response {
     private final StatusCode status;
     private final Headers headers;
-    private final byte[] body;
+    private InputStream body;
 
     public static final Headers DEFAULT_HEADERS = new Headers.Builder()
             .setHeader("Connection", "close")
@@ -37,7 +37,7 @@ public class Response {
         this(status, null, null);
     }
 
-    public Response(StatusCode status, byte[] body, String contentType) {
+    public Response(StatusCode status, InputStream body, String contentType) {
         this.status = status;
         Headers.Builder builder = new Headers.Builder(DEFAULT_HEADERS);
         if (contentType != null)
@@ -50,32 +50,20 @@ public class Response {
         return headers;
     }
 
-    public ByteBuffer[] toBytes(String httpVersion) {
+    public ByteBuffer toBytes(String httpVersion) {
         StringBuilder sb = new StringBuilder();
         sb.append(httpVersion).append(" ").append(status).append("\n");
         for (Map.Entry<String, String> header : headers)
             sb.append(header.getKey()).append(": ").append(header.getValue()).append("\n");
         sb.append("\n");
-        ByteBuffer headerBytes = ByteBuffer.wrap(sb.toString().getBytes());
-
-        if (body == null)
-            return new ByteBuffer[] {headerBytes};
-        else
-            return new ByteBuffer[] {headerBytes, ByteBuffer.wrap(body)};
+        return ByteBuffer.wrap(sb.toString().getBytes());
     }
-
-    public void writeResponse(OutputStream out, String httpVersion) throws IOException {
-        PrintWriter writer = new PrintWriter(out);
-
-        writer.println(httpVersion + " " + status);
-        for (Map.Entry<String, String> entry : headers.asMap().entrySet())
-            writer.println(entry.getKey() + ": " + entry.getValue());
-        writer.println();
-        writer.flush();
-
-        if (body != null) {
-            out.write(body);
-            out.flush();
-        }
+    
+    public InputStream getInputStream() {
+        if (body == null)
+            throw new IllegalStateException("getInputStream has already been called");
+        InputStream ret = body;
+        body = null;
+        return ret;
     }
 }

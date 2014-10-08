@@ -17,9 +17,9 @@
 package com.tbodt.jswerve.server;
 
 import com.tbodt.jswerve.*;
+import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.channels.SelectionKey;
-import java.nio.channels.SocketChannel;
+import java.nio.channels.*;
 
 /**
  * A single HTTP connection. Attached to the selector key for the socket channel for the HTTP connection.
@@ -29,6 +29,8 @@ import java.nio.channels.SocketChannel;
 public class HttpConnection extends AbstractConnection {
     private final Request.Parser parser = new Request.Parser();
     private Request request;
+    private ReadableByteChannel responseIn;
+    private final ByteBuffer outputBuffer = ByteBuffer.allocate(1024);
     
     public HttpConnection(Website website, SocketChannel socket) {
         super(website, socket);
@@ -57,10 +59,17 @@ public class HttpConnection extends AbstractConnection {
                     httpVersion = "HTTP/1.1";
                 response = new Response(status);
             }
-            for (ByteBuffer buffer : response.toBytes(httpVersion))
-                outputQueue.add(buffer);
+            queue.add(response.toBytes(httpVersion));
+            responseIn = Channels.newChannel(response.getInputStream());
             key.interestOps(SelectionKey.OP_WRITE);
         }
     }
 
+    @Override
+    protected void queueEmpty() throws IOException {
+        outputBuffer.clear();
+        responseIn.read(outputBuffer);
+        outputBuffer.flip();
+        queue.add(outputBuffer);
+    }
 }
