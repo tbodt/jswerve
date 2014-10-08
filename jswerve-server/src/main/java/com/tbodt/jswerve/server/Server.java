@@ -19,7 +19,6 @@ package com.tbodt.jswerve.server;
 import com.tbodt.jswerve.Website;
 import com.tbodt.jswerve.util.Logging;
 import java.io.IOException;
-import java.io.InterruptedIOException;
 import java.net.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.*;
@@ -95,41 +94,44 @@ public class Server implements Runnable {
                 selector.select();
 
                 Set<SelectionKey> keys = selector.selectedKeys();
-                for (SelectionKey key : keys) {
-                    if (!key.isValid()) {
-                        Logging.LOG.fine("Skipping invalid selector key");
-                        continue;
-                    }
-                    if (key.isAcceptable()) {
-                        ServerSocketChannel ssc = (ServerSocketChannel) key.channel();
-                        Protocol protocol = (Protocol) key.attachment();
-                        SocketChannel sc = ssc.accept();
-                        sc.configureBlocking(false);
-                        sc.register(selector, SelectionKey.OP_READ, protocol.newConnection(website, sc));
-                    }
-                    if (key.isReadable()) {
-                        ByteBuffer buffer = ByteBuffer.allocate(1024);
-                        SocketChannel sc = (SocketChannel) key.channel();
-                        int count = sc.read(buffer);
-                        if (count == -1) {
-                            // Connection shut down.
-                            sc.close();
-                            key.cancel();
+                for (SelectionKey key : keys)
+                    try {
+                        if (!key.isValid()) {
+                            Logging.LOG.fine("Skipping invalid selector key");
                             continue;
                         }
-                        buffer.flip();
-                        HttpConnection conn = (HttpConnection) key.attachment();
-                        conn.handleRead(buffer, key);
+                        if (key.isAcceptable()) {
+                            ServerSocketChannel ssc = (ServerSocketChannel) key.channel();
+                            Protocol protocol = (Protocol) key.attachment();
+                            SocketChannel sc = ssc.accept();
+                            sc.configureBlocking(false);
+                            sc.register(selector, SelectionKey.OP_READ, protocol.newConnection(website, sc));
+                        }
+                        if (key.isReadable()) {
+                            ByteBuffer buffer = ByteBuffer.allocate(1024);
+                            SocketChannel sc = (SocketChannel) key.channel();
+                            int count = sc.read(buffer);
+                            if (count == -1) {
+                                // Connection shut down.
+                                sc.close();
+                                key.cancel();
+                                continue;
+                            }
+                            buffer.flip();
+                            HttpConnection conn = (HttpConnection) key.attachment();
+                            conn.handleRead(buffer, key);
+                        }
+                        if (key.isWritable()) {
+                            SocketChannel sc = (SocketChannel) key.channel();
+                            HttpConnection conn = (HttpConnection) key.attachment();
+                            conn.handleWrite(key);
+                        }
+                    } catch (IOException ex) {
+                        // Not much can be done. Just close the socket and hope for the best.
+                        key.channel().close();
                     }
-                    if (key.isWritable()) {
-                        SocketChannel sc = (SocketChannel) key.channel();
-                        HttpConnection conn = (HttpConnection) key.attachment();
-                        conn.handleWrite(key);
-                    }
-                }
                 keys.clear();
             }
-        } catch (InterruptedIOException ex) {
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
