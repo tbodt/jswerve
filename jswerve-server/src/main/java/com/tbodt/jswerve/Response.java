@@ -34,7 +34,12 @@ public class Response {
             .build();
 
     public Response(StatusCode status) {
-        this(status, null, null);
+        this(status, new InputStream() {
+            @Override
+            public int read() throws IOException {
+                return -1;
+            }
+        }, null);
     }
 
     public Response(StatusCode status, InputStream body, String contentType) {
