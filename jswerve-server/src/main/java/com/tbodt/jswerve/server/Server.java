@@ -134,36 +134,4 @@ public class Server implements Runnable {
             throw new RuntimeException(ex);
         }
     }
-    /*
-     final Socket socket = channel.accept();
-     pool.execute(new Runnable() {
-     public void run() {
-     try {
-     StatusCode status;
-     Request request;
-     Response response;
-     String httpVersion;
-     try {
-     request = new Request(socket.getInputStream());
-     httpVersion = request.getHttpVersion();
-     response = website.service(request);
-     } catch (StatusCodeException ex) {
-     status = ex.getStatusCode();
-     if (ex instanceof BadRequestException)
-     httpVersion = ((BadRequestException) ex).getHttpVersion();
-     else
-     httpVersion = "HTTP/1.1";
-     if (ex.getCause() != null)
-     ex.getCause().printStackTrace(System.err);
-     response = new Response(status);
-     }
-     response.writeResponse(socket.getOutputStream(), httpVersion);
-     socket.close();
-     } catch (IOException ex) {
-     // we can't really do anything about that
-     }
-     }
-     });
-     */
-
 }
