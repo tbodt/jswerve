@@ -115,7 +115,6 @@ public class Server implements Runnable {
                             if (count == -1) {
                                 // Connection shut down.
                                 sc.close();
-                                key.cancel();
                                 continue;
                             }
                             buffer.flip();
@@ -123,7 +122,6 @@ public class Server implements Runnable {
                             conn.handleRead(buffer, key);
                         }
                         if (key.isWritable()) {
-                            SocketChannel sc = (SocketChannel) key.channel();
                             HttpConnection conn = (HttpConnection) key.attachment();
                             conn.handleWrite(key);
                         }
