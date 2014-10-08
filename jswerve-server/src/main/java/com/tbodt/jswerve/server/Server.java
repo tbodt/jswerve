@@ -34,14 +34,12 @@ import java.util.logging.Level;
 public class Server implements Runnable {
     private Thread theThread;
     private Website website;
-    private final Protocol[] protocols;
     private final ExecutorService pool = Executors.newCachedThreadPool();
     private final Selector selector;
 
     public Server(Website website, Protocol... protocols) throws IOException {
         this.website = website;
         selector = Selector.open();
-        this.protocols = protocols;
 
         for (Protocol protocol : protocols) {
             ServerSocketChannel channel = ServerSocketChannel.open();
