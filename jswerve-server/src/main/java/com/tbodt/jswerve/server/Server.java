@@ -26,7 +26,6 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -88,8 +87,8 @@ public class Server implements Runnable {
 
     @Override
     public void run() {
-        while (!Thread.interrupted())
-            try {
+        try {
+            while (!Thread.interrupted()) {
                 selector.select();
 
                 Set<SelectionKey> keys = selector.selectedKeys();
@@ -127,20 +126,18 @@ public class Server implements Runnable {
                         }
                     } catch (ClosedByInterruptException ex) {
                         // We were interrupted. Close everything and stop the thread.
-                        try {
-                            selector.close();
-                        } catch (IOException damnedEx) {
-                            // Damn.
-                        } finally {
-                            return;
-                        }
+                        selector.close();
+                        return;
                     } catch (IOException ex) {
                         // Not much can be done. Just close the socket and hope for the best.
+                        ex.printStackTrace(System.err);
                         key.channel().close();
                     }
                 keys.clear();
-            } catch (IOException ex) {
-                // Either select failed or something didn't close. All we can do is ignore it and hope it goes away.
             }
+        } catch (IOException ex) {
+            // Something didn't close or select failed. Print an error message, but nothing else can be done.
+            ex.printStackTrace(System.err);
+        }
     }
 }
