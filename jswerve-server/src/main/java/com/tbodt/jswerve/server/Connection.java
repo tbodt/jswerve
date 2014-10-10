@@ -17,7 +17,6 @@
 package com.tbodt.jswerve.server;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 
 /**
@@ -28,10 +27,10 @@ public interface Connection {
     /**
      * Do something when data arrives.
      *
-     * @param data the data
      * @param key the selection key
+     * @throws IOException if an I/O error occurs
      */
-    void handleRead(ByteBuffer data, SelectionKey key);
+    void handleRead(SelectionKey key) throws IOException;
 
     /**
      * Do something when the socket can handle data.
@@ -40,4 +39,22 @@ public interface Connection {
      * @throws IOException if an I/O error occurs
      */
     void handleWrite(SelectionKey key) throws IOException;
+
+    public enum Interest {
+        READ(SelectionKey.OP_READ),
+        WRITE(SelectionKey.OP_WRITE),
+        READ_WRITE(SelectionKey.OP_READ | SelectionKey.OP_WRITE);
+        
+        private final int ops;
+        
+        private Interest(int ops) {
+            this.ops = ops;
+        }
+        
+        public int getOps() {
+            return ops;
+        }
+    }
+    
+    Interest getInterest();
 }

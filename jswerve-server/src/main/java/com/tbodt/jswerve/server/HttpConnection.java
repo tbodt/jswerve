@@ -33,7 +33,7 @@ public class HttpConnection extends AbstractConnection {
     private final ByteBuffer outputBuffer = ByteBuffer.allocate(1024);
     
     public HttpConnection(Website website, SocketChannel socket) {
-        super(website, socket);
+        super(website, socket, Interest.READ);
     }
 
     /**
@@ -42,7 +42,7 @@ public class HttpConnection extends AbstractConnection {
      * @param data the data
      * @param key the selection key, in case you need it
      */
-    public void handleRead(ByteBuffer data, SelectionKey key) {
+    public void process(ByteBuffer data) {
         if (parser.parseNext(data)) {
             // An entire request was recieved! Yay!
             Response response;
@@ -59,20 +59,20 @@ public class HttpConnection extends AbstractConnection {
                     httpVersion = "HTTP/1.1";
                 response = new Response(status);
             }
-            queue.add(response.toBytes(httpVersion));
+            send(response.toBytes(httpVersion));
             responseIn = Channels.newChannel(response.getInputStream());
-            key.interestOps(SelectionKey.OP_WRITE);
+            setInterest(Interest.WRITE);
         }
     }
 
     @Override
-    protected void queueEmpty() throws IOException {
+    protected void respond() throws IOException {
         outputBuffer.clear();
         if (responseIn.read(outputBuffer) == -1) {
             socket.close();
             return;
         }
         outputBuffer.flip();
-        queue.add(outputBuffer);
+        send(outputBuffer);
     }
 }

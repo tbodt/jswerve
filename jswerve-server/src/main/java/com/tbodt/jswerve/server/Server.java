@@ -20,7 +20,6 @@ import com.tbodt.jswerve.Website;
 import com.tbodt.jswerve.util.Logging;
 import java.io.IOException;
 import java.net.*;
-import java.nio.ByteBuffer;
 import java.nio.channels.*;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -104,21 +103,15 @@ public class Server implements Runnable {
                             SocketChannel sc;
                             while ((sc = ssc.accept()) != null) {
                                 sc.configureBlocking(false);
-                                sc.register(selector, SelectionKey.OP_READ, protocol.newConnection(website, sc));
+                                Connection connection = protocol.newConnection(website, sc);
+                                sc.register(selector, connection.getInterest().getOps(), connection);
                             }
                         }
                         if (key.isReadable()) {
-                            ByteBuffer buffer = ByteBuffer.allocate(1024);
                             SocketChannel sc = (SocketChannel) key.channel();
-                            int count = sc.read(buffer);
-                            if (count == -1) {
-                                // Connection shut down.
-                                sc.close();
-                                continue;
-                            }
-                            buffer.flip();
+                            
                             HttpConnection conn = (HttpConnection) key.attachment();
-                            conn.handleRead(buffer, key);
+                            conn.handleRead(key);
                         }
                         if (key.isWritable()) {
                             HttpConnection conn = (HttpConnection) key.attachment();

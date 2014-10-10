@@ -29,27 +29,61 @@ import java.util.Queue;
  */
 public abstract class AbstractConnection implements Connection {
     protected final SocketChannel socket;
+    private Interest interest;
     protected final Website website;
-    protected final Queue<ByteBuffer> queue = new ArrayDeque<ByteBuffer>();
+    private final Queue<ByteBuffer> queue = new ArrayDeque<ByteBuffer>();
+    private static final ByteBuffer[] EMPTY_BYTE_BUFFER_ARRAY = new ByteBuffer[0];
 
-    public AbstractConnection(Website website, SocketChannel socket) {
+    public AbstractConnection(Website website, SocketChannel socket, Interest interest) {
         this.website = website;
         this.socket = socket;
+        this.interest = interest;
     }
 
-    private static final ByteBuffer[] EMPTY_BYTE_BUFFER_ARRAY = new ByteBuffer[0];
+    @Override
+    public void handleRead(SelectionKey key) throws IOException {
+        ByteBuffer data = ByteBuffer.allocate(1024);
+        while (socket.read(data) > 0) {
+            data.flip();
+            process(data);
+            data.clear();
+        }
+        if (key.isValid()) // it isn't if close was called
+            key.interestOps(interest.getOps());
+    }
 
     @Override
     public void handleWrite(SelectionKey key) throws IOException {
-        while (!queue.isEmpty()) {
+        do {
             ByteBuffer[] queueArray = queue.toArray(EMPTY_BYTE_BUFFER_ARRAY);
             socket.write(queueArray);
             while (!queue.isEmpty() && !queue.peek().hasRemaining())
                 queue.remove();
             if (queue.isEmpty())
-                queueEmpty();
-        }
+                respond();
+        } while (!queue.isEmpty());
+        if (key.isValid()) // it isn't if close was called
+            key.interestOps(interest.getOps());
     }
 
-    protected abstract void queueEmpty() throws IOException;
+    protected abstract void process(ByteBuffer data);
+
+    protected abstract void respond() throws IOException;
+
+    protected final void send(ByteBuffer data) {
+        queue.add(data);
+    }
+
+    protected final void close() throws IOException {
+        socket.close();
+    }
+
+    @Override
+    public Interest getInterest() {
+        return interest;
+    }
+
+    public void setInterest(Interest interest) {
+        this.interest = interest;
+    }
 }
