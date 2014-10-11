@@ -43,13 +43,18 @@ public abstract class AbstractConnection implements Connection {
     @Override
     public void handleRead(SelectionKey key) throws IOException {
         ByteBuffer data = ByteBuffer.allocate(1024);
-        while (socket.read(data) > 0) {
+        int count;
+        while ((count = socket.read(data)) > 0) {
             data.flip();
             process(data);
             data.clear();
         }
+        if (count == -1)
+            close(); // don't infinitely try to read a connection closed by the other end
+        
         if (key.isValid()) // it isn't if close was called
             key.interestOps(interest.getOps());
+        key.selector().wakeup();
     }
 
     @Override
@@ -64,6 +69,7 @@ public abstract class AbstractConnection implements Connection {
         } while (!queue.isEmpty());
         if (key.isValid()) // it isn't if close was called
             key.interestOps(interest.getOps());
+        key.selector().wakeup();
     }
 
     protected abstract void process(ByteBuffer data);

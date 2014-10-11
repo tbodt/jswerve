@@ -22,8 +22,7 @@ import java.io.IOException;
 import java.net.*;
 import java.nio.channels.*;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 import java.util.logging.Level;
 
 /**
@@ -33,7 +32,11 @@ import java.util.logging.Level;
 public class Server implements Runnable {
     private Thread theThread;
     private Website website;
-    private final ExecutorService pool = Executors.newCachedThreadPool();
+    private final ExecutorService pool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() - 2, new ThreadFactory() {
+        public Thread newThread(Runnable r) {
+            return new Thread(r, "Server slave");
+        }
+    });
     private final Selector selector;
 
     public Server(Website website, Protocol... protocols) throws IOException {
@@ -91,7 +94,7 @@ public class Server implements Runnable {
                 selector.select();
 
                 Set<SelectionKey> keys = selector.selectedKeys();
-                for (SelectionKey key : keys)
+                for (final SelectionKey key : keys)
                     try {
                         if (!key.isValid()) {
                             Logging.LOG.fine("Skipping invalid selector key");
@@ -108,29 +111,60 @@ public class Server implements Runnable {
                             }
                         }
                         if (key.isReadable()) {
-                            SocketChannel sc = (SocketChannel) key.channel();
-                            
-                            HttpConnection conn = (HttpConnection) key.attachment();
-                            conn.handleRead(key);
+                            key.interestOps(key.interestOps() & ~SelectionKey.OP_READ);
+                            final Connection conn = (Connection) key.attachment();
+                            pool.submit(new Runnable() {
+                                @Override
+                                public void run() {
+                                    try {
+                                        conn.handleRead(key);
+                                    } catch (IOException ex) {
+                                        handleException(key, ex);
+                                    }
+                                }
+                            });
                         }
                         if (key.isWritable()) {
-                            HttpConnection conn = (HttpConnection) key.attachment();
-                            conn.handleWrite(key);
+                            key.interestOps(key.interestOps() & ~SelectionKey.OP_WRITE);
+                            final Connection conn = (Connection) key.attachment();
+                            pool.submit(new Runnable() {
+                                public void run() {
+                                    try {
+                                        conn.handleWrite(key);
+                                    } catch (IOException ex) {
+                                        handleException(key, ex);
+                                    }
+                                }
+                            });
                         }
                     } catch (ClosedByInterruptException ex) {
                         // We were interrupted. Close everything and stop the thread.
                         selector.close();
                         return;
-                    } catch (IOException ex) {
-                        // Not much can be done. Just close the socket and hope for the best.
-                        ex.printStackTrace(System.err);
-                        key.channel().close();
                     }
                 keys.clear();
             }
         } catch (IOException ex) {
-            // Something didn't close or select failed. Print an error message, but nothing else can be done.
+            // Select failed. Print an error message, but nothing else can be done.
             ex.printStackTrace(System.err);
+        }
+    }
+
+    /**
+     * Handle exception thrown in a runnable.
+     *
+     * @param key the selection key
+     * @param ex the exception
+     */
+    private void handleException(SelectionKey key, IOException ex) {
+        // Not much can be done. Just close the socket and hope for the best.
+        ex.printStackTrace(System.err);
+        try {
+            key.channel().close();
+        } catch (IOException ex1) {
+            // Close failed. There is no hope.
+            ex1.printStackTrace(System.err);
+            
         }
     }
 }
