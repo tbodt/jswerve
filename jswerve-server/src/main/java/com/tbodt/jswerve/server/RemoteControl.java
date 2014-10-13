@@ -32,6 +32,7 @@ public final class RemoteControl {
     public static void activate() {
         if (!activated)
             new Thread(new Runnable() {
+                @Override
                 public void run() {
                     RemoteControl.run();
                 }

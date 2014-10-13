@@ -31,7 +31,7 @@ public abstract class AbstractConnection implements Connection {
     protected final SocketChannel socket;
     private Interest interest;
     protected final Website website;
-    private final Queue<ByteBuffer> queue = new ArrayDeque<ByteBuffer>();
+    private final Queue<ByteBuffer> queue = new ArrayDeque<>();
     private static final ByteBuffer[] EMPTY_BYTE_BUFFER_ARRAY = new ByteBuffer[0];
 
     public AbstractConnection(Website website, SocketChannel socket, Interest interest) {

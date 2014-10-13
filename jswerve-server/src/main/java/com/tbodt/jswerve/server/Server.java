@@ -32,6 +32,7 @@ public class Server implements Runnable {
     private Thread theThread;
     private Website website;
     private final ExecutorService pool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() - 2, new ThreadFactory() {
+        @Override
         public Thread newThread(Runnable r) {
             return new Thread(r, "Server slave");
         }
@@ -112,6 +113,7 @@ public class Server implements Runnable {
                         key.interestOps(0);
                         final Connection connection = (Connection) key.attachment();
                         pool.submit(new Runnable() {
+                            @Override
                             public void run() {
                                 try {
                                     if (key.isReadable())

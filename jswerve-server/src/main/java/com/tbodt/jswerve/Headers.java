@@ -35,11 +35,11 @@ public final class Headers implements Iterable<Map.Entry<String, String>> {
         private boolean built = false;
         
         public Builder() {
-            headersMap = new HashMap<String, String>();
+            headersMap = new HashMap<>();
         }
 
         public Builder(Headers headers) {
-            headersMap = new HashMap<String, String>(headers.asMap());
+            headersMap = new HashMap<>(headers.asMap());
         }
         
         public Builder setHeader(String name, String value) {
