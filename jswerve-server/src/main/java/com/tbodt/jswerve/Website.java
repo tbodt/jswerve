@@ -22,10 +22,10 @@ import com.tbodt.jswerve.server.JSwerve;
 import com.tbodt.jswerve.util.Logging;
 import java.io.*;
 import java.net.*;
+import java.nio.file.FileSystem;
+import java.nio.file.*;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 
 /**
  *
@@ -35,18 +35,22 @@ public class Website {
     private static final File SITES = new File(JSwerve.HOME, "sites");
     
     private final WebsiteClassLoader classLoader = new WebsiteClassLoader();
-    private final ZipFile archive;
+    private final FileSystem archive;
     private final Multimap<Request.Method, Page> entries = HashMultimap.create();
 
     public Website(String name) {
         this(new File(SITES, name + ".jar"));
     }
     
-    public Website(File site) {
+    public Website(File file) {
+        this(file.toPath());
+    }
+    
+    public Website(Path site) {
         try {
-            this.archive = new ZipFile(site);
-            ZipEntry mappings = archive.getEntry("META-INF/index");
-            BufferedReader mappingsReader = new BufferedReader(new InputStreamReader(archive.getInputStream(mappings)));
+            this.archive = FileSystems.newFileSystem(site, null);
+            Path mappings = archive.getPath("META-INF", "index");
+            BufferedReader mappingsReader = Files.newBufferedReader(mappings);
 
             String requestPattern;
             while ((requestPattern = mappingsReader.readLine()) != null) {
@@ -131,11 +135,10 @@ public class Website {
         @Override
         protected Class<?> findClass(String name) throws ClassNotFoundException {
             try {
-                ZipEntry entry = archive.getEntry(name.replace(".", "/") + ".class");
-                if (entry == null)
+                Path classFile = archive.getPath(name.replace(".", File.separator) + ".class");
+                if (Files.notExists(classFile))
                     throw new ClassNotFoundException(name);
-                InputStream in = archive.getInputStream(entry);
-                byte[] bytes = readAll(in);
+                byte[] bytes = Files.readAllBytes(classFile);
                 return defineClass(name, bytes, 0, bytes.length);
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
@@ -145,19 +148,13 @@ public class Website {
         @Override
         protected URL findResource(String name) {
             try {
-                return new URL("jar:" + new File(archive.getName()).toURI().toURL() + "!/" + name);
+                Path resource = archive.getPath(name);
+                if (Files.notExists(resource))
+                    return null;
+                return archive.getPath(name).toUri().toURL();
             } catch (MalformedURLException ex) {
                 throw new RuntimeException(ex);
             }
         }
-    }
-
-    private static byte[] readAll(InputStream in) throws IOException {
-        ByteArrayOutputStream buf = new ByteArrayOutputStream();
-        byte[] b = new byte[1024];
-        int n;
-        while ((n = in.read(b)) != -1)
-            buf.write(b, 0, n);
-        return buf.toByteArray();
     }
 }
