@@ -68,7 +68,7 @@ public class Website {
                 ensure(typePath.length == 2);
                 String contentType = typePath[0];
                 String path = typePath[1];
-                pages.add(new StaticPage(pattern, path, contentType));
+                pages.add(new StaticPage(method, pattern, path, contentType));
             }
             Logging.LOG.log(Level.INFO, "Successfully created website at {0}", site);
         } catch (IOException ex) {
@@ -82,34 +82,34 @@ public class Website {
     }
 
     public Response service(Request request) {
-        URI absoluteUri = URI.create("http://" + request.getHeaders().get("Host")).resolve(request.getUri());
-        String uri = absoluteUri.toString();
         for (Page page : pages)
-            if (page.getPattern().matcher(uri).matches())
-                return page.serve(request);
+            if (page.canService(request))
+                return page.service(request);
         return new Response(StatusCode.NOT_FOUND);
     }
 
     private static abstract class Page {
+        private final Request.Method method;
         private final Pattern pattern;
 
-        public Page(Pattern pattern) {
+        public Page(Request.Method method, Pattern pattern) {
+            this.method = method;
             this.pattern = pattern;
         }
 
-        public Pattern getPattern() {
-            return pattern;
-        }
+        public abstract Response service(Request request);
 
-        public abstract Response serve(Request request);
+        public boolean canService(Request request) {
+            return pattern.matcher(request.getUri().toString()).matches();
+        }
     }
 
     private final class StaticPage extends Page {
         private final String path;
         private final String contentType;
 
-        public StaticPage(Pattern pattern, String path, String contentType) {
-            super(pattern);
+        public StaticPage(Request.Method method, Pattern pattern, String path, String contentType) {
+            super(method, pattern);
             if (path.startsWith("/"))
                 path = path.substring(1);
             this.path = path;
@@ -117,7 +117,7 @@ public class Website {
         }
 
         @Override
-        public Response serve(Request request) {
+        public Response service(Request request) {
             return new Response(StatusCode.OK, classLoader.getResourceAsStream(path), contentType);
         }
 

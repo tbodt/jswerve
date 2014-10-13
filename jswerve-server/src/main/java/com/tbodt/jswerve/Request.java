@@ -239,13 +239,18 @@ public final class Request {
         public Request getRequest() {
             if (state == State.DONE && error != null)
                 throw error;
-            return new Request(method, uri, httpVersion, headersBuilder.build());
+            Headers headers = headersBuilder.build();
+            URI finalUri;
+            if (headers.contains("Host"))
+                finalUri = URI.create("http://" + headers.get("Host")).resolve(uri);
+            else
+                finalUri = uri;
+            return new Request(method, finalUri, httpVersion, headers);
         }
 
         private static class NeedMoreInputException extends RuntimeException {
             // No actual code is needed.
         }
-
     }
 
     public String getHttpVersion() {

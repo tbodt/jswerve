@@ -59,6 +59,11 @@ public final class Headers implements Iterable<Map.Entry<String, String>> {
         return headersMap.get(key.toLowerCase());
     }
     
+    public boolean contains(String key) {
+        return headersMap.containsKey(key.toLowerCase());
+    }
+    
+    @Override
     public Iterator<Map.Entry<String, String>> iterator() {
         return headersMap.entrySet().iterator();
     }
