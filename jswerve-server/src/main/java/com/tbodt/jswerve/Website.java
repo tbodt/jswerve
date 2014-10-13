@@ -25,7 +25,6 @@ import java.nio.file.*;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Level;
-import java.util.regex.Pattern;
 
 /**
  *
@@ -33,7 +32,7 @@ import java.util.regex.Pattern;
  */
 public class Website {
     private static final File SITES = new File(JSwerve.HOME, "sites");
-    
+
     private final WebsiteClassLoader classLoader = new WebsiteClassLoader();
     private final FileSystem archive;
     private final Set<AbstractPage> pages = new HashSet<>();
@@ -41,44 +40,37 @@ public class Website {
     public Website(String name) {
         this(new File(SITES, name + ".jar"));
     }
-    
+
     public Website(File file) {
         this(file.toPath());
     }
-    
+
     public Website(Path site) {
         try {
             this.archive = FileSystems.newFileSystem(site, null);
             Path mappings = archive.getPath("META-INF", "index");
             BufferedReader mappingsReader = Files.newBufferedReader(mappings);
 
-            String requestPattern;
-            while ((requestPattern = mappingsReader.readLine()) != null) {
-                Request.Method method;
-                Pattern pattern;
+            String pageLine;
+            while ((pageLine = mappingsReader.readLine()) != null)
+                if (pageLine.startsWith("@")) {
+                    pageLine = pageLine.substring(1);
 
-                String[] methodPattern = requestPattern.split(" ", 2);
-                ensure(methodPattern.length == 2);
-                method = Request.Method.forName(methodPattern[0]);
-                pattern = Pattern.compile(methodPattern[1]);
-
-                String response = mappingsReader.readLine();
-                ensure(response != null); // null means EOF
-                String[] typePath = response.split(":", 2);
-                ensure(typePath.length == 2);
-                String contentType = typePath[0];
-                String path = typePath[1];
-                pages.add(new StaticPage(method, pattern, path, contentType));
-            }
+                    String[] components = pageLine.split("\\s+", 4);
+                    if (components.length != 4)
+                        throw new IllegalArgumentException("invalid syntax in index");
+                    
+                    Request.Method method = Request.Method.forName(components[0]);
+                    String path = components[1];
+                    Path file = archive.getPath(components[2]);
+                    String contentType = components[3];
+                    pages.add(new StaticPage(path, file, contentType));
+                }
             Logging.LOG.log(Level.INFO, "Successfully created website at {0}", site);
         } catch (IOException ex) {
             Logging.LOG.log(Level.SEVERE, "Error creating website at " + site, ex);
             throw new RuntimeException(ex);
         }
-    }
-    private static void ensure(boolean condition) {
-        if (!condition)
-            throw new IllegalArgumentException("invalid syntax in index");
     }
 
     public Response service(Request request) {
@@ -89,20 +81,31 @@ public class Website {
     }
 
     private final class StaticPage extends AbstractPage {
-        final String path;
-        final String contentType;
+        private final Path file;
+        private final String path;
+        private final String contentType;
 
-        public StaticPage(Request.Method method, Pattern pattern, String path, String contentType) {
-            super(method, pattern);
-            if (path.startsWith("/"))
-                path = path.substring(1);
+        public StaticPage(String path, Path file, String contentType) {
+            super(Request.Method.GET);
+            this.file = file;
+            if (!path.startsWith("/"))
+                path = "/" + path;
             this.path = path;
             this.contentType = contentType;
         }
 
         @Override
+        public boolean canService(Request request) {
+            return super.canService(request) && request.getUri().getPath().equals(path);
+        }
+
+        @Override
         public Response service(Request request) {
-            return new Response(StatusCode.OK, classLoader.getResourceAsStream(path), contentType);
+            try {
+                return new Response(StatusCode.OK, Files.newInputStream(file), contentType);
+            } catch (IOException ex) {
+                return new Response(StatusCode.INTERNAL_SERVER_ERROR);
+            }
         }
 
         public String getPath() {

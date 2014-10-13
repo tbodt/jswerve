@@ -16,19 +16,18 @@
  */
 package com.tbodt.jswerve;
 
-/**
- *
- * @author Theodore Dubois
- */
-public abstract class AbstractPage implements Page {
-    private final Request.Method method;
+import java.util.regex.Pattern;
 
-    protected AbstractPage(Request.Method method) {
-        this.method = method;
+public abstract class PatternPage extends AbstractPage {
+    private final Pattern pattern;
+
+    public PatternPage(Request.Method method, Pattern pattern) {
+        super(method);
+        this.pattern = pattern;
     }
 
     @Override
     public boolean canService(Request request) {
-        return request.getMethod() == method;
+        return pattern.matcher(request.getUri().toString()).matches();
     }
 }
