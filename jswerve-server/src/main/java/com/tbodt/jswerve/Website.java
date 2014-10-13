@@ -19,7 +19,7 @@ package com.tbodt.jswerve;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.tbodt.jswerve.server.JSwerve;
-import com.tbodt.jswerve.util.Logging;
+import com.tbodt.jswerve.server.Logging;
 import java.io.*;
 import java.net.*;
 import java.nio.file.FileSystem;
