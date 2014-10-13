@@ -94,54 +94,39 @@ public class Server implements Runnable {
                 selector.select();
 
                 Set<SelectionKey> keys = selector.selectedKeys();
-                for (final SelectionKey key : keys)
-                    try {
-                        if (!key.isValid()) {
-                            Logging.LOG.fine("Skipping invalid selector key");
-                            continue;
-                        }
-                        if (key.isAcceptable()) {
-                            ServerSocketChannel ssc = (ServerSocketChannel) key.channel();
-                            Protocol protocol = (Protocol) key.attachment();
-                            SocketChannel sc;
-                            while ((sc = ssc.accept()) != null) {
-                                sc.configureBlocking(false);
-                                Connection connection = protocol.newConnection(website, sc);
-                                sc.register(selector, connection.getInterest().getOps(), connection);
-                            }
-                        }
-                        if (key.isReadable()) {
-                            key.interestOps(key.interestOps() & ~SelectionKey.OP_READ);
-                            final Connection conn = (Connection) key.attachment();
-                            pool.submit(new Runnable() {
-                                @Override
-                                public void run() {
-                                    try {
-                                        conn.handleRead(key);
-                                    } catch (IOException ex) {
-                                        handleException(key, ex);
-                                    }
-                                }
-                            });
-                        }
-                        if (key.isWritable()) {
-                            key.interestOps(key.interestOps() & ~SelectionKey.OP_WRITE);
-                            final Connection conn = (Connection) key.attachment();
-                            pool.submit(new Runnable() {
-                                public void run() {
-                                    try {
-                                        conn.handleWrite(key);
-                                    } catch (IOException ex) {
-                                        handleException(key, ex);
-                                    }
-                                }
-                            });
-                        }
-                    } catch (ClosedByInterruptException ex) {
-                        // We were interrupted. Close everything and stop the thread.
-                        selector.close();
-                        return;
+                for (final SelectionKey key : keys) {
+                    if (!key.isValid()) {
+                        Logging.LOG.fine("Skipping invalid selector key");
+                        continue;
                     }
+                    if (key.isAcceptable()) {
+                        ServerSocketChannel ssc = (ServerSocketChannel) key.channel();
+                        Protocol protocol = (Protocol) key.attachment();
+                        SocketChannel sc;
+                        while ((sc = ssc.accept()) != null) {
+                            sc.configureBlocking(false);
+                            Connection connection = protocol.newConnection(website, sc);
+                            sc.register(selector, connection.getInterest().getOps(), connection);
+                        }
+                    }
+                    if (key.isReadable() || key.isWritable()) {
+                        key.interestOps(0);
+                        final Connection connection = (Connection) key.attachment();
+                        pool.submit(new Runnable() {
+                            public void run() {
+                                try {
+                                    if (key.isReadable())
+                                        connection.handleRead(key);
+                                    if (key.isWritable())
+                                        connection.handleWrite(key);
+                                    key.interestOps(connection.getInterest().getOps());
+                                } catch (IOException ex) {
+                                    handleException(key, ex);
+                                }
+                            }
+                        });
+                    }
+                }
                 keys.clear();
             }
         } catch (IOException ex) {
@@ -164,7 +149,6 @@ public class Server implements Runnable {
         } catch (IOException ex1) {
             // Close failed. There is no hope.
             ex1.printStackTrace(System.err);
-            
         }
     }
 }
