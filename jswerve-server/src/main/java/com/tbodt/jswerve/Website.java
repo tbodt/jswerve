@@ -36,7 +36,7 @@ public class Website {
     
     private final WebsiteClassLoader classLoader = new WebsiteClassLoader();
     private final FileSystem archive;
-    private final Set<Page> pages = new HashSet<>();
+    private final Set<AbstractPage> pages = new HashSet<>();
 
     public Website(String name) {
         this(new File(SITES, name + ".jar"));
@@ -82,31 +82,15 @@ public class Website {
     }
 
     public Response service(Request request) {
-        for (Page page : pages)
+        for (AbstractPage page : pages)
             if (page.canService(request))
                 return page.service(request);
         return new Response(StatusCode.NOT_FOUND);
     }
 
-    private static abstract class Page {
-        private final Request.Method method;
-        private final Pattern pattern;
-
-        public Page(Request.Method method, Pattern pattern) {
-            this.method = method;
-            this.pattern = pattern;
-        }
-
-        public abstract Response service(Request request);
-
-        public boolean canService(Request request) {
-            return request.getMethod() == method && pattern.matcher(request.getUri().toString()).matches();
-        }
-    }
-
-    private final class StaticPage extends Page {
-        private final String path;
-        private final String contentType;
+    private final class StaticPage extends AbstractPage {
+        final String path;
+        final String contentType;
 
         public StaticPage(Request.Method method, Pattern pattern, String path, String contentType) {
             super(method, pattern);
