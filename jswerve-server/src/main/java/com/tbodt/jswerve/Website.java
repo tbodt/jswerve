@@ -100,7 +100,7 @@ public class Website {
         public abstract Response service(Request request);
 
         public boolean canService(Request request) {
-            return pattern.matcher(request.getUri().toString()).matches();
+            return request.getMethod() == method && pattern.matcher(request.getUri().toString()).matches();
         }
     }
 
