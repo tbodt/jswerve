@@ -13,6 +13,7 @@
         <module>distribution</module>
         <module>jswerve-console</module>
         <module>jswerve-maven-plugin</module>
+        <module>examples</module>
     </modules>
     
     <build>
