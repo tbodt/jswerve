@@ -48,7 +48,7 @@ public class Website {
     public Website(Path site) {
         try {
             this.archive = FileSystems.newFileSystem(site, null);
-            Path mappings = archive.getPath("META-INF", "index");
+            Path mappings = archive.getPath("META-INF", "jswerve-pages");
             BufferedReader mappingsReader = Files.newBufferedReader(mappings);
 
             String pageLine;
