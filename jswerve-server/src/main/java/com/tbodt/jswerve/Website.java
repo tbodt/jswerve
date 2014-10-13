@@ -16,14 +16,14 @@
  */
 package com.tbodt.jswerve;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
 import com.tbodt.jswerve.server.JSwerve;
 import com.tbodt.jswerve.server.Logging;
 import java.io.*;
 import java.net.*;
 import java.nio.file.FileSystem;
 import java.nio.file.*;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
 
@@ -36,7 +36,7 @@ public class Website {
     
     private final WebsiteClassLoader classLoader = new WebsiteClassLoader();
     private final FileSystem archive;
-    private final Multimap<Request.Method, Page> entries = HashMultimap.create();
+    private final Set<Page> pages = new HashSet<>();
 
     public Website(String name) {
         this(new File(SITES, name + ".jar"));
@@ -68,7 +68,7 @@ public class Website {
                 ensure(typePath.length == 2);
                 String contentType = typePath[0];
                 String path = typePath[1];
-                entries.put(method, new StaticPage(pattern, path, contentType));
+                pages.add(new StaticPage(pattern, path, contentType));
             }
             Logging.LOG.log(Level.INFO, "Successfully created website at {0}", site);
         } catch (IOException ex) {
@@ -84,8 +84,7 @@ public class Website {
     public Response service(Request request) {
         URI absoluteUri = URI.create("http://" + request.getHeaders().get("Host")).resolve(request.getUri());
         String uri = absoluteUri.toString();
-        Request.Method method = request.getMethod();
-        for (Page page : entries.get(method))
+        for (Page page : pages)
             if (page.getPattern().matcher(uri).matches())
                 return page.serve(request);
         return new Response(StatusCode.NOT_FOUND);
