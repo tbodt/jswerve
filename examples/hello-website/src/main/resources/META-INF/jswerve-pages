@@ -1,2 +1,2 @@
-@GET / /com/tbodt/jswerve/hello/index.html text/html
-@GET /smile.png /com/tbodt/jswerve/hello/smile.png image/png
+/ /com/tbodt/jswerve/hello/index.html text/html
+/smile.png /com/tbodt/jswerve/hello/smile.png image/png

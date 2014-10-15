@@ -52,20 +52,16 @@ public class Website {
             BufferedReader mappingsReader = Files.newBufferedReader(mappings);
 
             String pageLine;
-            while ((pageLine = mappingsReader.readLine()) != null)
-                if (pageLine.startsWith("@")) {
-                    pageLine = pageLine.substring(1);
+            while ((pageLine = mappingsReader.readLine()) != null) {
+                String[] components = pageLine.split("\\s+", 3);
+                if (components.length != 3)
+                    throw new IllegalArgumentException("invalid syntax in index");
 
-                    String[] components = pageLine.split("\\s+", 4);
-                    if (components.length != 4)
-                        throw new IllegalArgumentException("invalid syntax in index");
-                    
-                    Request.Method method = Request.Method.forName(components[0]);
-                    String path = components[1];
-                    Path file = archive.getPath(components[2]);
-                    String contentType = components[3];
-                    pages.add(new StaticPage(path, file, contentType));
-                }
+                String path = components[0];
+                Path file = archive.getPath(components[1]);
+                String contentType = components[2];
+                pages.add(new StaticPage(path, file, contentType));
+            }
             Logging.LOG.log(Level.INFO, "Successfully created website at {0}", site);
         } catch (IOException ex) {
             Logging.LOG.log(Level.SEVERE, "Error creating website at " + site, ex);

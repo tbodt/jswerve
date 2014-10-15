@@ -34,7 +34,9 @@ public class Server implements Runnable {
     private final ExecutorService pool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() - 2, new ThreadFactory() {
         @Override
         public Thread newThread(Runnable r) {
-            return new Thread(r, "Server slave");
+            Thread t = new Thread(r, "Server slave");
+            t.setContextClassLoader(website.getClassLoader());
+            return t;
         }
     });
     private final Selector selector;
