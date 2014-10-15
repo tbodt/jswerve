@@ -13,7 +13,18 @@
     
     <modules>
         <module>hello-website</module>
+        <module>name-website</module>
     </modules>
+    
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>jswerve-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
     
     <build>
         <pluginManagement>

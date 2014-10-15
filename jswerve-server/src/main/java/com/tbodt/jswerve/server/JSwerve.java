@@ -16,7 +16,7 @@
  */
 package com.tbodt.jswerve.server;
 
-import com.tbodt.jswerve.Website;
+import com.tbodt.jswerve.*;
 import java.io.*;
 
 /**
@@ -25,18 +25,11 @@ import java.io.*;
  * @author Theodore Dubois
  */
 public class JSwerve {
-    /**
-     * The home directory for the server.
-     */
-    public static File HOME;
+
     /**
      * The default port for the server.
      */
     public static final int PORT = 8888;
-    /**
-     * If no HTTP version is specified by the client, this is used.
-     */
-    public static final String DEFAULT_HTTP_VERSION = "HTTP/1.1";
 
     /**
      * @param args the command line arguments
@@ -45,8 +38,8 @@ public class JSwerve {
         System.setProperty("line.separator", "\r\n"); // that's how HTTP does it
         if (System.getProperty("jswerve.home") == null)
             System.setProperty("jswerve.home", args[0]);
-        HOME = new File(System.getProperty("jswerve.home"));
-        if (!HOME.exists()) {
+        Constants.HOME = new File(System.getProperty("jswerve.home"));
+        if (!Constants.HOME.exists()) {
             System.err.println("That home doesn't exist");
             System.exit(1);
         }

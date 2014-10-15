@@ -16,6 +16,7 @@
  */
 package com.tbodt.jswerve.server;
 
+import com.tbodt.jswerve.BadRequestException;
 import com.tbodt.jswerve.*;
 import java.io.IOException;
 import java.nio.ByteBuffer;

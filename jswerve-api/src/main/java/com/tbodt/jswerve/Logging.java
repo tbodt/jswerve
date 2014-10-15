@@ -14,9 +14,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.tbodt.jswerve.server;
+package com.tbodt.jswerve;
 
-import com.tbodt.jswerve.server.JSwerve;
 import java.io.*;
 import java.util.logging.*;
 
@@ -59,7 +58,7 @@ public final class Logging {
         LOG.setLevel(Level.ALL);
         LOG.setUseParentHandlers(false);
 
-        Handler logHandler = new FileHandler(JSwerve.HOME.getAbsolutePath() + File.separator + "jswerve.log");
+        Handler logHandler = new FileHandler(Constants.HOME.getAbsolutePath() + File.separator + "jswerve.log");
         logHandler.setFormatter(new Formatter() {
             @Override
             public String format(LogRecord record) {

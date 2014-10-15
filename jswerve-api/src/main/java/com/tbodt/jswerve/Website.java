@@ -16,8 +16,6 @@
  */
 package com.tbodt.jswerve;
 
-import com.tbodt.jswerve.server.JSwerve;
-import com.tbodt.jswerve.server.Logging;
 import java.io.*;
 import java.net.*;
 import java.nio.file.FileSystem;
@@ -31,11 +29,11 @@ import java.util.logging.Level;
  * @author Theodore Dubois
  */
 public class Website {
-    private static final File SITES = new File(JSwerve.HOME, "sites");
+    private static final File SITES = new File(Constants.HOME, "sites");
 
     private final WebsiteClassLoader classLoader = new WebsiteClassLoader();
     private final FileSystem archive;
-    private final Set<AbstractPage> pages = new HashSet<>();
+    private final Set<Page> pages = new HashSet<>();
 
     public Website(String name) {
         this(new File(SITES, name + ".jar"));
@@ -54,13 +52,29 @@ public class Website {
             String pageLine;
             while ((pageLine = mappingsReader.readLine()) != null) {
                 String[] components = pageLine.split("\\s+", 3);
-                if (components.length != 3)
-                    throw new IllegalArgumentException("invalid syntax in index");
+                if (components.length == 1) {
+                    String className = components[0];
+                    try {
+                        @SuppressWarnings("unchecked")
+                        Class<? extends Page> clazz = (Class<? extends Page>) classLoader.loadClass(className);
+                        Page page = clazz.newInstance();
+                        pages.add(page);
+                    } catch (ClassNotFoundException ex) {
+                        throw new IllegalArgumentException("no index class " + className);
+                    } catch (InstantiationException ex) {
+                        throw new IllegalArgumentException("class " + className + " has no no-arg constructor");
+                    } catch (IllegalAccessException ex) {
+                        throw new IllegalArgumentException("class " + className + " has no public no-arg constructor");
+                    }
+                } else {
+                    if (components.length != 3)
+                        throw new IllegalArgumentException("invalid syntax in index");
 
-                String path = components[0];
-                Path file = archive.getPath(components[1]);
-                String contentType = components[2];
-                pages.add(new StaticPage(path, file, contentType));
+                    String path = components[0];
+                    Path file = archive.getPath(components[1]);
+                    String contentType = components[2];
+                    pages.add(new StaticPage(path, file, contentType));
+                }
             }
             Logging.LOG.log(Level.INFO, "Successfully created website at {0}", site);
         } catch (IOException ex) {
@@ -70,7 +84,7 @@ public class Website {
     }
 
     public Response service(Request request) {
-        for (AbstractPage page : pages)
+        for (Page page : pages)
             if (page.canService(request))
                 return page.service(request);
         return new Response(StatusCode.NOT_FOUND);
