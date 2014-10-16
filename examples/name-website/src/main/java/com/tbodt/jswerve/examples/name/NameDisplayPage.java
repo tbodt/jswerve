@@ -6,6 +6,7 @@
 package com.tbodt.jswerve.examples.name;
 
 import com.tbodt.jswerve.*;
+import java.io.PrintWriter;
 import java.util.regex.Pattern;
 
 /**
@@ -19,6 +20,8 @@ public class NameDisplayPage extends PatternPage {
 
     @Override
     public Response service(Request request) {
-        return null;
+        Response.Builder builder = Response.builder();
+        PrintWriter out = new PrintWriter(builder.getOutputStream());
+        return builder.build();
     }
 }

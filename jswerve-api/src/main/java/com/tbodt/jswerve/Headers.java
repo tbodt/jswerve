@@ -24,6 +24,8 @@ import java.util.*;
  * @author Theodore Dubois
  */
 public final class Headers implements Iterable<Map.Entry<String, String>> {
+    public static final Headers EMPTY_HEADERS = new Headers(Collections.<String, String>emptyMap());
+    
     private final Map<String, String> headersMap;
 
     private Headers(Map<String, String> headers) {
@@ -44,6 +46,11 @@ public final class Headers implements Iterable<Map.Entry<String, String>> {
         
         public Builder setHeader(String name, String value) {
             headersMap.put(name.toLowerCase(), value);
+            return this;
+        }
+        
+        public Builder setHeaders(Headers headers) {
+            headersMap.putAll(headers.headersMap);
             return this;
         }
         

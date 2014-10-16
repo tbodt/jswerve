@@ -33,8 +33,8 @@ public class Response {
             .setHeader("Connection", "close")
             .build();
 
-    public Response(StatusCode status) {
-        this(status, new InputStream() {
+    public Response(StatusCode status, Headers headers) {
+        this(status, headers, new InputStream() {
             @Override
             public int read() throws IOException {
                 return -1;
@@ -42,15 +42,71 @@ public class Response {
         }, null);
     }
 
-    public Response(StatusCode status, InputStream body, String contentType) {
+    public Response(StatusCode status, Headers headers, InputStream body, String contentType) {
         this.status = status;
-        Headers.Builder builder = new Headers.Builder(DEFAULT_HEADERS);
+        Headers.Builder builder = new Headers.Builder(headers);
+        builder.setHeaders(headers);
         if (contentType != null)
             builder.setHeader("Content-Type", contentType);
         this.headers = builder.build();
         this.body = body;
     }
-
+        
+    public static final class Builder {
+        private StatusCode status;
+        private final Headers.Builder headers = new Headers.Builder();
+        private final ByteArrayOutputStream out = new ByteArrayOutputStream();
+        private InputStream body;
+        private String contentType;
+        
+        private boolean built = false;
+        
+        private Builder() {}
+        
+        public Builder status(StatusCode status) {
+            this.status = status;
+            return this;
+        }
+        
+        public Builder header(String key, String value) {
+            headers.setHeader(key, value);
+            return this;
+        }
+        
+        public Builder setBytes(byte[] bytes, String contentType) {
+            body = new ByteArrayInputStream(bytes);
+            this.contentType = contentType;
+            return this;
+        }
+        
+        public OutputStream getOutputStream() {
+            return out;
+        }
+        
+        public Builder setContentType(String contentType) {
+            this.contentType = contentType;
+            return this;
+        }
+        
+        public Response build() {
+            if (built)
+                throw new IllegalStateException("already built");
+            if (status == null)
+                throw new IllegalStateException("no status provided");
+            if (contentType == null)
+                throw new IllegalStateException("need content type");
+            built = true;
+            
+            if (body == null)
+                body = new ByteArrayInputStream(out.toByteArray());
+            return new Response(status, headers.build(), body, contentType);
+        }
+    }
+    
+    public static Builder builder() {
+        return new Builder();
+    }
+    
     public Headers getHeaders() {
         return headers;
     }

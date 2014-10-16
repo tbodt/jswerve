@@ -59,7 +59,7 @@ public class HttpConnection extends AbstractConnection {
                     httpVersion = ((BadRequestException) ex).getHttpVersion();
                 else
                     httpVersion = "HTTP/1.1";
-                response = new Response(status);
+                response = new Response(status, Headers.EMPTY_HEADERS);
             }
             send(response.toBytes(httpVersion));
             responseIn = Channels.newChannel(response.getInputStream());

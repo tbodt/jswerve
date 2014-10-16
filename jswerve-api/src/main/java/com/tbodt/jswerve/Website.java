@@ -87,7 +87,7 @@ public class Website {
         for (Page page : pages)
             if (page.canService(request))
                 return page.service(request);
-        return new Response(StatusCode.NOT_FOUND);
+        return new Response(StatusCode.NOT_FOUND, Headers.EMPTY_HEADERS);
     }
 
     private final class StaticPage extends AbstractPage {
@@ -112,9 +112,9 @@ public class Website {
         @Override
         public Response service(Request request) {
             try {
-                return new Response(StatusCode.OK, Files.newInputStream(file), contentType);
+                return new Response(StatusCode.OK, Headers.EMPTY_HEADERS, Files.newInputStream(file), contentType);
             } catch (IOException ex) {
-                return new Response(StatusCode.INTERNAL_SERVER_ERROR);
+                return new Response(StatusCode.INTERNAL_SERVER_ERROR, Headers.EMPTY_HEADERS);
             }
         }
 
