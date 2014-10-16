@@ -16,6 +16,7 @@
  */
 package com.tbodt.jswerve.server;
 
+import com.tbodt.jswerve.Logging;
 import com.tbodt.jswerve.Website;
 import java.io.IOException;
 import java.net.*;

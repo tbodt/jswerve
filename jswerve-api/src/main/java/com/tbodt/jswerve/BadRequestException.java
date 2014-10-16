@@ -14,10 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.tbodt.jswerve.server;
-
-import com.tbodt.jswerve.StatusCode;
-import com.tbodt.jswerve.StatusCodeException;
+package com.tbodt.jswerve;
 
 /**
  *
@@ -25,7 +22,7 @@ import com.tbodt.jswerve.StatusCodeException;
  */
 public class BadRequestException extends StatusCodeException {
     private final String httpVersion;
-    
+
     public BadRequestException(StatusCode code, String httpVersion) {
         super(code);
         this.httpVersion = httpVersion;
@@ -36,7 +33,7 @@ public class BadRequestException extends StatusCodeException {
     }
     
     public BadRequestException() {
-        this(JSwerve.DEFAULT_HTTP_VERSION);
+        this(Constants.DEFAULT_HTTP_VERSION);
     }
 
     public String getHttpVersion() {

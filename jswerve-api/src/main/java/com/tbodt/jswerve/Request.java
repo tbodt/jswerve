@@ -16,7 +16,6 @@
  */
 package com.tbodt.jswerve;
 
-import com.tbodt.jswerve.server.BadRequestException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
