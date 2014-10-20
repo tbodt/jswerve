@@ -16,6 +16,7 @@
  */
 package com.tbodt.jswerve;
 
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public abstract class PatternPage extends AbstractPage {
@@ -29,5 +30,9 @@ public abstract class PatternPage extends AbstractPage {
     @Override
     public boolean canService(Request request) {
         return pattern.matcher(request.getUri().toString()).matches();
+    }
+    
+    protected final Matcher matcher(Request request) {
+        return pattern.matcher(request.getUri().toString());
     }
 }

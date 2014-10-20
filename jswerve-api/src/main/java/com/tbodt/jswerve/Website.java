@@ -18,8 +18,6 @@ package com.tbodt.jswerve;
 
 import java.io.*;
 import java.net.*;
-import java.nio.file.FileSystem;
-import java.nio.file.*;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Level;
@@ -31,8 +29,7 @@ import java.util.logging.Level;
 public class Website {
     private static final File SITES = new File(Constants.HOME, "sites");
 
-    private final WebsiteClassLoader classLoader = new WebsiteClassLoader();
-    private final FileSystem archive;
+    private final ClassLoader loader;
     private final Set<Page> pages = new HashSet<>();
 
     public Website(String name) {
@@ -40,14 +37,23 @@ public class Website {
     }
 
     public Website(File file) {
-        this(file.toPath());
+        this(classLoaderForFile(file));
+    }
+    
+    // this is in a separate method because the constructor call can't go in a try/catch and has to be first
+    private static ClassLoader classLoaderForFile(File file) {
+        try {
+            return new URLClassLoader(new URL[] {file.toURI().toURL()});
+        } catch (MalformedURLException ex) {
+            // no will happen
+            throw new RuntimeException(ex);
+        }
     }
 
-    public Website(Path site) {
+    public Website(ClassLoader loader) {
         try {
-            this.archive = FileSystems.newFileSystem(site, null);
-            Path mappings = archive.getPath("META-INF", "jswerve-pages");
-            BufferedReader mappingsReader = Files.newBufferedReader(mappings);
+            this.loader = loader;
+            BufferedReader mappingsReader = new BufferedReader(new InputStreamReader(loader.getResourceAsStream("META-INF/jswerve-pages")));
 
             String pageLine;
             while ((pageLine = mappingsReader.readLine()) != null) {
@@ -56,7 +62,7 @@ public class Website {
                     String className = components[0];
                     try {
                         @SuppressWarnings("unchecked")
-                        Class<? extends Page> clazz = (Class<? extends Page>) classLoader.loadClass(className);
+                        Class<? extends Page> clazz = (Class<? extends Page>) loader.loadClass(className);
                         Page page = clazz.newInstance();
                         pages.add(page);
                     } catch (ClassNotFoundException ex) {
@@ -71,14 +77,14 @@ public class Website {
                         throw new IllegalArgumentException("invalid syntax in index");
 
                     String path = components[0];
-                    Path file = archive.getPath(components[1]);
+                    URL file = loader.getResource(components[1]);
                     String contentType = components[2];
                     pages.add(new StaticPage(path, file, contentType));
                 }
             }
-            Logging.LOG.log(Level.INFO, "Successfully created website at {0}", site);
+            Logging.LOG.log(Level.INFO, "Successfully created website");
         } catch (IOException ex) {
-            Logging.LOG.log(Level.SEVERE, "Error creating website at " + site, ex);
+            Logging.LOG.log(Level.SEVERE, "Error creating website", ex);
             throw new RuntimeException(ex);
         }
     }
@@ -91,13 +97,13 @@ public class Website {
     }
 
     private final class StaticPage extends AbstractPage {
-        private final Path file;
+        private final URL url;
         private final String path;
         private final String contentType;
 
-        public StaticPage(String path, Path file, String contentType) {
+        public StaticPage(String path, URL file, String contentType) {
             super(Request.Method.GET);
-            this.file = file;
+            this.url = file;
             if (!path.startsWith("/"))
                 path = "/" + path;
             this.path = path;
@@ -112,7 +118,7 @@ public class Website {
         @Override
         public Response service(Request request) {
             try {
-                return new Response(StatusCode.OK, Headers.EMPTY_HEADERS, Files.newInputStream(file), contentType);
+                return new Response(StatusCode.OK, Headers.EMPTY_HEADERS, url.openStream(), contentType);
             } catch (IOException ex) {
                 return new Response(StatusCode.INTERNAL_SERVER_ERROR, Headers.EMPTY_HEADERS);
             }
@@ -124,33 +130,6 @@ public class Website {
     }
 
     public ClassLoader getClassLoader() {
-        return classLoader;
-    }
-
-    private final class WebsiteClassLoader extends ClassLoader {
-        @Override
-        protected Class<?> findClass(String name) throws ClassNotFoundException {
-            try {
-                Path classFile = archive.getPath(name.replace(".", File.separator) + ".class");
-                if (Files.notExists(classFile))
-                    throw new ClassNotFoundException(name);
-                byte[] bytes = Files.readAllBytes(classFile);
-                return defineClass(name, bytes, 0, bytes.length);
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
-            }
-        }
-
-        @Override
-        protected URL findResource(String name) {
-            try {
-                Path resource = archive.getPath(name);
-                if (Files.notExists(resource))
-                    return null;
-                return archive.getPath(name).toUri().toURL();
-            } catch (MalformedURLException ex) {
-                throw new RuntimeException(ex);
-            }
-        }
+        return loader;
     }
 }

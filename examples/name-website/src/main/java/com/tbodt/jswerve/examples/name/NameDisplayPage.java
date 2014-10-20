@@ -20,8 +20,18 @@ public class NameDisplayPage extends PatternPage {
 
     @Override
     public Response service(Request request) {
+        String name = matcher(request).group(1);
         Response.Builder builder = Response.builder();
         PrintWriter out = new PrintWriter(builder.getOutputStream());
+        out.println("<!DOCTYPE html>");
+        out.println("<html>");
+        out.println("<head>");
+        out.println("<title>Hello, " + name + "!</title>");
+        out.println("</head>");
+        out.println("<body>");
+        out.println("Hello world! Your name is " + name + ".");
+        out.println("</body>");
+        out.println("</html>");
         return builder.build();
     }
 }
