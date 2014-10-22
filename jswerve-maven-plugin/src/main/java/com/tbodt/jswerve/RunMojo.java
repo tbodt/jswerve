@@ -41,9 +41,9 @@ public class RunMojo extends AbstractMojo {
     @Parameter(defaultValue = "${project.artifacts}", readonly = true)
     private Set<Artifact> projectArtifacts;
     
-    @Parameter(defaultValue = "${project.artifact}", readonly = true)
-    private Artifact projectArtifact;
-
+    @Parameter(defaultValue = "${plugin.artifacts}", readonly = true)
+    private Set<Artifact> pluginArtifacts;
+    
     /**
      * Location of the archive.
      */
@@ -84,14 +84,14 @@ public class RunMojo extends AbstractMojo {
         });
         Set<URL> urls = new HashSet<URL>();
         try {
-            for (Artifact artifact : projectArtifacts) {
-                urls.add(artifact.getFile().toURI().toURL());
-            }
+            for (Artifact artifact : projectArtifacts)
+                if (!pluginArtifacts.contains(artifact))
+                    urls.add(artifact.getFile().toURI().toURL());
             urls.add(archive.toURI().toURL());
         } catch (MalformedURLException ex) {
             throw new RuntimeException(ex); // this really shouldn't happen
         }
-        ClassLoader loader = new URLClassLoader(urls.toArray(new URL[urls.size()]));
+        ClassLoader loader = new URLClassLoader(urls.toArray(new URL[urls.size()]), RunMojo.class.getClassLoader());
 
         Server server;
         try {
