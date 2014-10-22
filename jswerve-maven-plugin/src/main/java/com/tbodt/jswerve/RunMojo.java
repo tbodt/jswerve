@@ -17,7 +17,6 @@ package com.tbodt.jswerve;
  */
 import com.tbodt.jswerve.server.HttpProtocol;
 import com.tbodt.jswerve.server.Server;
-import org.apache.maven.project.MavenProject;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -29,16 +28,21 @@ import java.util.*;
 import java.util.logging.*;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.logging.Log;
+import org.apache.maven.plugins.annotations.*;
 
 /**
  * A mojo that runs JSwerve with the artifact.
  *
  * @author Theodore Dubois
  */
-@Mojo(name = "run", requiresDirectInvocation = true)
+@Mojo(name = "run", requiresDirectInvocation = true, requiresDependencyResolution = ResolutionScope.COMPILE)
 public class RunMojo extends AbstractMojo {
-    @Parameter(defaultValue = "${project}", readonly = true)
-    private MavenProject project;
+    
+    @Parameter(defaultValue = "${project.artifacts}", readonly = true)
+    private Set<Artifact> projectArtifacts;
+    
+    @Parameter(defaultValue = "${project.artifact}", readonly = true)
+    private Artifact projectArtifact;
 
     /**
      * Location of the archive.
@@ -80,11 +84,10 @@ public class RunMojo extends AbstractMojo {
         });
         Set<URL> urls = new HashSet<URL>();
         try {
-            for (Object artifactObject : project.getDependencies()) {
-                Artifact artifact = (Artifact) artifactObject;
+            for (Artifact artifact : projectArtifacts) {
                 urls.add(artifact.getFile().toURI().toURL());
             }
-            urls.add(project.getArtifact().getFile().toURI().toURL());
+            urls.add(archive.toURI().toURL());
         } catch (MalformedURLException ex) {
             throw new RuntimeException(ex); // this really shouldn't happen
         }
