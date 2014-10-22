@@ -42,7 +42,7 @@ public class RunMojo extends AbstractMojo {
     private Set<Artifact> projectArtifacts;
     
     @Parameter(defaultValue = "${plugin.artifacts}", readonly = true)
-    private Set<Artifact> pluginArtifacts;
+    private List<Artifact> pluginArtifacts;
     
     /**
      * Location of the archive.
