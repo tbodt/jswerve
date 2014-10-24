@@ -33,6 +33,12 @@ public class Server implements Runnable {
     private Thread theThread;
     private Website website;
     private final ExecutorService pool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() - 2, new ThreadFactory() {
+        private ThreadGroup tg = new ThreadGroup("server") {
+            @Override
+            public void uncaughtException(Thread t, Throwable e) {
+                Logging.LOG.log(Level.SEVERE, "Uncaught exception", e);
+            }
+        };
         @Override
         public Thread newThread(Runnable r) {
             Thread t = new Thread(r, "Server slave");

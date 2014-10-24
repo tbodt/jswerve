@@ -90,9 +90,14 @@ public class Website {
     }
 
     public Response service(Request request) {
+        try {
         for (Page page : pages)
             if (page.canService(request))
                 return page.service(request);
+        } catch (RuntimeException ex) {
+            ex.printStackTrace(System.err);
+            throw new StatusCodeException(StatusCode.INTERNAL_SERVER_ERROR);
+        }
         return new Response(StatusCode.NOT_FOUND, Headers.EMPTY_HEADERS);
     }
 

@@ -7,6 +7,7 @@ package com.tbodt.jswerve.examples.name;
 
 import com.tbodt.jswerve.*;
 import java.io.PrintWriter;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -15,14 +16,17 @@ import java.util.regex.Pattern;
  */
 public class NameDisplayPage extends PatternPage {
     public NameDisplayPage() {
-        super(Request.Method.GET, Pattern.compile("/(\\w)+/?"));
+        super(Request.Method.GET, Pattern.compile("/(\\w+)/?"));
     }
 
     @Override
     public Response service(Request request) {
-        String name = matcher(request).group(1);
-        Response.Builder builder = Response.builder();
-        PrintWriter out = new PrintWriter(builder.getOutputStream());
+        Matcher matcher = matcher(request);
+        if (!matcher.matches())
+            throw new IllegalArgumentException();
+        String name = matcher.group(1);
+        Response.Builder builder = Response.builder().status(StatusCode.OK);
+        PrintWriter out = new PrintWriter(builder.getOutputStream(), true);
         out.println("<!DOCTYPE html>");
         out.println("<html>");
         out.println("<head>");
@@ -32,6 +36,7 @@ public class NameDisplayPage extends PatternPage {
         out.println("Hello world! Your name is " + name + ".");
         out.println("</body>");
         out.println("</html>");
+        builder.setContentType("text/html");
         return builder.build();
     }
 }

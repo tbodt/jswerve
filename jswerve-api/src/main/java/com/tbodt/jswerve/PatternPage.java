@@ -29,10 +29,10 @@ public abstract class PatternPage extends AbstractPage {
 
     @Override
     public boolean canService(Request request) {
-        return pattern.matcher(request.getUri().toString()).matches();
+        return pattern.matcher(request.getUri().getPath()).matches();
     }
     
     protected final Matcher matcher(Request request) {
-        return pattern.matcher(request.getUri().toString());
+        return pattern.matcher(request.getUri().getPath());
     }
 }
