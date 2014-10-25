@@ -95,7 +95,7 @@ public class RunMojo extends AbstractMojo {
 
         Server server;
         try {
-            server = new Server(new Website(loader), new HttpProtocol());
+            server = new Server(new Website(archive, loader), new HttpProtocol());
             server.start();
             server.join();
         } catch (InterruptedException ex) {
