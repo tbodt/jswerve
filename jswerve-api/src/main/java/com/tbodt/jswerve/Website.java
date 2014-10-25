@@ -30,7 +30,7 @@ public class Website {
     private static final File SITES = new File(Constants.HOME, "sites");
 
     private final ClassLoader loader;
-    private final Set<Page> pages = new HashSet<>();
+    private final Set<Page> pages = new HashSet<Page>();
 
     public Website(String name) {
         this(new File(SITES, name + ".jar"));
