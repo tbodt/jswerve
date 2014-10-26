@@ -17,6 +17,7 @@ package com.tbodt.jswerve;
  */
 import com.tbodt.jswerve.server.HttpProtocol;
 import com.tbodt.jswerve.server.Server;
+import com.tbodt.jswerve.server.Website;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
