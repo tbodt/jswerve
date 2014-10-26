@@ -1,0 +1,16 @@
+language: java
+
+install:
+    - mvn install
+    - cd jswerve-maven-plugin
+    - mvn install
+    - cd ..
+    
+os:
+    - linux
+    - osx
+jdk:
+    - openjdk6
+    - openjdk7
+    - oraclejdk7
+    - oraclejdk8
