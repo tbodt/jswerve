@@ -83,6 +83,10 @@ public class Response {
             return out;
         }
         
+        public PrintWriter getWriter() {
+            return new PrintWriter(getOutputStream(), true);
+        }
+        
         public Builder setContentType(String contentType) {
             this.contentType = contentType;
             return this;

@@ -81,9 +81,8 @@ public class Website {
         for (String className : interestingClasses)
             try {
                 Class<?> clazz = loader.loadClass(className);
-                @SuppressWarnings("unchecked")
-                Page page = (Page) container.get(clazz, null);
-                pages.add(page);
+                for (Page page : AnnotatedMethodPage.introspect(clazz))
+                    pages.add(page);
             } catch (ClassNotFoundException ex) {
                 throw new IllegalArgumentException("intersting class " + className + " doesn't exist");
             } catch (ReflectionException ex) {
@@ -95,9 +94,13 @@ public class Website {
 
     public Response service(Request request) {
         try {
-            for (Page page : pages)
-                if (page.canService(request))
-                    return page.service(request);
+            for (Page page : pages) {
+                Response response = page.tryService(request);
+                if (response != null)
+                    return response;
+            }
+        } catch (StatusCodeException ex) {
+            throw ex;
         } catch (RuntimeException ex) {
             ex.printStackTrace(System.err);
             throw new StatusCodeException(StatusCode.INTERNAL_SERVER_ERROR);
@@ -105,13 +108,12 @@ public class Website {
         return new Response(StatusCode.NOT_FOUND, Headers.EMPTY_HEADERS);
     }
 
-    private final class StaticPage extends AbstractPage {
+    private final class StaticPage implements Page {
         private final URL url;
         private final String path;
         private final String contentType;
 
         public StaticPage(String path, URL file, String contentType) {
-            super(Request.Method.GET);
             this.url = file;
             if (!path.startsWith("/"))
                 path = "/" + path;
@@ -120,21 +122,14 @@ public class Website {
         }
 
         @Override
-        public boolean canService(Request request) {
-            return super.canService(request) && request.getUri().getPath().equals(path);
-        }
-
-        @Override
-        public Response service(Request request) {
+        public Response tryService(Request request) {
+            if (request.getMethod() != Request.Method.GET || !request.getUri().getPath().equals(path))
+                return null;
             try {
                 return new Response(StatusCode.OK, Headers.EMPTY_HEADERS, url.openStream(), contentType);
             } catch (IOException ex) {
                 return new Response(StatusCode.INTERNAL_SERVER_ERROR, Headers.EMPTY_HEADERS);
             }
-        }
-
-        public String getPath() {
-            return path;
         }
     }
 

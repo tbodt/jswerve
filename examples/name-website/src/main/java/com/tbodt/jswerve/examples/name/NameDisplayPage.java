@@ -6,25 +6,17 @@
 package com.tbodt.jswerve.examples.name;
 
 import com.tbodt.jswerve.*;
+import com.tbodt.jswerve.annotation.Path;
+import com.tbodt.jswerve.annotation.PathParam;
 import java.io.PrintWriter;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  *
  * @author Theodore Dubois
  */
-public class NameDisplayPage extends PatternPage {
-    public NameDisplayPage() {
-        super(Request.Method.GET, Pattern.compile("/(\\w+)/?"));
-    }
-
-    @Override
-    public Response service(Request request) {
-        Matcher matcher = matcher(request);
-        if (!matcher.matches())
-            throw new IllegalArgumentException();
-        String name = matcher.group(1);
+public class NameDisplayPage {
+    @Path("/{name}")
+    public Response displayName(@PathParam("name") String name) {
         Response.Builder builder = Response.builder().status(StatusCode.OK);
         PrintWriter out = new PrintWriter(builder.getOutputStream(), true);
         out.println("<!DOCTYPE html>");

@@ -15,14 +15,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.tbodt.jswerve;
+package com.tbodt.jswerve.server;
+
+import com.tbodt.jswerve.Request;
+import com.tbodt.jswerve.Response;
 
 /**
  *
  * @author Theodore Dubois
  */
 public interface Page {
-    boolean canService(Request request);
-
-    Response service(Request request);
+    /**
+     * Service the request if you can. Return {@code null} if you can't.
+     * @param request the request
+     * @return the result, or null
+     */
+    Response tryService(Request request);
 }

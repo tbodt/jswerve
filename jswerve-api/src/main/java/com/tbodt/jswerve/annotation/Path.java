@@ -14,25 +14,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.tbodt.jswerve;
+package com.tbodt.jswerve.annotation;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.lang.annotation.*;
 
-public abstract class PatternPage extends AbstractPage {
-    private final Pattern pattern;
-
-    public PatternPage(Request.Method method, Pattern pattern) {
-        super(method);
-        this.pattern = pattern;
-    }
-
-    @Override
-    public boolean canService(Request request) {
-        return pattern.matcher(request.getUri().getPath()).matches();
-    }
-    
-    protected final Matcher matcher(Request request) {
-        return pattern.matcher(request.getUri().getPath());
-    }
+/**
+ * Specifies that a method can be invoked for a request, and specifies the request path.
+ *
+ * @author Theodore Dubois
+ */
+@Documented
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.METHOD})
+public @interface Path {
+    /**
+     * If there's a request matching this path, this method is invoked.
+     *
+     * @return the path pattern
+     */
+    String value();
 }

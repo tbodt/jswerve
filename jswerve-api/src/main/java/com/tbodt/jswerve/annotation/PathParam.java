@@ -14,21 +14,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.tbodt.jswerve;
+
+package com.tbodt.jswerve.annotation;
+
+import java.lang.annotation.*;
 
 /**
  *
  * @author Theodore Dubois
  */
-public abstract class AbstractPage implements Page {
-    private final Request.Method method;
-
-    protected AbstractPage(Request.Method method) {
-        this.method = method;
-    }
-
-    @Override
-    public boolean canService(Request request) {
-        return request.getMethod() == method;
-    }
+@Documented
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.PARAMETER)
+public @interface PathParam {
+    String value();
 }
