@@ -1,5 +1,6 @@
 JSwerve
 =======
+[![Build Status](https://travis-ci.org/tbodt/jswerve.svg?branch=master)](https://travis-ci.org/tbodt/jswerve)
 
 JSwerve is, or rather will be, a Java application server that proves it is possible to write cool websites in Java.
 
