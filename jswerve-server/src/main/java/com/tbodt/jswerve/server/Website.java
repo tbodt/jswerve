@@ -81,12 +81,12 @@ public class Website {
         for (String className : interestingClasses)
             try {
                 Class<?> clazz = loader.loadClass(className);
-                for (Page page : AnnotatedMethodPage.introspect(clazz))
+                for (Page page : AnnotatedMethodPage.introspect(clazz, container))
                     pages.add(page);
             } catch (ClassNotFoundException ex) {
                 throw new IllegalArgumentException("intersting class " + className + " doesn't exist");
-            } catch (ReflectionException ex) {
-                throw new IllegalArgumentException("error creating/introspecting " + className, ex);
+            } catch (InvalidWebsiteException ex) {
+                throw new IllegalArgumentException("error in website", ex);
             } catch (ClassCastException ex) {
                 // this class doesn't implement Page. ignore, and try the next one.
             }
