@@ -16,20 +16,21 @@
  */
 package com.tbodt.jswerve;
 
+import com.tbodt.jswerve.server.HttpProtocol;
+import com.tbodt.jswerve.server.Server;
+import com.tbodt.jswerve.server.Website;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import java.io.File;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import java.io.IOException;
 import java.net.*;
 import java.util.*;
 import java.util.logging.*;
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.plugin.*;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugins.annotations.*;
-import org.apache.maven.plugins.annotations.Mojo;
 
 /**
  * A mojo that runs JSwerve with the artifact.
@@ -38,10 +39,10 @@ import org.apache.maven.plugins.annotations.Mojo;
  */
 @Mojo(name = "run", requiresDirectInvocation = true, requiresDependencyResolution = ResolutionScope.COMPILE)
 public class RunMojo extends AbstractMojo {
-
+    
     @Parameter(defaultValue = "${project.artifacts}", readonly = true)
     private Set<Artifact> projectArtifacts;
-
+    
     @Parameter(defaultValue = "${plugin.artifacts}", readonly = true)
     private List<Artifact> pluginArtifacts;
     
@@ -51,56 +52,7 @@ public class RunMojo extends AbstractMojo {
     @Parameter(defaultValue = "${project.build.directory}/${project.build.finalName}.jar", required = true)
     private File archive;
 
-    public void execute() throws MojoExecutionException, MojoFailureException {
-        initLogging();
-        
-        Set<URL> urls = new HashSet<URL>();
-        try {
-            for (Artifact artifact : projectArtifacts)
-                urls.add(artifact.getFile().toURI().toURL());
-            for (Artifact artifact : pluginArtifacts)
-                urls.add(artifact.getFile().toURI().toURL());
-            urls.add(archive.toURI().toURL());
-        } catch (MalformedURLException ex) {
-            throw new RuntimeException(ex); // this really shouldn't happen
-        }
-        ClassLoader loader = new URLClassLoader(urls.toArray(new URL[urls.size()]));
-
-        // We've got to reflect.
-        try {
-            Class<?> serverClass = loader.loadClass("com.tbodt.jswerve.server.Server");
-            Class<?> websiteClass = loader.loadClass("com.tbodt.jswerve.server.Website");
-            Class<?> protocolClass = loader.loadClass("com.tbodt.jswerve.server.Protocol");
-            Class<?> httpProtocolClass = loader.loadClass("com.tbodt.jswerve.server.HttpProtocol");
-            Class<?> fileClass = loader.loadClass("java.io.File");
-            Class<?> classLoaderClass = loader.loadClass("java.lang.ClassLoader");
-
-            Method start = serverClass.getMethod("start");
-            Method join = serverClass.getMethod("join");
-
-            Object website = websiteClass.getConstructor(fileClass, classLoaderClass).newInstance(archive, loader);
-            Object protocol = httpProtocolClass.getConstructor().newInstance();
-            Object server = serverClass.getConstructor(websiteClass, protocolClass).newInstance(website, protocol);
-
-            start.invoke(server);
-            join.invoke(server);
-        } catch (ClassNotFoundException ex) {
-            throw new MojoExecutionException("REFLECTION FAILURE", ex);
-        } catch (NoSuchMethodException ex) {
-            throw new MojoExecutionException("REFLECTION FAILURE", ex);
-        } catch (InstantiationException ex) {
-            throw new MojoExecutionException("REFLECTION FAILURE", ex);
-        } catch (IllegalAccessException ex) {
-            throw new MojoExecutionException("REFLECTION FAILURE", ex);
-        } catch (IllegalArgumentException ex) {
-            throw new MojoExecutionException("REFLECTION FAILURE", ex);
-        } catch (InvocationTargetException ex) {
-            // Now this means something.
-            throw new MojoFailureException("Something bad happened", ex);
-        }
-    }
-
-    private void initLogging() {
+    public void execute() throws MojoExecutionException {
         final Log mavenLog = getLog();
         Logger log = Logger.getLogger("com.tbodt.jswerve");
         log.setUseParentHandlers(false);
@@ -132,5 +84,26 @@ public class RunMojo extends AbstractMojo {
             public void close() throws SecurityException {
             }
         });
+        Set<URL> urls = new HashSet<URL>();
+        try {
+            for (Artifact artifact : projectArtifacts)
+                if (!pluginArtifacts.contains(artifact))
+                    urls.add(artifact.getFile().toURI().toURL());
+            urls.add(archive.toURI().toURL());
+        } catch (MalformedURLException ex) {
+            throw new RuntimeException(ex); // this really shouldn't happen
+        }
+        ClassLoader loader = new URLClassLoader(urls.toArray(new URL[urls.size()]), RunMojo.class.getClassLoader());
+
+        Server server;
+        try {
+            server = new Server(new Website(archive, loader), new HttpProtocol());
+            server.start();
+            server.join();
+        } catch (InterruptedException ex) {
+            throw new MojoExecutionException("Interrupted rudely", ex);
+        } catch (IOException ex) {
+            throw new MojoExecutionException("Failed to create website", ex);
+        }
     }
 }
