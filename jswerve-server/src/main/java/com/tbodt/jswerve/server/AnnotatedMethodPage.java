@@ -79,7 +79,7 @@ public class AnnotatedMethodPage implements Page {
 
     private static abstract class ParameterGenerator<T> {
         public static ParameterGenerator create(Annotation annotation) throws InvalidWebsiteException {
-            if (annotation.getClass() == PathParam.class)
+            if (PathParam.class.isAssignableFrom(annotation.getClass()))
                 return new PathParameterGenerator((PathParam) annotation);
             else
                 return null;
