@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Theodore Dubois
+ * Copyright (C) 2014 duboist
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,18 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-package com.tbodt.jswerve.annotation;
-
-import java.lang.annotation.*;
+package com.tbodt.jswerve.server;
 
 /**
  *
  * @author Theodore Dubois
  */
-@Documented
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.PARAMETER)
-public @interface PathParam {
-    String value();
+public final class RoutingTable {
+    private final Route[] routes;
 }
