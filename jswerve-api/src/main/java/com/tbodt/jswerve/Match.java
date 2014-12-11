@@ -16,11 +16,15 @@
  */
 package com.tbodt.jswerve;
 
+import java.lang.annotation.*;
+
 /**
  *
  * @author Theodore Dubois
  */
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)
 public @interface Match {
     String path();
-    Request.Method method();
+    Request.Method[] method();
 }

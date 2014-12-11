@@ -32,27 +32,24 @@ public class Website {
 
     private ClassLoader loader;
     private final Container container = new Container();
-    private final Set<Page> pages = new HashSet<Page>();
+    private RoutingTable routes;
 
     public Website(String name) throws IOException {
         this(new File(SITES, name + ".jar"));
     }
 
     public Website(File file) throws IOException {
-        try {
-            init(file, new URLClassLoader(new URL[] {file.toURI().toURL()}));
-        } catch (MalformedURLException ex) {
-            // no will happen
-            throw new RuntimeException(ex);
-        }
+        this(file, new URLClassLoader(new URL[] {file.toURI().toURL()}));
     }
 
     public Website(File archive, ClassLoader loader) throws IOException {
-        init(archive, loader);
+        this.loader = loader;
+        init(archive);
     }
 
-    private void init(File archive, ClassLoader loader) throws IOException {
-        Set<String> classes = new HashSet<String>();
+    private void init(File archive) throws IOException {
+        Set<Class<?>> classes = new HashSet<Class<?>>();
+        
         if (archive.isDirectory())
             spiderDirectory(archive, classes);
         else {
@@ -60,10 +57,11 @@ public class Website {
             for (ZipEntry entry : Collections.list(file.entries()))
                 addClass(classes, entry.getName());
         }
-        init(loader, classes.toArray(new String[classes.size()]));
+        
+        this.routes = RoutingTable.build(classes.toArray(new Class<?>[classes.size()]));
     }
 
-    private void spiderDirectory(File archive, Set<String> classes) {
+    private void spiderDirectory(File archive, Set<Class<?>> classes) {
         for (File file : archive.listFiles())
             if (file.isDirectory())
                 spiderDirectory(archive, classes);
@@ -71,65 +69,23 @@ public class Website {
                 addClass(classes, file.getName());
     }
 
-    private void addClass(Set<String> classes, String name) {
-        if (name.endsWith(".class"))
-            classes.add(name.substring(0, name.indexOf(".class")).replace('/', '.'));
-    }
-
-    private void init(ClassLoader loader, String[] interestingClasses) {
-        this.loader = loader;
-        for (String className : interestingClasses)
-            try {
-                Class<?> clazz = loader.loadClass(className);
-                for (Page page : AnnotatedMethodPage.introspect(clazz, container))
-                    pages.add(page);
-            } catch (ClassNotFoundException ex) {
-                throw new IllegalArgumentException("intersting class " + className + " doesn't exist");
-            } catch (InvalidWebsiteException ex) {
-                throw new IllegalArgumentException("error in website", ex);
-            } catch (ClassCastException ex) {
-                // this class doesn't implement Page. ignore, and try the next one.
-            }
+    private void addClass(Set<Class<?>> classes, String name) {
+        try {
+            if (name.endsWith(".class"))
+                classes.add(loader.loadClass(name.substring(0, name.indexOf(".class")).replace('/', '.')));
+        } catch (ClassNotFoundException ex) {
+            throw new WTFException("A class that is in the archive was not found in the archive!! File a bug report!!");
+        }
     }
 
     public Response service(Request request) {
         try {
-            for (Page page : pages) {
-                Response response = page.tryService(request);
-                if (response != null)
-                    return response;
-            }
+            return routes.route(request);
         } catch (StatusCodeException ex) {
             throw ex;
         } catch (RuntimeException ex) {
             ex.printStackTrace(System.err);
             throw new StatusCodeException(StatusCode.INTERNAL_SERVER_ERROR);
-        }
-        return new Response(StatusCode.NOT_FOUND, Headers.EMPTY_HEADERS);
-    }
-
-    private final class StaticPage implements Page {
-        private final URL url;
-        private final String path;
-        private final String contentType;
-
-        public StaticPage(String path, URL file, String contentType) {
-            this.url = file;
-            if (!path.startsWith("/"))
-                path = "/" + path;
-            this.path = path;
-            this.contentType = contentType;
-        }
-
-        @Override
-        public Response tryService(Request request) {
-            if (request.getMethod() != Request.Method.GET || !request.getUri().getPath().equals(path))
-                return null;
-            try {
-                return new Response(StatusCode.OK, Headers.EMPTY_HEADERS, url.openStream(), contentType);
-            } catch (IOException ex) {
-                return new Response(StatusCode.INTERNAL_SERVER_ERROR, Headers.EMPTY_HEADERS);
-            }
         }
     }
 

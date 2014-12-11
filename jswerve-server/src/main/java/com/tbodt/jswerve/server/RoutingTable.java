@@ -16,10 +16,69 @@
  */
 package com.tbodt.jswerve.server;
 
+import com.tbodt.jswerve.*;
+import com.tbodt.jswerve.controller.Controller;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.*;
+
 /**
  *
  * @author Theodore Dubois
  */
 public final class RoutingTable {
     private final Route[] routes;
+
+    private RoutingTable(Class<?>[] classes) {
+        List<Route> routesList = new ArrayList<Route>();
+        
+        for (Class<?> klass : classes) {
+            if (Controller.class.isAssignableFrom(klass)) {
+                for (Method method : klass.getMethods()) {
+                    for (Annotation annotation : method.getAnnotations()) {
+                        if (isRoutingAnnotation(annotation)) {
+                            routesList.add(new Route(annotation, method));
+                        }
+                    }
+                }
+            }
+        }
+        
+        routes = routesList.toArray(new Route[routesList.size()]);
+    }
+
+    public static RoutingTable build(Class<?>[] classes) {
+        return new RoutingTable(classes);
+    }
+    
+    public Response route(Request request) {
+        for (Route route : routes) {
+            if (route.methods.contains(request.getMethod()) &&
+                route.path.equals(request.getUri().getPath())) {
+                Controller controller = Controller.instantiate((Class<? extends Controller>) route.action.getDeclaringClass());
+                controller.invoke(route.action);
+            }
+        }
+    }
+
+    private final class Route {
+        private final String path;
+        private final EnumSet<Request.Method> methods;
+        private final Method action;
+
+        public Route(Annotation a, Method action) {
+            this.action = action;
+            if (a instanceof Match) {
+                Match annotation = (Match) a;
+                path = annotation.path();
+                methods = EnumSet.copyOf(Arrays.asList(annotation.method()));
+            } else
+                throw new IllegalArgumentException("Annotation isn't a routing annotation");
+        }
+
+    }
+
+    public static boolean isRoutingAnnotation(Annotation a) {
+        return a instanceof Match;
+    }
 }

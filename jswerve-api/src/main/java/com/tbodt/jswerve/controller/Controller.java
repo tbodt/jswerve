@@ -14,24 +14,36 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.tbodt.jswerve.server;
+package com.tbodt.jswerve.controller;
 
-import com.tbodt.jswerve.Match;
-import com.tbodt.jswerve.Request;
-import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 
 /**
  *
  * @author Theodore Dubois
  */
-public final class Route {
-    private final String path;
-    private final Request.Method method;
-    public Route(Annotation annotation) {
-        if (annotation instanceof Match) {
-            Match match = (Match) annotation;
-            path = match.path();
-            method = match.method();
+public abstract class Controller {
+    private byte[] responseData;
+
+    public byte[] getResponseData() {
+        return responseData;
+    }
+
+    protected void setResponseData(byte[] responseData) {
+        this.responseData = responseData;
+    }
+    
+    public static Controller instantiate(Class<? extends Controller> klass) {
+        try {
+            return klass.newInstance();
+        } catch (InstantiationException ex) {
+            throw new RuntimeException(ex);
+        } catch (IllegalAccessException ex) {
+            throw new RuntimeException(ex);
         }
+    }
+    
+    public void invoke(Method action) {
+        
     }
 }
