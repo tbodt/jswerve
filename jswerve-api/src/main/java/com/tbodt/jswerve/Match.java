@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 duboist
+ * Copyright (C) 2014 Theodore Dubois
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@ package com.tbodt.jswerve;
 
 /**
  *
- * @author duboist
+ * @author Theodore Dubois
  */
 public @interface Match {
     String path();

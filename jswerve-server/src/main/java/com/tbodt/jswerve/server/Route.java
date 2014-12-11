@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 duboist
+ * Copyright (C) 2014 Theodore Dubois
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@ import java.lang.annotation.Annotation;
 
 /**
  *
- * @author duboist
+ * @author Theodore Dubois
  */
 public final class Route {
     private final String path;
