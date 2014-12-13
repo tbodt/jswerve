@@ -58,7 +58,7 @@ public class Website {
                 addClass(classes, entry.getName());
         }
         
-        this.routes = RoutingTable.build(classes.toArray(new Class<?>[classes.size()]));
+        this.routes = RoutingTable.extract(classes.toArray(new Class<?>[classes.size()]));
     }
 
     private void spiderDirectory(File archive, Set<Class<?>> classes) {

@@ -41,4 +41,8 @@ public abstract class Routes {
     protected final Route.Builder match(String path) {
         return new Route.Builder(path);
     }
+
+    public List<Route> getRoutes() {
+        return routes;
+    }
 }

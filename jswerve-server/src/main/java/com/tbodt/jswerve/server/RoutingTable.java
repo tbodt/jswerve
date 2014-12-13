@@ -19,52 +19,41 @@ package com.tbodt.jswerve.server;
 import com.tbodt.jswerve.Route;
 import com.tbodt.jswerve.*;
 import com.tbodt.jswerve.controller.Controller;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.*;
 
 /**
  *
  * @author Theodore Dubois
  */
 public final class RoutingTable {
-    private final Route[] routes;
+    private final Routes routes;
 
-    private RoutingTable(Class<?>[] classes) {
-        List<Route> routesList = new ArrayList<Route>();
-        
+    private RoutingTable(Class<?>[] classes) throws InvalidWebsiteException {
         for (Class<?> klass : classes) {
-            if (Controller.class.isAssignableFrom(klass)) {
-                for (Method method : klass.getMethods()) {
-                    for (Annotation annotation : method.getAnnotations()) {
-                        if (isRoutingAnnotation(annotation)) {
-                            routesList.add(new Route(annotation, method));
-                        }
-                    }
+            if (Routes.class.isAssignableFrom(klass)) {
+                try {
+                    routes = ((Class<? extends Routes>) klass).newInstance();
+                } catch (InstantiationException ex) {
+                    throw new InvalidWebsiteException("You defined a routes constructor!!!");
+                } catch (IllegalAccessException ex) {
+                    throw new InvalidWebsiteException("You defined a routes constructor!!!");
                 }
+                break;
             }
         }
-        
-        routes = routesList.toArray(new Route[routesList.size()]);
     }
 
-    public static RoutingTable build(Class<?>[] classes) {
+    public static RoutingTable extract(Class<?>[] classes) throws InvalidWebsiteException {
         return new RoutingTable(classes);
     }
     
     public Response route(Request request) {
-        for (Route route : routes) {
-            if (route.methods.contains(request.getMethod()) &&
-                route.path.equals(request.getUri().getPath())) {
+        for (Route route : routes.getRoutes()) {
+            if (route.getMethods().contains(request.getMethod()) &&
+                route.getPath().equals(request.getUri().getPath())) {
                 Controller controller = Controller.instantiate((Class<? extends Controller>) route.action.getDeclaringClass());
                 controller.invoke(route.action);
                 return new Response
             }
         }
-    }
-
-
-    public static boolean isRoutingAnnotation(Annotation a) {
-        return a instanceof Match;
     }
 }
