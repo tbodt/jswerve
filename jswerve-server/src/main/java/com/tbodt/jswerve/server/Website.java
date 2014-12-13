@@ -58,7 +58,11 @@ public class Website {
                 addClass(classes, entry.getName());
         }
         
-        this.routes = RoutingTable.extract(classes.toArray(new Class<?>[classes.size()]));
+        try {
+            this.routes = RoutingTable.extract(classes.toArray(new Class<?>[classes.size()]));
+        } catch (InvalidWebsiteException ex) {
+            throw new IllegalArgumentException("error in website", ex);
+        }
     }
 
     private void spiderDirectory(File archive, Set<Class<?>> classes) {
