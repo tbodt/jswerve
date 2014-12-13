@@ -16,6 +16,7 @@
  */
 package com.tbodt.jswerve.server;
 
+import com.tbodt.jswerve.Route;
 import com.tbodt.jswerve.*;
 import com.tbodt.jswerve.controller.Controller;
 import java.lang.annotation.Annotation;
@@ -57,26 +58,11 @@ public final class RoutingTable {
                 route.path.equals(request.getUri().getPath())) {
                 Controller controller = Controller.instantiate((Class<? extends Controller>) route.action.getDeclaringClass());
                 controller.invoke(route.action);
+                return new Response
             }
         }
     }
 
-    private final class Route {
-        private final String path;
-        private final EnumSet<Request.Method> methods;
-        private final Method action;
-
-        public Route(Annotation a, Method action) {
-            this.action = action;
-            if (a instanceof Match) {
-                Match annotation = (Match) a;
-                path = annotation.path();
-                methods = EnumSet.copyOf(Arrays.asList(annotation.method()));
-            } else
-                throw new IllegalArgumentException("Annotation isn't a routing annotation");
-        }
-
-    }
 
     public static boolean isRoutingAnnotation(Annotation a) {
         return a instanceof Match;
