@@ -45,12 +45,13 @@ public class RouteDefinerTest {
             }
         }
         List<Route> routes = new GetRoutes().getRoutes();
-        assertEquals(routes.size(), 1);
+        assertEquals(1, routes.size());
         Route route = routes.get(0);
-        assertEquals(route.getMethods(), EnumSet.of(HttpMethod.GET));
-        assertEquals(route.getPattern(), "/wonderful/path");
-        assertEquals(route.getController(), "controller");
-        assertEquals(route.getAction(), "action");
+        assertEquals(EnumSet.of(HttpMethod.GET), route.getMethods());
+        System.out.println(Arrays.toString(route.getPattern()));
+        assertArrayEquals(new String[] {"wonderful", "path"}, route.getPattern());
+        assertEquals("controller", route.getController());
+        assertEquals("action", route.getAction());
     }
     
     @Test
@@ -63,11 +64,11 @@ public class RouteDefinerTest {
             }
         }
         List<Route> routes = new MatchRoutes().getRoutes();
-        assertEquals(routes.size(), 1);
+        assertEquals(1, routes.size());
         Route route = routes.get(0);
-        assertEquals(route.getMethods(), EnumSet.of(HttpMethod.GET));
-        assertEquals(route.getPattern(), "/wonderful/path");
-        assertEquals(route.getController(), "controller");
-        assertEquals(route.getAction(), "action");
+        assertEquals(EnumSet.of(HttpMethod.GET), route.getMethods());
+        assertArrayEquals(new String[] {"wonderful", "path"}, route.getPattern());
+        assertEquals("controller", route.getController());
+        assertEquals("action", route.getAction());
     }
 }

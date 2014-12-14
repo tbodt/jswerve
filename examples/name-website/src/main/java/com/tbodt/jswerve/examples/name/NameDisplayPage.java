@@ -5,27 +5,24 @@
  */
 package com.tbodt.jswerve.examples.name;
 
-import com.tbodt.jswerve.*;
-import java.io.PrintWriter;
-
 /**
  *
  * @author Theodore Dubois
  */
 public class NameDisplayPage {
-    public Response displayName(@PathParam("name") String name) {
-        Response.Builder builder = Response.builder().status(StatusCode.OK);
-        PrintWriter out = new PrintWriter(builder.getOutputStream(), true);
-        out.println("<!DOCTYPE html>");
-        out.println("<html>");
-        out.println("<head>");
-        out.println("<title>Hello, " + name + "!</title>");
-        out.println("</head>");
-        out.println("<body>");
-        out.println("Hello world! Your name is " + name + ".");
-        out.println("</body>");
-        out.println("</html>");
-        builder.setContentType("text/html");
-        return builder.build();
-    }
+//    public Response displayName(@PathParam("name") String name) {
+//        Response.Builder builder = Response.builder().status(StatusCode.OK);
+//        PrintWriter out = new PrintWriter(builder.getOutputStream(), true);
+//        out.println("<!DOCTYPE html>");
+//        out.println("<html>");
+//        out.println("<head>");
+//        out.println("<title>Hello, " + name + "!</title>");
+//        out.println("</head>");
+//        out.println("<body>");
+//        out.println("Hello world! Your name is " + name + ".");
+//        out.println("</body>");
+//        out.println("</html>");
+//        builder.setContentType("text/html");
+//        return builder.build();
+//    }
 }

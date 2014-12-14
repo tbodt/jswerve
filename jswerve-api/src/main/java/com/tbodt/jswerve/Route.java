@@ -16,7 +16,9 @@
  */
 package com.tbodt.jswerve;
 
-import java.util.EnumSet;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  *
@@ -49,5 +51,17 @@ public final class Route {
 
     public String getAction() {
         return action;
+    }
+
+    private static final Pattern PATH_COMPONENTS = Pattern.compile("[^/]+");
+    private static final String[] EMPTY_STRING_ARRAY = new String[0];
+
+    public static String[] pathComponents(String path) {
+        // This is, unfortunately, more complicated than it needs to be. Which is why it's a static method.
+        List<String> components = new ArrayList<String>();
+        Matcher matcher = PATH_COMPONENTS.matcher(path);
+        while (matcher.find())
+            components.add(matcher.group());
+        return components.toArray(EMPTY_STRING_ARRAY);
     }
 }

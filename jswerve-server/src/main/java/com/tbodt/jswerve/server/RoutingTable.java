@@ -63,15 +63,15 @@ public final class RoutingTable {
     
     private boolean pathsMatch(String path, String[] pattern) {
         int i, j;
-        String[] pathComponents = path.split("/+");
+        String[] pathComponents = Route.pathComponents(path);
         for (i = 0, j = 0; i < pattern.length && j < pathComponents.length; i++, j++) {
             String patternComponent = pattern[i];
-            String pathComponent = pattern[j];
+            String pathComponent = pathComponents[j];
             if (!patternComponent.startsWith(":")) {
                 if (!patternComponent.equals(pathComponent))
                     return false;
             }
         }
-        return i + 2 == pattern.length && j + 2 == pathComponents.length;
+        return i == pattern.length && j == pathComponents.length;
     }
 }

@@ -41,8 +41,9 @@ public abstract class RoutesDefiner {
         private String action;
         private boolean built = false;
 
+
         public RouteInfo(String pattern) {
-            this.pattern = pattern.split("/+");
+            this.pattern = Route.pathComponents(pattern);
         }
 
         public RouteInfo to(String controller, String action) {
@@ -75,7 +76,7 @@ public abstract class RoutesDefiner {
     protected final RouteInfo match(String path) {
         return new RouteInfo(path);
     }
-    
+
     protected final RouteInfo get(String path) {
         return new RouteInfo(path).via(HttpMethod.GET);
     }
