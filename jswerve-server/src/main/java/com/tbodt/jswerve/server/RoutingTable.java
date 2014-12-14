@@ -18,42 +18,46 @@ package com.tbodt.jswerve.server;
 
 import com.tbodt.jswerve.Route;
 import com.tbodt.jswerve.*;
-import com.tbodt.jswerve.controller.Controller;
+import java.util.List;
 
 /**
  *
  * @author Theodore Dubois
  */
 public final class RoutingTable {
-    private final Routes routes;
+    private final List<Route> routes;
 
     private RoutingTable(Class<?>[] classes) throws InvalidWebsiteException {
-        for (Class<?> klass : classes) {
-            if (Routes.class.isAssignableFrom(klass)) {
-                try {
-                    routes = ((Class<? extends Routes>) klass).newInstance();
-                } catch (InstantiationException ex) {
-                    throw new InvalidWebsiteException("You defined a routes constructor!!!");
-                } catch (IllegalAccessException ex) {
-                    throw new InvalidWebsiteException("You defined a routes constructor!!!");
-                }
-                break;
-            }
+        Class<? extends RoutesDefiner> definerClass = null;
+        for (Class<?> klass : classes)
+            if (RoutesDefiner.class.isAssignableFrom(klass))
+                if (definerClass == null)
+                    definerClass = (Class<? extends RoutesDefiner>) klass;
+                else
+                    throw new InvalidWebsiteException("more than one RoutesDefiner");
+        
+        if (definerClass == null)
+            throw new InvalidWebsiteException("no RoutesDefiner");
+        
+        try {
+            routes = definerClass.newInstance().getRoutes();
+        } catch (InstantiationException ex) {
+            throw new InvalidWebsiteException("no no-arg constructor in RoutesDefiner");
+        } catch (IllegalAccessException ex) {
+            throw new InvalidWebsiteException("no public no-arg constructor in RoutesDefiner");
         }
     }
 
     public static RoutingTable extract(Class<?>[] classes) throws InvalidWebsiteException {
         return new RoutingTable(classes);
     }
-    
+
     public Response route(Request request) {
-        for (Route route : routes.getRoutes()) {
-            if (route.getMethods().contains(request.getMethod()) &&
-                route.getPath().equals(request.getUri().getPath())) {
-                Controller controller = Controller.instantiate((Class<? extends Controller>) route.action.getDeclaringClass());
-                controller.invoke(route.action);
-                return new Response
+        for (Route route : routes)
+            if (route.getMethods().contains(request.getMethod())
+                    && route.getPath().equals(request.getUri().getPath())) {
+                // Yay!
             }
-        }
+        return null;
     }
 }

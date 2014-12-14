@@ -28,45 +28,7 @@ public final class Route {
     private final String controller;
     private final String action;
 
-    public static final class Builder {
-        private final String path;
-        private EnumSet<Request.Method> methods;
-        private String controller;
-        private String action;
-        private boolean built = false;
-
-        public Builder(String path) {
-            this.path = path;
-        }
-
-        public Builder to(String controller, String action) {
-            if (controller != null || action != null)
-                throw new IllegalStateException("to has already been specified");
-            this.controller = controller;
-            this.action = action;
-            return this;
-        }
-
-        public Builder via(Request.Method first, Request.Method... rest) {
-            if (methods != null)
-                throw new IllegalStateException("Via has already been specified");
-            methods = EnumSet.of(first, rest);
-            return this;
-        }
-
-        public Route build() {
-            if (methods == null)
-                throw new IllegalStateException("Must specify via");
-            if (controller == null || action == null)
-                throw new IllegalStateException("Must specify to");
-            if (built)
-                throw new IllegalStateException("Already been built");
-            built = true;
-            return new Route(path, methods, controller, action);
-        }
-    }
-
-    private Route(String path, EnumSet<Request.Method> methods, String controller, String action) {
+    Route(String path, EnumSet<Request.Method> methods, String controller, String action) {
         this.path = path;
         this.methods = methods;
         this.controller = controller;
