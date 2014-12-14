@@ -6,8 +6,6 @@
 package com.tbodt.jswerve.examples.name;
 
 import com.tbodt.jswerve.*;
-import com.tbodt.jswerve.annotation.Path;
-import com.tbodt.jswerve.annotation.PathParam;
 import java.io.PrintWriter;
 
 /**
@@ -15,7 +13,6 @@ import java.io.PrintWriter;
  * @author Theodore Dubois
  */
 public class NameDisplayPage {
-    @Path("/{name}")
     public Response displayName(@PathParam("name") String name) {
         Response.Builder builder = Response.builder().status(StatusCode.OK);
         PrintWriter out = new PrintWriter(builder.getOutputStream(), true);

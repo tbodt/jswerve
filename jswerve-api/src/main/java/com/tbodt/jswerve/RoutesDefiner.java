@@ -36,7 +36,7 @@ public abstract class RoutesDefiner {
 
     public static class RouteInfo {
         private final String[] pattern;
-        private EnumSet<Request.Method> methods;
+        private EnumSet<HttpMethod> methods;
         private String controller;
         private String action;
         private boolean built = false;
@@ -53,7 +53,7 @@ public abstract class RoutesDefiner {
             return this;
         }
 
-        public RouteInfo via(Request.Method first, Request.Method... rest) {
+        public RouteInfo via(HttpMethod first, HttpMethod... rest) {
             if (methods != null)
                 throw new IllegalStateException("Via has already been specified");
             methods = EnumSet.of(first, rest);
@@ -77,7 +77,7 @@ public abstract class RoutesDefiner {
     }
     
     protected final RouteInfo get(String path) {
-        return new RouteInfo(path).via(Request.Method.GET);
+        return new RouteInfo(path).via(HttpMethod.GET);
     }
 
     public List<Route> getRoutes() {

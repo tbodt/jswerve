@@ -16,38 +16,32 @@
  */
 package com.tbodt.jswerve;
 
-import java.util.EnumSet;
+import java.nio.ByteBuffer;
 
 /**
  *
  * @author Theodore Dubois
  */
-public final class Route {
-    private final String[] pattern;
-    private final EnumSet<HttpMethod> methods;
-    private final String controller;
-    private final String action;
+public final class Content {
+    private final ByteBuffer data;
+    private final String mimeType;
+    
+    public static Content EMPTY = new Content(new byte[0], null);
 
-    Route(String[] pattern, EnumSet<HttpMethod> methods, String controller, String action) {
-        this.pattern = pattern;
-        this.methods = methods;
-        this.controller = controller;
-        this.action = action;
+    public Content(byte[] data, String mimeType) {
+        this(ByteBuffer.wrap(data), mimeType);
+    }
+    
+    public Content(ByteBuffer data, String mimeType) {
+        this.data = data;
+        this.mimeType = mimeType;
     }
 
-    public String[] getPattern() {
-        return pattern;
+    public ByteBuffer getData() {
+        return data;
     }
 
-    public EnumSet<HttpMethod> getMethods() {
-        return methods;
-    }
-
-    public String getController() {
-        return controller;
-    }
-
-    public String getAction() {
-        return action;
+    public String getContentType() {
+        return mimeType;
     }
 }

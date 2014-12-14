@@ -16,7 +16,6 @@
  */
 package com.tbodt.jswerve.server;
 
-import com.tbodt.jswerve.Request;
 import java.util.HashMap;
 import java.util.Map;
 

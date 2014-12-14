@@ -14,17 +14,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.tbodt.jswerve;
 
-import java.lang.annotation.*;
+package com.tbodt.jswerve;
 
 /**
  *
  * @author Theodore Dubois
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.METHOD)
-public @interface Match {
-    String path();
-    Request.Method[] method();
+public enum HttpMethod {
+    GET;
+
+    public static HttpMethod forName(String name) throws StatusCodeException {
+        try {
+            return HttpMethod.valueOf(name);
+        } catch (IllegalArgumentException e) {
+            throw new StatusCodeException(StatusCode.NOT_IMPLEMENTED);
+        }
+    }
+
 }

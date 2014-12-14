@@ -66,6 +66,7 @@ public abstract class AbstractConnection implements Connection {
             if (queue.isEmpty())
                 respond();
         } while (!queue.isEmpty());
+        
         if (key.isValid()) // it isn't if close was called
             key.interestOps(interest.getOps());
         key.selector().wakeup();

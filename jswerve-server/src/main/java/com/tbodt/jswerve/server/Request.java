@@ -14,8 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.tbodt.jswerve;
+package com.tbodt.jswerve.server;
 
+import com.tbodt.jswerve.BadRequestException;
+import com.tbodt.jswerve.Headers;
+import com.tbodt.jswerve.HttpMethod;
+import com.tbodt.jswerve.StatusCodeException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
@@ -27,24 +31,12 @@ import java.nio.ByteBuffer;
  * @author Theodore Dubois
  */
 public final class Request {
-    private final Request.Method method;
+    private final HttpMethod method;
     private final URI uri;
     private final String httpVersion;
     private final Headers headers;
 
-    public enum Method {
-        GET;
-
-        public static Method forName(String name) throws StatusCodeException {
-            try {
-                return valueOf(name);
-            } catch (IllegalArgumentException e) {
-                throw new StatusCodeException(StatusCode.NOT_IMPLEMENTED);
-            }
-        }
-    }
-
-    private Request(Request.Method method, URI uri, String httpVersion, Headers headers) {
+    private Request(HttpMethod method, URI uri, String httpVersion, Headers headers) {
         this.method = method;
         this.uri = uri;
         this.httpVersion = httpVersion;
@@ -60,7 +52,7 @@ public final class Request {
         private boolean newline;
         private RuntimeException error;
 
-        private Request.Method method;
+        private HttpMethod method;
         private URI uri;
         private String httpVersion;
         private final Headers.Builder headersBuilder = new Headers.Builder();
@@ -82,7 +74,7 @@ public final class Request {
             METHOD {
                 @Override
                 public State parse(Parser p) {
-                    p.method = Method.forName(p.readChunk());
+                    p.method = HttpMethod.forName(p.readChunk());
                     return State.URI;
                 }
             },
@@ -256,7 +248,7 @@ public final class Request {
         return httpVersion;
     }
 
-    public Method getMethod() {
+    public HttpMethod getMethod() {
         return method;
     }
 

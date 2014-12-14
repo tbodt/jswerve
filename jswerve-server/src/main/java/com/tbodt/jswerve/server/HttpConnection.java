@@ -30,7 +30,6 @@ public class HttpConnection extends AbstractConnection {
     private final Request.Parser parser = new Request.Parser();
     private Request request;
     private ReadableByteChannel responseIn;
-    private final ByteBuffer outputBuffer = ByteBuffer.allocate(1024);
     
     public HttpConnection(Website website, SocketChannel socket) {
         super(website, socket, Interest.READ);
@@ -61,19 +60,14 @@ public class HttpConnection extends AbstractConnection {
                 response = new Response(status, Headers.EMPTY_HEADERS);
             }
             send(response.toBytes(httpVersion));
-            responseIn = Channels.newChannel(response.getInputStream());
+            send(response.getContent().getData());
             setInterest(Interest.WRITE);
         }
     }
 
     @Override
     protected void respond() throws IOException {
-        outputBuffer.clear();
-        if (responseIn.read(outputBuffer) == -1) {
-            socket.close();
-            return;
-        }
-        outputBuffer.flip();
-        send(outputBuffer);
+        // all the data was written
+        socket.close();
     }
 }
