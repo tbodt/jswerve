@@ -35,14 +35,14 @@ public abstract class RoutesDefiner {
     }
 
     public static class RouteInfo {
-        private final String path;
+        private final String[] pattern;
         private EnumSet<Request.Method> methods;
         private String controller;
         private String action;
         private boolean built = false;
 
-        public RouteInfo(String path) {
-            this.path = path;
+        public RouteInfo(String pattern) {
+            this.pattern = pattern.split("/+");
         }
 
         public RouteInfo to(String controller, String action) {
@@ -68,7 +68,7 @@ public abstract class RoutesDefiner {
             if (built)
                 throw new IllegalStateException("Already been built");
             built = true;
-            return new Route(path, methods, controller, action);
+            return new Route(pattern, methods, controller, action);
         }
     }
 

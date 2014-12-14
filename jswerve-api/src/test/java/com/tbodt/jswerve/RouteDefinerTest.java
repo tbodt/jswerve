@@ -48,7 +48,7 @@ public class RouteDefinerTest {
         assertEquals(routes.size(), 1);
         Route route = routes.get(0);
         assertEquals(route.getMethods(), EnumSet.of(Request.Method.GET));
-        assertEquals(route.getPath(), "/wonderful/path");
+        assertEquals(route.getPattern(), "/wonderful/path");
         assertEquals(route.getController(), "controller");
         assertEquals(route.getAction(), "action");
     }
@@ -66,7 +66,7 @@ public class RouteDefinerTest {
         assertEquals(routes.size(), 1);
         Route route = routes.get(0);
         assertEquals(route.getMethods(), EnumSet.of(Request.Method.GET));
-        assertEquals(route.getPath(), "/wonderful/path");
+        assertEquals(route.getPattern(), "/wonderful/path");
         assertEquals(route.getController(), "controller");
         assertEquals(route.getAction(), "action");
     }

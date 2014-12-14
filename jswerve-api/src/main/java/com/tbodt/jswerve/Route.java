@@ -23,20 +23,20 @@ import java.util.EnumSet;
  * @author Theodore Dubois
  */
 public final class Route {
-    private final String path;
+    private final String[] pattern;
     private final EnumSet<Request.Method> methods;
     private final String controller;
     private final String action;
 
-    Route(String path, EnumSet<Request.Method> methods, String controller, String action) {
-        this.path = path;
+    Route(String[] pattern, EnumSet<Request.Method> methods, String controller, String action) {
+        this.pattern = pattern;
         this.methods = methods;
         this.controller = controller;
         this.action = action;
     }
 
-    public String getPath() {
-        return path;
+    public String[] getPattern() {
+        return pattern;
     }
 
     public EnumSet<Request.Method> getMethods() {

@@ -55,9 +55,23 @@ public final class RoutingTable {
     public Response route(Request request) {
         for (Route route : routes)
             if (route.getMethods().contains(request.getMethod())
-                    && route.getPath().equals(request.getUri().getPath())) {
-                // Yay!
+                    && pathsMatch(request.getUri().getPath(), route.getPattern())) {
+                return new Response(StatusCode.OK, Headers.EMPTY_HEADERS);
             }
-        return null;
+        return new Response(StatusCode.NOT_FOUND, Headers.EMPTY_HEADERS);
+    }
+    
+    private boolean pathsMatch(String path, String[] pattern) {
+        int i, j;
+        String[] pathComponents = path.split("/+");
+        for (i = 0, j = 0; i < pattern.length && j < pathComponents.length; i++, j++) {
+            String patternComponent = pattern[i];
+            String pathComponent = pattern[j];
+            if (!patternComponent.startsWith(":")) {
+                if (!patternComponent.equals(pathComponent))
+                    return false;
+            }
+        }
+        return i + 2 == pattern.length && j + 2 == pathComponents.length;
     }
 }
