@@ -18,7 +18,7 @@ package com.tbodt.jswerve.server;
 
 import com.tbodt.jswerve.Route;
 import com.tbodt.jswerve.*;
-import java.util.List;
+import java.util.*;
 
 /**
  *
@@ -35,10 +35,10 @@ public final class RoutingTable {
                     definerClass = (Class<? extends RoutesDefiner>) klass;
                 else
                     throw new InvalidWebsiteException("more than one RoutesDefiner");
-        
+
         if (definerClass == null)
             throw new InvalidWebsiteException("no RoutesDefiner");
-        
+
         try {
             routes = definerClass.newInstance().getRoutes();
         } catch (InstantiationException ex) {
@@ -55,23 +55,28 @@ public final class RoutingTable {
     public Response route(Request request) {
         for (Route route : routes)
             if (route.getMethods().contains(request.getMethod())
-                    && pathsMatch(request.getUri().getPath(), route.getPattern())) {
+                    && pathsMatch(request.getUri().getPath(), route.getPattern(), request))
                 return new Response(StatusCode.OK, Headers.EMPTY_HEADERS);
-            }
         return new Response(StatusCode.NOT_FOUND, Headers.EMPTY_HEADERS);
     }
-    
-    private boolean pathsMatch(String path, String[] pattern) {
+
+    private boolean pathsMatch(String path, String[] pattern, Request request) {
         int i, j;
+        Map<String, String> paremeters = new HashMap<String, String>();
         String[] pathComponents = Route.pathComponents(path);
         for (i = 0, j = 0; i < pattern.length && j < pathComponents.length; i++, j++) {
             String patternComponent = pattern[i];
             String pathComponent = pathComponents[j];
-            if (!patternComponent.startsWith(":")) {
-                if (!patternComponent.equals(pathComponent))
-                    return false;
-            }
+            if (patternComponent.startsWith(":")) {
+                if (!patternComponent.equals(":"))
+                    paremeters.put(patternComponent.substring(1), pathComponent);
+            } else if (!patternComponent.equals(pathComponent))
+                return false;
         }
-        return i == pattern.length && j == pathComponents.length;
+        if (i == pattern.length && j == pathComponents.length) {
+            request.setPathParameters(paremeters);
+            return true;
+        } else
+            return false;
     }
 }

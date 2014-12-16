@@ -20,9 +20,10 @@ import com.tbodt.jswerve.BadRequestException;
 import com.tbodt.jswerve.Headers;
 import com.tbodt.jswerve.HttpMethod;
 import com.tbodt.jswerve.StatusCodeException;
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.io.UnsupportedEncodingException;
+import java.net.*;
 import java.nio.ByteBuffer;
+import java.util.*;
 
 /**
  * An RFC-2616 compliant HTTP request.
@@ -35,6 +36,9 @@ public final class Request {
     private final URI uri;
     private final String httpVersion;
     private final Headers headers;
+
+    private Map<String, String> queryParameters;
+    private Map<String, String> pathParameters;
 
     private Request(HttpMethod method, URI uri, String httpVersion, Headers headers) {
         this.method = method;
@@ -59,92 +63,92 @@ public final class Request {
 
         private enum State {
             START {
-                @Override
-                public State parse(Parser p) {
-                    char ch;
-                    // Ignore empty lines at the beginning.
-                    do
-                        ch = p.next();
-                    while (ch == '\n');
-                    p.string.setLength(0);
-                    p.string.append(ch);
-                    return State.METHOD;
-                }
-            },
+                        @Override
+                        public State parse(Parser p) {
+                            char ch;
+                            // Ignore empty lines at the beginning.
+                            do
+                                ch = p.next();
+                            while (ch == '\n');
+                            p.string.setLength(0);
+                            p.string.append(ch);
+                            return State.METHOD;
+                        }
+                    },
             METHOD {
-                @Override
-                public State parse(Parser p) {
-                    p.method = HttpMethod.forName(p.readChunk());
-                    return State.URI;
-                }
-            },
+                        @Override
+                        public State parse(Parser p) {
+                            p.method = HttpMethod.forName(p.readChunk());
+                            return State.URI;
+                        }
+                    },
             URI {
-                @Override
-                public State parse(Parser p) {
-                    try {
-                        p.uri = new URI(p.readChunk());
-                    } catch (URISyntaxException ex) {
-                        throw new BadRequestException();
-                    }
-                    return State.VERSION;
-                }
-            },
+                        @Override
+                        public State parse(Parser p) {
+                            try {
+                                p.uri = new URI(p.readChunk());
+                            } catch (URISyntaxException ex) {
+                                throw new BadRequestException();
+                            }
+                            return State.VERSION;
+                        }
+                    },
             VERSION {
-                @Override
-                public State parse(Parser p) {
-                    p.httpVersion = p.readLastChunk();
-                    return State.HEADER;
-                }
-            },
+                        @Override
+                        public State parse(Parser p) {
+                            p.httpVersion = p.readLastChunk();
+                            return State.HEADER;
+                        }
+                    },
             HEADER {
-                @Override
-                public State parse(Parser p) {
-                    char ch = p.next();
-                    if (ch == '\n')
-                        return State.DONE;
-                    else {
-                        p.string.setLength(0);
-                        p.string.append(ch);
-                        return State.HEADER_NAME;
-                    }
-                }
-            },
+                        @Override
+                        public State parse(Parser p) {
+                            char ch = p.next();
+                            if (ch == '\n')
+                                return State.DONE;
+                            else {
+                                p.string.setLength(0);
+                                p.string.append(ch);
+                                return State.HEADER_NAME;
+                            }
+                        }
+                    },
             HEADER_NAME {
-                @Override
-                public State parse(Parser p) {
-                    p.headerName = p.readChunk();
-                    if (!p.headerName.endsWith(":"))
-                        throw new BadRequestException();
-                    p.headerName = p.headerName.substring(0, p.headerName.length() - 1);
-                    return State.HEADER_VALUE;
-                }
-            },
+                        @Override
+                        public State parse(Parser p) {
+                            p.headerName = p.readChunk();
+                            if (!p.headerName.endsWith(":"))
+                                throw new BadRequestException();
+                            p.headerName = p.headerName.substring(0, p.headerName.length() - 1);
+                            return State.HEADER_VALUE;
+                        }
+                    },
             HEADER_VALUE {
-                @Override
-                public State parse(Parser p) {
-                    String headerValue = p.readLastChunk();
-                    p.headersBuilder.setHeader(p.headerName, headerValue);
-                    return State.HEADER;
-                }
-            },
+                        @Override
+                        public State parse(Parser p) {
+                            String headerValue = p.readLastChunk();
+                            p.headersBuilder.setHeader(p.headerName, headerValue);
+                            return State.HEADER;
+                        }
+                    },
             DONE {
-                @Override
-                public State parse(Parser p) {
-                    // We're done. Just absorb any more input.
-                    p.data.position(0).limit(0);
-                    return State.DONE;
-                }
-            },
+                        @Override
+                        public State parse(Parser p) {
+                            // We're done. Just absorb any more input.
+                            p.data.position(0).limit(0);
+                            return State.DONE;
+                        }
+                    },
             ERROR {
-                @Override
-                public State parse(Parser p) {
-                    do
-                        while (!p.newline)
-                            p.newline = p.next() == '\n';
-                    while (p.next() != '\n');
-                    return State.DONE;
-                }
-            };
+                        @Override
+                        public State parse(Parser p) {
+                            do
+                                while (!p.newline)
+                                    p.newline = p.next() == '\n';
+                            while (p.next() != '\n');
+                            return State.DONE;
+                        }
+                    };
 
             public abstract State parse(Parser p);
         }
@@ -258,5 +262,40 @@ public final class Request {
 
     public Headers getHeaders() {
         return headers;
+    }
+
+    public Map<String, String> getQueryParameters() {
+        if (queryParameters == null)
+            queryParameters = decodeParameters(uri.getQuery());
+        return queryParameters;
+    }
+
+    private static Map<String, String> decodeParameters(String encoded) {
+        try {
+            Map<String, String> map = new HashMap<String, String>();
+            StringTokenizer tok = new StringTokenizer(encoded, "&");
+            while (tok.hasMoreTokens()) {
+                String parameter = tok.nextToken();
+                int equalIndex = parameter.indexOf("=");
+                if (equalIndex == -1)
+                    continue;
+                String key = URLDecoder.decode(parameter.substring(0, equalIndex), "UTF-8");
+                String value = URLDecoder.decode(parameter.substring(equalIndex + 1), "UTF-8");
+                if (key.equals(""))
+                    continue;
+                map.put(key, value);
+            }
+            return map;
+        } catch (UnsupportedEncodingException ex) {
+            throw new WTFException("I thought the UTF-8 encoding existed!");
+        }
+    }
+
+    public Map<String, String> getPathParameters() {
+        return pathParameters;
+    }
+
+    public void setPathParameters(Map<String, String> pathParameters) {
+        this.pathParameters = pathParameters;
     }
 }
