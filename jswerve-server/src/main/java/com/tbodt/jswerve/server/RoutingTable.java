@@ -55,8 +55,9 @@ public final class RoutingTable {
     public Response route(Request request) {
         for (Route route : routes)
             if (route.getMethods().contains(request.getMethod())
-                    && pathsMatch(request.getUri().getPath(), route.getPattern(), request))
+                    && pathsMatch(request.getUri().getPath(), route.getPattern(), request)) {
                 return new Response(StatusCode.OK, Headers.EMPTY_HEADERS);
+            }
         return new Response(StatusCode.NOT_FOUND, Headers.EMPTY_HEADERS);
     }
 
