@@ -84,7 +84,10 @@ public class Website {
 
     public Response service(Request request) {
         try {
-            return routes.route(request);
+            Route route = routes.route(request);
+            String controller = route.getController();
+            String action = route.getAction();
+            return new Response(StatusCode.OK, Headers.EMPTY_HEADERS);
         } catch (StatusCodeException ex) {
             throw ex;
         } catch (RuntimeException ex) {

@@ -52,13 +52,12 @@ public final class RoutingTable {
         return new RoutingTable(classes);
     }
 
-    public Response route(Request request) {
+    public Route route(Request request) {
         for (Route route : routes)
             if (route.getMethods().contains(request.getMethod())
-                    && pathsMatch(request.getUri().getPath(), route.getPattern(), request)) {
-                return new Response(StatusCode.OK, Headers.EMPTY_HEADERS);
-            }
-        return new Response(StatusCode.NOT_FOUND, Headers.EMPTY_HEADERS);
+                    && pathsMatch(request.getUri().getPath(), route.getPattern(), request))
+                return route;
+        throw new RoutingException(request);
     }
 
     private boolean pathsMatch(String path, String[] pattern, Request request) {
