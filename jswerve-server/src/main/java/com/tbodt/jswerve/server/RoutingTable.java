@@ -27,7 +27,7 @@ import java.util.*;
 public final class RoutingTable {
     private final List<Route> routes;
 
-    private RoutingTable(Class<?>[] classes) throws InvalidWebsiteException {
+    private RoutingTable(Collection<? extends Class<?>> classes) throws InvalidWebsiteException {
         Class<? extends RoutesDefiner> definerClass = null;
         for (Class<?> klass : classes)
             if (RoutesDefiner.class.isAssignableFrom(klass))
@@ -48,7 +48,7 @@ public final class RoutingTable {
         }
     }
 
-    public static RoutingTable extract(Class<?>[] classes) throws InvalidWebsiteException {
+    public static RoutingTable extract(Collection<? extends Class<?>> classes) throws InvalidWebsiteException {
         return new RoutingTable(classes);
     }
 

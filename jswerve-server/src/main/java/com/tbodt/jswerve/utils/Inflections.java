@@ -14,22 +14,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.tbodt.jswerve.controller;
+package com.tbodt.jswerve.utils;
 
-import com.tbodt.jswerve.Content;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  *
  * @author Theodore Dubois
  */
-public abstract class Controller {
-    private Content responseData;
-
-    public Content getResponseData() {
-        return responseData;
+public final class Inflections {
+    public static String camelize(String term) {
+        StringBuilder sb = new StringBuilder();
+        for (String part : StringUtils.split(term, "-_"))
+            sb.append(StringUtils.capitalize(part));
+        return sb.toString();
     }
 
-    protected void setResponseData(Content responseData) {
-        this.responseData = responseData;
+    private Inflections() {
     }
 }

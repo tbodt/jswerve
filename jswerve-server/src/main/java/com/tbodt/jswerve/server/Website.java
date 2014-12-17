@@ -31,8 +31,8 @@ public class Website {
     private static final File SITES = new File(Constants.HOME, "sites");
 
     private ClassLoader loader;
-    private final Container container = new Container();
     private RoutingTable routes;
+    private ControllersInfo controllers;
 
     public Website(String name) throws IOException {
         this(new File(SITES, name + ".jar"));
@@ -59,7 +59,8 @@ public class Website {
         }
         
         try {
-            this.routes = RoutingTable.extract(classes.toArray(new Class<?>[classes.size()]));
+            this.routes = RoutingTable.extract(classes);
+            this.controllers = new ControllersInfo(classes);
         } catch (InvalidWebsiteException ex) {
             throw new IllegalArgumentException("error in website", ex);
         }
@@ -85,7 +86,7 @@ public class Website {
     public Response service(Request request) {
         try {
             Route route = routes.route(request);
-            String controller = route.getController();
+            ControllerInfo controller = route.getController();
             String action = route.getAction();
             return new Response(StatusCode.OK, Headers.EMPTY_HEADERS);
         } catch (StatusCodeException ex) {
