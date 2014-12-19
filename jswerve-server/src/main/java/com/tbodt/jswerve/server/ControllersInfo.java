@@ -17,6 +17,7 @@
 package com.tbodt.jswerve.server;
 
 import com.tbodt.jswerve.controller.Controller;
+import com.tbodt.jswerve.utils.Inflections;
 import java.util.*;
 import org.apache.commons.lang3.StringUtils;
 
@@ -34,6 +35,10 @@ public final class ControllersInfo {
             if (Controller.class.isAssignableFrom(klass) && simpleName.endsWith("Controller"))
                 controllersMap.put(StringUtils.removeEnd(simpleName, "Controller"), new ControllerInfo((Class<? extends Controller>) klass));
         }
-        controllers = Collections.unmodifiableMap(controllers);
+        controllers = Collections.unmodifiableMap(controllersMap);
+    }
+    
+    public ControllerInfo getControllerInfo(String controller) {
+        return controllers.get(Inflections.camelize(controller));
     }
 }

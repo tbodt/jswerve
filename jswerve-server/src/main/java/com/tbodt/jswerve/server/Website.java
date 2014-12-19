@@ -86,7 +86,7 @@ public class Website {
     public Response service(Request request) {
         try {
             Route route = routes.route(request);
-            ControllerInfo controller = route.getController();
+            ControllerInfo controller = controllers.getControllerInfo(route.getController());
             String action = route.getAction();
             return new Response(StatusCode.OK, Headers.EMPTY_HEADERS);
         } catch (StatusCodeException ex) {
