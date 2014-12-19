@@ -17,6 +17,7 @@
 package com.tbodt.jswerve.server;
 
 import com.tbodt.jswerve.*;
+import com.tbodt.jswerve.controller.Controller;
 import java.io.*;
 import java.net.*;
 import java.util.*;
@@ -86,7 +87,8 @@ public class Website {
     public Response service(Request request) {
         try {
             Route route = routes.route(request);
-            ControllerInfo controller = controllers.getControllerInfo(route.getController());
+            ControllerInfo controllerInfo = controllers.getControllerInfo(route.getController());
+            Controller controller = controllerInfo.instantiate();
             String action = route.getAction();
             return new Response(StatusCode.OK, Headers.EMPTY_HEADERS);
         } catch (StatusCodeException ex) {

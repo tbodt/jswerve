@@ -25,11 +25,15 @@ import com.tbodt.jswerve.Content;
 public abstract class Controller {
     private Content responseData;
 
-    public Content getResponseData() {
+    protected final String getParam(String param) {
+        return null
+    }
+    
+    public final Content getResponseData() {
         return responseData;
     }
 
-    protected void setResponseData(Content responseData) {
+    protected final void setResponseData(Content responseData) {
         this.responseData = responseData;
     }
 }
