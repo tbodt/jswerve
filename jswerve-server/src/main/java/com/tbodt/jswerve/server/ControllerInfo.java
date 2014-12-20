@@ -35,7 +35,7 @@ public final class ControllerInfo {
         this.controllerClass = controllerClass;
         Map<String, Method> actionsMap = new HashMap<String, Method>();
         for (Method action : controllerClass.getMethods())
-            if (Modifier.isPublic(action.getModifiers()) && action.getParameterCount() == 0 && action.getReturnType() == void.class)
+            if (Modifier.isPublic(action.getModifiers()) && action.getParameterTypes().length == 0 && action.getReturnType() == void.class)
                 actionsMap.put(action.getName(), action);
         this.actions = Collections.unmodifiableMap(actionsMap);
     }
