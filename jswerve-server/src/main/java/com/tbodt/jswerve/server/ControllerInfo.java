@@ -16,8 +16,11 @@
  */
 package com.tbodt.jswerve.server;
 
+import com.tbodt.jswerve.WTFException;
+import com.tbodt.jswerve.StatusCode;
+import com.tbodt.jswerve.StatusCodeException;
 import com.tbodt.jswerve.controller.Controller;
-import java.lang.reflect.Method;
+import java.lang.reflect.*;
 import java.util.*;
 
 /**
@@ -32,7 +35,7 @@ public final class ControllerInfo {
         this.controllerClass = controllerClass;
         Map<String, Method> actionsMap = new HashMap<String, Method>();
         for (Method action : controllerClass.getMethods())
-            if (action.getParameterCount() == 0 && action.getReturnType() == void.class)
+            if (Modifier.isPublic(action.getModifiers()) && action.getParameterCount() == 0 && action.getReturnType() == void.class)
                 actionsMap.put(action.getName(), action);
         this.actions = Collections.unmodifiableMap(actionsMap);
     }
@@ -48,6 +51,21 @@ public final class ControllerInfo {
     }
     
     public void invoke(Controller controller, String action) {
+        if (!controllerClass.isInstance(controller))
+            throw new IllegalArgumentException("controller is not the right class");
+        try {
+            actions.get(action).invoke(controller);
+        } catch (IllegalAccessException ex) {
+            throw new WTFException("controller action is not public!", ex);
+        } catch (IllegalArgumentException ex) {
+            throw new WTFException("controller action takes arguments, or something!", ex);
+        } catch (InvocationTargetException ex) {
+            Throwable why = ex.getCause();
+            if (why instanceof StatusCodeException)
+                throw (StatusCodeException) why;
+            else
+                throw new StatusCodeException(StatusCode.INTERNAL_SERVER_ERROR, why);
+        }
     }
 
     public Map<String, Method> getActions() {

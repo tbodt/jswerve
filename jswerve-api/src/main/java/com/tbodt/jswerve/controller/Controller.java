@@ -17,16 +17,22 @@
 package com.tbodt.jswerve.controller;
 
 import com.tbodt.jswerve.Content;
+import java.util.Map;
 
 /**
  *
  * @author Theodore Dubois
  */
 public abstract class Controller {
+    private Map<String, String> parameters;
     private Content responseData;
 
+    public void init(Map<String, String> parameters) {
+        this.parameters = parameters;
+    }
+    
     protected final String getParam(String param) {
-        return null
+        return parameters.get(param);
     }
     
     public final Content getResponseData() {

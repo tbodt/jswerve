@@ -16,7 +16,8 @@ import java.io.StringWriter;
  */
 public class NameController extends Controller {
     public void displayName() {
-        PrintWriter out = new PrintWriter(new StringWriter(), true);
+        StringWriter sw = new StringWriter();
+        PrintWriter out = new PrintWriter(sw, true);
         out.println("<!DOCTYPE html>");
         out.println("<html>");
         out.println("<head>");
@@ -26,6 +27,6 @@ public class NameController extends Controller {
         out.println("Hello world! Your name is " + getParam("name") + ".");
         out.println("</body>");
         out.println("</html>");
-        setResponseData(new Content(out.toString().getBytes(), "text/html"));
+        setResponseData(new Content(sw.toString().getBytes(), "text/html"));
     }
 }

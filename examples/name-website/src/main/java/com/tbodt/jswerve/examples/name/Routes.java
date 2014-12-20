@@ -25,7 +25,7 @@ import com.tbodt.jswerve.RoutesDefiner;
 public class Routes extends RoutesDefiner {
     public Routes() {
         draw(
-                get("/:name").to("name", "display")
+                get("/:name").to("name", "displayName")
         );
     }
 }

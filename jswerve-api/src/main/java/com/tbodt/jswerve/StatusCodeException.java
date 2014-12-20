@@ -28,7 +28,7 @@ public class StatusCodeException extends RuntimeException {
         this.code = code;
     }
 
-    public StatusCodeException(StatusCode code, Exception e) {
+    public StatusCodeException(StatusCode code, Throwable e) {
         super(code.toString(), e);
         this.code = code;
     }

@@ -14,7 +14,7 @@
  * the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-package com.tbodt.jswerve.server;
+package com.tbodt.jswerve;
 
 /**
  * An exception indicating that something completely unexpected and a bug report should be filed.
@@ -23,10 +23,19 @@ package com.tbodt.jswerve.server;
  */
 public class WTFException extends RuntimeException {
     /**
-     * Constructs an instance of <code>WTFException</code> with the specified detail message.
+     * Constructs an instance of {@code WTFException} with the specified detail message.
      * @param msg what the f*** happened
      */
     public WTFException(String msg) {
         super(msg);
+    }
+    
+    /**
+     * Constructs an instance of {@code WTFException} with the specified detail message and cause.
+     * @param msg what the f*** happened
+     * @param cause why the f*** it happened
+     */
+    public WTFException(String msg, Throwable cause) {
+        super(msg, cause);
     }
 }

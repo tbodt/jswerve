@@ -20,6 +20,7 @@ import com.tbodt.jswerve.BadRequestException;
 import com.tbodt.jswerve.Headers;
 import com.tbodt.jswerve.HttpMethod;
 import com.tbodt.jswerve.StatusCodeException;
+import com.tbodt.jswerve.WTFException;
 import java.io.UnsupportedEncodingException;
 import java.net.*;
 import java.nio.ByteBuffer;
@@ -37,6 +38,7 @@ public final class Request {
     private final String httpVersion;
     private final Headers headers;
 
+    private Map<String, String> parameters;
     private Map<String, String> queryParameters;
     private Map<String, String> pathParameters;
 
@@ -264,9 +266,23 @@ public final class Request {
         return headers;
     }
 
+    public Map<String, String> getParameters() {
+        if (parameters == null) {
+            Map<String, String> parametersMap = new HashMap<String, String>();
+            parametersMap.putAll(getQueryParameters());
+            parametersMap.putAll(getPathParameters());
+            parameters = Collections.unmodifiableMap(parametersMap);
+        }
+        return parameters;
+
+    }
+
     public Map<String, String> getQueryParameters() {
         if (queryParameters == null)
-            queryParameters = decodeParameters(uri.getQuery());
+            if (uri.getQuery() != null)
+                queryParameters = decodeParameters(uri.getQuery());
+            else
+                queryParameters = Collections.emptyMap();
         return queryParameters;
     }
 
@@ -285,7 +301,7 @@ public final class Request {
                     continue;
                 map.put(key, value);
             }
-            return map;
+            return Collections.unmodifiableMap(map);
         } catch (UnsupportedEncodingException ex) {
             throw new WTFException("I thought the UTF-8 encoding existed!");
         }
@@ -296,6 +312,6 @@ public final class Request {
     }
 
     public void setPathParameters(Map<String, String> pathParameters) {
-        this.pathParameters = pathParameters;
+        this.pathParameters = Collections.unmodifiableMap(pathParameters);
     }
 }
