@@ -16,32 +16,18 @@
  */
 package com.tbodt.jswerve;
 
-import java.nio.ByteBuffer;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *
  * @author Theodore Dubois
  */
-public final class Content {
-    private final ByteBuffer data;
-    private final String mimeType;
-    
-    public static Content EMPTY = new Content(new byte[0], null);
-
-    public Content(byte[] data, String mimeType) {
-        this(ByteBuffer.wrap(data), mimeType);
-    }
-    
-    public Content(ByteBuffer data, String mimeType) {
-        this.data = data;
-        this.mimeType = mimeType;
-    }
-
-    public ByteBuffer getData() {
-        return data.asReadOnlyBuffer();
-    }
-
-    public String getContentType() {
-        return mimeType;
+public class ContentTest {
+    @Test
+    public void testEmptyContent() {
+        Content empty = Content.EMPTY;
+        assertEquals(0, empty.getData().remaining());
+        assertNull(empty.getContentType());
     }
 }
