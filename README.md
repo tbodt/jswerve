@@ -1,7 +1,7 @@
 JSwerve
 =======
 [![Build Status](https://travis-ci.org/tbodt/jswerve.svg?branch=master)](https://travis-ci.org/tbodt/jswerve)
-[![codecov.io](https://codecov.io/github/tbodt/jswerve/coverage.svg?branch=master)](https://codecov.io/github/tbodt/jswerve?branch=master)
+[![Coverage Status](https://img.shields.io/coveralls/tbodt/jswerve.svg)](https://coveralls.io/r/tbodt/jswerve?branch=master)
 
 JSwerve is, or rather will be, a Java application server that proves it is possible to write cool websites in Java.
 
