@@ -5,6 +5,8 @@ jdk:
   - oraclejdk7
   - oraclejdk8
 
+install: true
+script: mvn test
 after_success:
   - mvn clean cobertura:cobertura coveralls:report
 
