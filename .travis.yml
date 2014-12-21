@@ -5,7 +5,5 @@ jdk:
     - oraclejdk7
     - oraclejdk8
 
-before_install:
-  sudo pip install codecov
 after_success:
-  codecov
+  - mvn clean cobertura:cobertura coveralls:report
