@@ -2,3 +2,4 @@ target/
 *~
 /.c9/
 /.codio
+.DS_Store
