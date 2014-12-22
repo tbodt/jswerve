@@ -27,7 +27,4 @@ public final class Inflections {
     public static String camelize(String term) {
         return StringUtils.replaceChars(WordUtils.capitalizeFully(term, '-', '_'), "-_", "");
     }
-
-    private Inflections() {
-    }
 }
