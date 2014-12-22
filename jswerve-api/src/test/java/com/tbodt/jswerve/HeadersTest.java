@@ -16,6 +16,8 @@
  */
 package com.tbodt.jswerve;
 
+import java.util.HashMap;
+import java.util.Map;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -30,13 +32,13 @@ public class HeadersTest {
         builder.setHeader("Content-Type", "text/html");
         Headers headers = builder.build();
         assertEquals("text/html", headers.get("Content-Type"));
-        
+
         builder = new Headers.Builder(headers);
         builder.setHeader("Connection", "close");
         headers = builder.build();
         assertEquals("text/html", headers.get("Content-Type"));
         assertEquals("close", headers.get("Connection"));
-        
+
         builder = new Headers.Builder();
         builder.setHeaders(headers);
         builder.setHeader("Content-Length", "more than the atoms in the observable universe");
@@ -44,5 +46,39 @@ public class HeadersTest {
         assertEquals("text/html", headers.get("Content-Type"));
         assertEquals("close", headers.get("Connection"));
         assertEquals("more than the atoms in the observable universe", headers.get("Content-Length"));
-    }    
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void testBuildingFailure() {
+        Headers.Builder builder = new Headers.Builder();
+        builder.build();
+        builder.build();
+    }
+
+    @Test
+    public void testUsing() {
+        Headers.Builder builder = new Headers.Builder();
+        builder.setHeader("Connection", "close");
+        builder.setHeader("Content-Type", "text/html");
+        Headers headers = builder.build();
+
+        assertTrue(headers.contains("Connection"));
+        assertTrue(headers.contains("Content-Type"));
+
+        assertEquals("close", headers.get("Connection"));
+        assertEquals("text/html", headers.get("Content-Type"));
+
+        for (Map.Entry<String, String> header : headers)
+            if (header.getKey().equalsIgnoreCase("Connection"))
+                assertEquals("close", header.getValue());
+            else if (header.getKey().equalsIgnoreCase("Content-Type"))
+                assertEquals("text/html", header.getValue());
+            else
+                fail("Header key I didn't put there");
+        
+        Map<String, String> headerValues = new HashMap<String, String>();
+        headerValues.put("connection", "close");
+        headerValues.put("content-type", "text/html");
+        assertEquals(headerValues, headers.asMap());
+    }
 }
