@@ -16,18 +16,22 @@
  */
 package com.tbodt.jswerve.utils;
 
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.text.WordUtils;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *
  * @author Theodore Dubois
  */
-public final class Inflections {
-    public static String camelize(String term) {
-        return StringUtils.replaceChars(WordUtils.capitalizeFully(term, '-', '_'), "-_", "");
-    }
-
-    private Inflections() {
+public class InflectionsTest {
+    @Test
+    public void testCamelize() {
+        assertEquals("Camel", Inflections.camelize("camel"));
+        assertEquals("Camel", Inflections.camelize("Camel"));
+        assertEquals("Camel", Inflections.camelize("cAMEl"));
+        assertEquals("CamelCase", Inflections.camelize("camel-case"));
+        assertEquals("CamelCase", Inflections.camelize("caMel-casE"));
+        assertEquals("CamelCase", Inflections.camelize("camel_case"));
+        assertEquals("CamelCase", Inflections.camelize("caMel_casE"));
     }
 }
