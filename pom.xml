@@ -10,7 +10,6 @@
     <modules>
         <module>jswerve-server</module>
         <module>distribution</module>
-        <module>jswerve-console</module>
         <module>jswerve-maven-plugin</module>
         <module>examples</module>
         <module>jswerve-api</module>
