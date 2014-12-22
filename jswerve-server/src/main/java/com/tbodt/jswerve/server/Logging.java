@@ -16,7 +16,6 @@
  */
 package com.tbodt.jswerve.server;
 
-import com.tbodt.jswerve.Constants;
 import java.io.*;
 import java.util.logging.*;
 

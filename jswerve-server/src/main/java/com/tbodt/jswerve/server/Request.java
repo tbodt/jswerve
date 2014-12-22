@@ -16,7 +16,6 @@
  */
 package com.tbodt.jswerve.server;
 
-import com.tbodt.jswerve.BadRequestException;
 import com.tbodt.jswerve.Headers;
 import com.tbodt.jswerve.HttpMethod;
 import com.tbodt.jswerve.StatusCodeException;
