@@ -53,7 +53,7 @@ public class Website {
         Set<Class<?>> classes = new HashSet<Class<?>>();
         
         if (archive.isDirectory())
-            spiderDirectory(archive, classes);
+            spiderDirectory(archive, "", classes);
         else {
             ZipFile file = new ZipFile(archive);
             for (ZipEntry entry : Collections.list(file.entries()))
@@ -68,12 +68,18 @@ public class Website {
         }
     }
 
-    private void spiderDirectory(File archive, Set<Class<?>> classes) {
-        for (File file : archive.listFiles())
-            if (file.isDirectory())
-                spiderDirectory(archive, classes);
+    private void spiderDirectory(File root, String path, Set<Class<?>> classes) {
+        for (File file : new File(root, path).listFiles()) {
+            String relativePath;
+            if (path.equals(""))
+                relativePath = file.getName();
             else
-                addClass(classes, file.getName());
+                relativePath = path + File.separator + file.getName();
+            if (file.isDirectory())
+                spiderDirectory(root, relativePath, classes);
+            else
+                addClass(classes, relativePath);
+        }
     }
 
     private void addClass(Set<Class<?>> classes, String name) {

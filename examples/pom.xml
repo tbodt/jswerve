@@ -14,6 +14,7 @@
     <modules>
         <module>hello-website</module>
         <module>name-website</module>
+        <module>empty-example</module>
     </modules>
     
     <dependencyManagement>
