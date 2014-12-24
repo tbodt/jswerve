@@ -35,6 +35,17 @@
                     <artifactId>jswerve-maven-plugin</artifactId>
                     <version>${project.version}</version>
                 </plugin>
+                <!-- I haven't figured out testing for websites, so skip code coverage -->
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>cobertura-maven-plugin</artifactId>
+                    <version>2.6</version>
+                    <configuration>
+                        <format>xml</format>
+                        <maxmem>256m</maxmem>
+                        <aggregate>true</aggregate>
+                    </configuration>
+                </plugin>
             </plugins>
         </pluginManagement>
     </build>
