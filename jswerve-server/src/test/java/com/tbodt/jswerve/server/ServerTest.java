@@ -16,8 +16,8 @@
  */
 package com.tbodt.jswerve.server;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
+import java.net.URL;
 import org.apache.commons.lang3.SystemUtils;
 import static org.junit.Assert.*;
 import org.junit.Test;
@@ -34,6 +34,15 @@ public class ServerTest {
                 "examples/empty-example/target/classes/"
         )), new HttpProtocol());
         server.start();
+        
+        URL url = new URL("http://localhost:8888/");
+        try {
+            url.openStream();
+            fail("URL was not a 404");
+        } catch (FileNotFoundException e) {
+        }
         assertTrue(true);
+        
+        server.stop();
     }
 }
