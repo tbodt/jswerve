@@ -23,15 +23,12 @@ import java.util.*;
  * @author Theodore Dubois
  */
 public abstract class RoutesDefiner {
-    private Route[] routes;
+    private final Route[] routes;
 
-    protected final void draw(RouteInfo... routesInfo) {
-        if (routes == null) {
-            routes = new Route[routesInfo.length];
-            for (int i = 0; i < routesInfo.length; i++)
-                routes[i] = routesInfo[i].build();
-        } else
-            throw new IllegalStateException("draw already called");
+    protected RoutesDefiner(RouteInfo... routesInfo) {
+        routes = new Route[routesInfo.length];
+        for (int i = 0; i < routesInfo.length; i++)
+            routes[i] = routesInfo[i].build();
     }
 
     public static class RouteInfo {
@@ -40,7 +37,6 @@ public abstract class RoutesDefiner {
         private String controller;
         private String action;
         private boolean built = false;
-
 
         public RouteInfo(String pattern) {
             this.pattern = Route.pathComponents(pattern);
@@ -73,11 +69,11 @@ public abstract class RoutesDefiner {
         }
     }
 
-    protected final RouteInfo match(String path) {
+    protected static final RouteInfo match(String path) {
         return new RouteInfo(path);
     }
 
-    protected final RouteInfo get(String path) {
+    protected static final RouteInfo get(String path) {
         return new RouteInfo(path).via(HttpMethod.GET);
     }
 

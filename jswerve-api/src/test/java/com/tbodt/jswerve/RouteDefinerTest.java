@@ -29,7 +29,7 @@ public class RouteDefinerTest {
     public void testNoRoutes() {
         class NoRoutes extends RoutesDefiner {
             public NoRoutes() {
-                draw();
+                super();
             }
         }
         assertEquals(new NoRoutes().getRoutes(), Collections.emptyList());
@@ -39,7 +39,7 @@ public class RouteDefinerTest {
     public void testGet() {
         class GetRoutes extends RoutesDefiner {
             public GetRoutes() {
-                draw(
+                super(
                         get("/wonderful/path").to("controller", "action")
                 );
             }
@@ -58,7 +58,7 @@ public class RouteDefinerTest {
     public void testMatch() {
         class MatchRoutes extends RoutesDefiner {
             public MatchRoutes() {
-                draw(
+                super(
                         match("/wonderful/path").via(HttpMethod.GET).to("controller", "action")
                 );
             }
