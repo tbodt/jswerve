@@ -30,15 +30,9 @@ import java.util.zip.ZipFile;
  * @author Theodore Dubois
  */
 public class Website {
-    private static final File SITES = new File(Constants.HOME, "sites");
-
     private ClassLoader loader;
     private RoutingTable routes;
     private ControllersInfo controllers;
-
-    public Website(String name) throws IOException {
-        this(new File(SITES, name + ".jar"));
-    }
 
     public Website(File file) throws IOException {
         this(file, new URLClassLoader(new URL[] {file.toURI().toURL()}));
