@@ -16,33 +16,61 @@
  */
 package com.tbodt.jswerve.server;
 
+import com.tbodt.jswerve.util.Expectable;
 import java.io.*;
-import java.net.URL;
+import java.net.*;
 import org.apache.commons.lang3.SystemUtils;
+import org.junit.*;
 import static org.junit.Assert.*;
-import org.junit.Test;
 
 /**
  *
  * @author Theodore Dubois
  */
 public class ServerTest {
+    private static Server server;
+
     @Test
-    public void testEverything() throws IOException {
-        Server server = new Server(new Website(new File(
-                SystemUtils.getUserDir().getParentFile(), // the root directory for Maven
-                "examples/empty-example/target/classes/"
-        )), new HttpProtocol());
-        server.start();
-        
+    public void testBasics() throws IOException {
+        Expectable ex = new Expectable(new Socket("localhost", 8888));
+        ex.writeln("GET / HTTP/1.1\n"
+                + "Host: localhost\n");
+        ex.expect("HTTP/1.1 404");
+        ex.close();
+    }
+
+    @Test
+    public void testDiscontinuousRequest() throws IOException {
+        Expectable ex = new Expectable(new Socket("localhost", 8888));
+        ex.writeln("GET / HTTP/1.1");
+        ex.writeln("Host: localhost");
+        ex.writeln();
+        ex.expect("HTTP/1.1 404");
+        ex.close();
+    }
+
+    @Test
+    public void testWithHttpUrlConnection() throws IOException {
         URL url = new URL("http://localhost:8888/");
         try {
             url.openStream();
             fail("URL was not a 404");
         } catch (FileNotFoundException e) {
         }
-        assertTrue(true);
-        
-        server.stop();
+    }
+
+    @BeforeClass
+    public static void startServer() throws IOException {
+        server = new Server(new Website(new File(
+                SystemUtils.getUserDir().getParentFile(), // the root directory for Maven
+                "examples/empty-example/target/classes/"
+        )), new HttpProtocol());
+        server.start();
+    }
+
+    @AfterClass
+    public static void stopServer() {
+        if (server != null)
+            server.stop();
     }
 }
