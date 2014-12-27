@@ -45,7 +45,24 @@ public class ServerTest {
         ex.writeln("GET / HTTP/1.1");
         ex.close();
     }
-    
+
+    @Test
+    public void testBadRequests() throws IOException {
+        Expectable ex = new Expectable(new Socket("localhost", 8888));
+        ex.writeln("GET /");
+        ex.writeln("Host: localhost");
+        ex.writeln();
+        ex.expect("HTTP/1.1 400");
+        ex.close();
+        
+        ex = new Expectable(new Socket("localhost", 8888));
+        ex.writeln("GET / HTTP/1.1");
+        ex.writeln("Host is localhost");
+        ex.writeln();
+        ex.expect("HTTP/1.1 400");
+        ex.close();
+    }
+
     @Test
     public void testDiscontinuousRequest() throws IOException {
         Expectable ex = new Expectable(new Socket("localhost", 8888));
