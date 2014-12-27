@@ -40,6 +40,13 @@ public class ServerTest {
     }
 
     @Test
+    public void testAbruptClose() throws IOException {
+        Expectable ex = new Expectable(new Socket("localhost", 8888));
+        ex.writeln("GET / HTTP/1.1");
+        ex.close();
+    }
+    
+    @Test
     public void testDiscontinuousRequest() throws IOException {
         Expectable ex = new Expectable(new Socket("localhost", 8888));
         ex.writeln("GET / HTTP/1.1");
