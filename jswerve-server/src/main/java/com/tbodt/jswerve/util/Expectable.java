@@ -68,6 +68,7 @@ public final class Expectable {
     
     public void writeln() throws IOException {
         out.write("\n");
+        out.flush();
     }
     
 
