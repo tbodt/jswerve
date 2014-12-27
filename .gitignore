@@ -3,3 +3,5 @@ target/
 /.c9/
 /.codio
 .DS_Store
+hs_err_pid*
+replay_pid*
