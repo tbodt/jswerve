@@ -65,6 +65,28 @@ public class ExpectableTest {
         Writer expectOut = new StringWriter();
         Expectable ex = new Expectable(expectIn, expectOut);
         
-        ex.expect("test line\nanother test line\nthis doesn't exist");
+        ex.expect("test line");
+        ex.expect("another test");
+        ex.expect("this doesn't exist");
+    }
+    
+    @Test(expected = UnexpectedDataException.class)
+    public void testUnexpectingExact() throws IOException {
+        Reader expectIn = new StringReader("test line\nanother test line");
+        Writer expectOut = new StringWriter();
+        Expectable ex = new Expectable(expectIn, expectOut);
+        
+        ex.expectExact("this is not really there");
+    }
+    
+    @Test(expected = UnexpectedDataException.class)
+    public void testUnexpectingExactEOF() throws IOException {
+        Reader expectIn = new StringReader("test line\nanother test line");
+        Writer expectOut = new StringWriter();
+        Expectable ex = new Expectable(expectIn, expectOut);
+        
+        ex.expectExact("test line");
+        ex.expectExact("another test line");
+        ex.expectExact("this doesn't exist");
     }
 }
