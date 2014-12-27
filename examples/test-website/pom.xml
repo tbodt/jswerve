@@ -7,7 +7,7 @@
         <version>0.1-SNAPSHOT</version>
     </parent>
     <groupId>com.tbodt.jswerve.examples</groupId>
-    <artifactId>empty-example</artifactId>
+    <artifactId>test-website</artifactId>
     <packaging>jar</packaging>
     <dependencies>
         <dependency>
@@ -17,4 +17,5 @@
             <type>jar</type>
         </dependency>
     </dependencies>
+    <name>test-website</name>
 </project>

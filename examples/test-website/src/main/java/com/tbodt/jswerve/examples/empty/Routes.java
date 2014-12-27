@@ -12,5 +12,9 @@ import com.tbodt.jswerve.RoutesDefiner;
  * @author Theodore Dubois
  */
 public class Routes extends RoutesDefiner {
-
+    public Routes() {
+        super(
+                get("/").to("salutation", "hello")
+        );
+    }
 }

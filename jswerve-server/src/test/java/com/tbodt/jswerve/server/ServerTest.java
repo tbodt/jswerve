@@ -33,30 +33,42 @@ public class ServerTest {
     @Test
     public void testBasics() throws IOException {
         Expectable ex = new Expectable(new Socket("localhost", 8888));
-        ex.writeln("GET / HTTP/1.1\n"
+        ex.writeln("GET /404 HTTP/1.1\n"
                 + "Host: localhost\n");
         ex.expect("HTTP/1.1 404");
         ex.close();
     }
 
     @Test
+    public void testSuccess() throws IOException {
+        Expectable ex = new Expectable(new Socket("localhost", 8888));
+        ex.writeln("GET / HTTP/1.1\n"
+                + "Host: localhost\n");
+        ex.expect("HTTP/1.1 200");
+        ex.expect("");
+        ex.expectExact("");
+        ex.expectExact("Hello World!");
+        ex.close();
+    }
+
+    @Test
     public void testAbruptClose() throws IOException {
         Expectable ex = new Expectable(new Socket("localhost", 8888));
-        ex.writeln("GET / HTTP/1.1");
+        ex.writeln("GET /404 HTTP/1.1");
         ex.close();
     }
 
     @Test
     public void testBadRequests() throws IOException {
         Expectable ex = new Expectable(new Socket("localhost", 8888));
-        ex.writeln("GET /");
+        ex.writeln("GET /404");
         ex.writeln("Host: localhost");
         ex.writeln();
         ex.expect("HTTP/1.1 400");
         ex.close();
-        
+
         ex = new Expectable(new Socket("localhost", 8888));
-        ex.writeln("GET / HTTP/1.1");
+        ex.writeln("GET /404 HTTP/1.1");
         ex.writeln("Host is localhost");
         ex.writeln();
         ex.expect("HTTP/1.1 400");
@@ -66,7 +78,7 @@ public class ServerTest {
     @Test
     public void testDiscontinuousRequest() throws IOException {
         Expectable ex = new Expectable(new Socket("localhost", 8888));
-        ex.writeln("GET / HTTP/1.1");
+        ex.writeln("GET /404 HTTP/1.1");
         ex.writeln("Host: localhost");
         ex.writeln();
         ex.expect("HTTP/1.1 404");
@@ -75,7 +87,7 @@ public class ServerTest {
 
     @Test
     public void testWithHttpUrlConnection() throws IOException {
-        URL url = new URL("http://localhost:8888/");
+        URL url = new URL("http://localhost:8888/404");
         try {
             url.openStream();
             fail("URL was not a 404");
@@ -87,7 +99,7 @@ public class ServerTest {
     public static void startServer() throws IOException {
         server = new Server(new Website(new File(
                 SystemUtils.getUserDir().getParentFile(), // the root directory for Maven
-                "examples/empty-example/target/classes/"
+                "examples/test-website/target/classes/"
         )), new HttpProtocol());
         server.start();
     }
