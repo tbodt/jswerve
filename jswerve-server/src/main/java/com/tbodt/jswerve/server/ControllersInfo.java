@@ -17,7 +17,7 @@
 package com.tbodt.jswerve.server;
 
 import com.tbodt.jswerve.controller.Controller;
-import com.tbodt.jswerve.utils.Inflections;
+import com.tbodt.jswerve.util.Inflections;
 import java.util.*;
 import org.apache.commons.lang3.StringUtils;
 

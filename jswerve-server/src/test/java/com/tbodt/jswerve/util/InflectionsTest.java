@@ -14,23 +14,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.tbodt.jswerve.utils;
+package com.tbodt.jswerve.util;
 
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.text.WordUtils;
+import com.tbodt.jswerve.util.Inflections;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *
  * @author Theodore Dubois
  */
-public final class Inflections {
-    public static String camelize(String term) {
-        return StringUtils.replaceChars(WordUtils.capitalizeFully(term, '-', '_'), "-_", "");
-    }
-
-    private Inflections() {
-    }
-    static {
-        new Inflections(); // to increase code coverage
+public class InflectionsTest {
+    @Test
+    public void testCamelize() {
+        assertEquals("Camel", Inflections.camelize("camel"));
+        assertEquals("Camel", Inflections.camelize("Camel"));
+        assertEquals("Camel", Inflections.camelize("cAMEl"));
+        assertEquals("CamelCase", Inflections.camelize("camel-case"));
+        assertEquals("CamelCase", Inflections.camelize("caMel-casE"));
+        assertEquals("CamelCase", Inflections.camelize("camel_case"));
+        assertEquals("CamelCase", Inflections.camelize("caMel_casE"));
     }
 }
