@@ -37,7 +37,17 @@ public class ExpectableTest {
         assertEquals("test stuff\nmore test stuff", expectOut.toString());
 
         ex.expect("test line");
-        ex.expect("another test line");
+        ex.expect("another test");
+    }
+    
+    @Test
+    public void testExpectingExact() throws IOException {
+        Reader expectIn = new StringReader("test line\nanother test line");
+        Writer expectOut = new StringWriter();
+        Expectable ex = new Expectable(expectIn, expectOut);
+
+        ex.expectExact("test line");
+        ex.expectExact("another test line");
     }
 
     @Test(expected = UnexpectedDataException.class)
@@ -47,5 +57,14 @@ public class ExpectableTest {
         Expectable ex = new Expectable(expectIn, expectOut);
         
         ex.expect("this is not really there");
+    }
+    
+    @Test(expected = UnexpectedDataException.class)
+    public void testUnexpectingEOF() throws IOException {
+        Reader expectIn = new StringReader("test line\nanother test line");
+        Writer expectOut = new StringWriter();
+        Expectable ex = new Expectable(expectIn, expectOut);
+        
+        ex.expect("test line\nanother test line\nthis doesn't exist");
     }
 }
