@@ -7,7 +7,7 @@ jdk:
 
 install: true
 script: mvn cobertura:cobertura
-after-success: mvn coveralls:report
+after_success: mvn coveralls:report
 
 sudo: false
 cache:
