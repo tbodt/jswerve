@@ -16,6 +16,7 @@
  */
 package com.tbodt.jswerve;
 
+import com.tbodt.jswerve.controller.Controller;
 import java.util.*;
 import static org.junit.Assert.*;
 import org.junit.Test;
@@ -40,7 +41,7 @@ public class RouteDefinerTest {
         class GetRoutes extends RoutesDefiner {
             public GetRoutes() {
                 super(
-                        get("/wonderful/path").to("controller", "action")
+                        get("/wonderful/path").to(Controller.class, "action")
                 );
             }
         }
@@ -50,7 +51,7 @@ public class RouteDefinerTest {
         assertEquals(EnumSet.of(HttpMethod.GET), route.getMethods());
         System.out.println(Arrays.toString(route.getPattern()));
         assertArrayEquals(new String[] {"wonderful", "path"}, route.getPattern());
-        assertEquals("controller", route.getController());
+        assertEquals(Controller.class, route.getController());
         assertEquals("action", route.getAction());
     }
     
@@ -59,7 +60,7 @@ public class RouteDefinerTest {
         class MatchRoutes extends RoutesDefiner {
             public MatchRoutes() {
                 super(
-                        match("/wonderful/path").via(HttpMethod.GET).to("controller", "action")
+                        match("/wonderful/path").via(HttpMethod.GET).to(Controller.class, "action")
                 );
             }
         }
@@ -68,7 +69,7 @@ public class RouteDefinerTest {
         Route route = routes.get(0);
         assertEquals(EnumSet.of(HttpMethod.GET), route.getMethods());
         assertArrayEquals(new String[] {"wonderful", "path"}, route.getPattern());
-        assertEquals("controller", route.getController());
+        assertEquals(Controller.class, route.getController());
         assertEquals("action", route.getAction());
     }
 }

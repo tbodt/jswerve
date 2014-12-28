@@ -14,7 +14,7 @@ import com.tbodt.jswerve.RoutesDefiner;
 public class Routes extends RoutesDefiner {
     public Routes() {
         super(
-                get("/").to("salutation", "hello")
+                get("/").to(SalutationController.class, "hello")
         );
     }
 }

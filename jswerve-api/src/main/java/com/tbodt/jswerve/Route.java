@@ -16,6 +16,7 @@
  */
 package com.tbodt.jswerve;
 
+import com.tbodt.jswerve.controller.Controller;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -27,10 +28,10 @@ import java.util.regex.Pattern;
 public final class Route {
     private final String[] pattern;
     private final EnumSet<HttpMethod> methods;
-    private final String controller;
+    private final Class<? extends Controller> controller;
     private final String action;
 
-    Route(String[] pattern, EnumSet<HttpMethod> methods, String controller, String action) {
+    Route(String[] pattern, EnumSet<HttpMethod> methods, Class<? extends Controller> controller, String action) {
         this.pattern = pattern;
         this.methods = methods;
         this.controller = controller;
@@ -45,7 +46,7 @@ public final class Route {
         return methods;
     }
 
-    public String getController() {
+    public Class<? extends Controller> getController() {
         return controller;
     }
 

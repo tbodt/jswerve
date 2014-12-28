@@ -30,8 +30,16 @@ import java.util.*;
 public final class ControllerInfo {
     private final Class<? extends Controller> controllerClass;
     private final Map<String, Method> actions;
+    
+    private static final Map<Class<? extends Controller>, ControllerInfo> cache = new HashMap<Class<? extends Controller>, ControllerInfo>();
 
-    public ControllerInfo(Class<? extends Controller> controllerClass) {
+    public static ControllerInfo get(Class<? extends Controller> controllerClass) {
+        if (!cache.containsKey(controllerClass))
+            cache.put(controllerClass, new ControllerInfo(controllerClass));
+        return cache.get(controllerClass);
+    }
+    
+    private ControllerInfo(Class<? extends Controller> controllerClass) {
         this.controllerClass = controllerClass;
         Map<String, Method> actionsMap = new HashMap<String, Method>();
         for (Method action : controllerClass.getMethods())
@@ -54,6 +62,8 @@ public final class ControllerInfo {
         if (!controllerClass.isInstance(controller))
             throw new IllegalArgumentException("controller is not the right class");
         try {
+            if (!actions.containsKey(action))
+                throw new WTFException("action " + action + " does't exist!");
             actions.get(action).invoke(controller);
         } catch (IllegalAccessException ex) {
             throw new WTFException("controller action is not public!", ex);
@@ -66,10 +76,6 @@ public final class ControllerInfo {
             else
                 throw new StatusCodeException(StatusCode.INTERNAL_SERVER_ERROR, why);
         }
-    }
-
-    public Map<String, Method> getActions() {
-        return actions;
     }
 
     public Class<? extends Controller> getControllerClass() {

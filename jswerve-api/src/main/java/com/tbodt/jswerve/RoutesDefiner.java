@@ -16,6 +16,7 @@
  */
 package com.tbodt.jswerve;
 
+import com.tbodt.jswerve.controller.Controller;
 import java.util.*;
 
 /**
@@ -34,7 +35,7 @@ public abstract class RoutesDefiner {
     public static class RouteInfo {
         private final String[] pattern;
         private EnumSet<HttpMethod> methods;
-        private String controller;
+        private Class<? extends Controller> controller;
         private String action;
         private boolean built = false;
 
@@ -42,7 +43,7 @@ public abstract class RoutesDefiner {
             this.pattern = Route.pathComponents(pattern);
         }
 
-        public RouteInfo to(String controller, String action) {
+        public RouteInfo to(Class<? extends Controller> controller, String action) {
             if (this.controller != null || this.action != null)
                 throw new IllegalStateException("to has already been specified");
             this.controller = controller;

@@ -32,7 +32,6 @@ import java.util.zip.ZipFile;
 public class Website {
     private ClassLoader loader;
     private RoutingTable routes;
-    private ControllersInfo controllers;
 
     public Website(File file) throws IOException {
         this(file, new URLClassLoader(new URL[] {file.toURI().toURL()}));
@@ -56,7 +55,6 @@ public class Website {
         
         try {
             this.routes = RoutingTable.extract(classes);
-            this.controllers = new ControllersInfo(classes);
         } catch (InvalidWebsiteException ex) {
             throw new IllegalArgumentException("error in website", ex);
         }
@@ -88,7 +86,7 @@ public class Website {
     public Response service(Request request) {
         try {
             Route route = routes.route(request);
-            ControllerInfo controllerInfo = controllers.getControllerInfo(route.getController());
+            ControllerInfo controllerInfo = ControllerInfo.get(route.getController());
             Controller controller = controllerInfo.instantiate();
             controller.init(request.getParameters());
             controllerInfo.invoke(controller, route.getAction());
