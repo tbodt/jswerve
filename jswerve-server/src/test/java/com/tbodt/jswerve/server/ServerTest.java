@@ -52,6 +52,15 @@ public class ServerTest {
     }
 
     @Test
+    public void testNoHost() throws IOException {
+        Expectable ex = new Expectable(new Socket("localhost", 8888));
+        ex.writeln("GET /404 HTTP/1.1");
+        ex.writeln();
+        ex.expect("HTTP/1.1 404");
+        ex.close();
+    }
+
+    @Test
     public void testAbruptClose() throws IOException {
         Expectable ex = new Expectable(new Socket("localhost", 8888));
         ex.writeln("GET /404 HTTP/1.1");
@@ -73,11 +82,40 @@ public class ServerTest {
         ex.writeln();
         ex.expect("HTTP/1.1 400");
         ex.close();
+
+        ex = new Expectable(new Socket("localhost", 8888));
+        ex.write("GET /404 HTTP/1.1\r");
+        ex.writeln("Host: localhost");
+        ex.writeln();
+        ex.expect("HTTP/1.1 400");
+        ex.close();
+
+        ex = new Expectable(new Socket("localhost", 8888));
+        ex.write("GET /404 HTTP/1.1\rx");
+        ex.writeln("Host: localhost");
+        ex.writeln();
+        ex.expect("HTTP/1.1 400");
+        ex.close();
     }
 
     @Test
     public void testDiscontinuousRequest() throws IOException {
         Expectable ex = new Expectable(new Socket("localhost", 8888));
+        ex.writeln("GET /404 HTTP/1.1");
+        ex.writeln("Host: localhost");
+        ex.writeln();
+        ex.expect("HTTP/1.1 404");
+        ex.close();
+
+        ex = new Expectable(new Socket("localhost", 8888));
+        ex.write("GET /404 HTTP/1.1\r");
+        ex.write("\n");
+        ex.writeln("Host: localhost");
+        ex.writeln();
+        ex.expect("HTTP/1.1 404");
+        ex.close();
+
+        ex = new Expectable(new Socket("localhost", 8888));
         ex.writeln("GET /404 HTTP/1.1");
         ex.writeln("Host: localhost");
         ex.writeln();
