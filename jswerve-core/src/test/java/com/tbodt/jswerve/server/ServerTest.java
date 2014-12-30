@@ -138,7 +138,7 @@ public class ServerTest {
         server = new Server(new Website(new File(
                 SystemUtils.getUserDir().getParentFile(), // the root directory for Maven
                 "examples/test-website/target/classes/"
-        )), new HttpProtocol());
+        )));
         server.start();
     }
 

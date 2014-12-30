@@ -46,7 +46,7 @@ public class Server implements Runnable {
     });
     private final Selector selector;
 
-    public Server(Website website, Protocol... protocols) throws IOException {
+    public Server(Website website) throws IOException {
         this.website = website;
         selector = Selector.open();
 

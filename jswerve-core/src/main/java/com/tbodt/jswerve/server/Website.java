@@ -33,18 +33,22 @@ public class Website {
     private ClassLoader loader;
     private RoutingTable routes;
 
-    public Website(File file) throws IOException {
+    public Website(File file) throws IOException, InvalidWebsiteException {
         this(file, new URLClassLoader(new URL[] {file.toURI().toURL()}));
     }
 
-    public Website(File archive, ClassLoader loader) throws IOException {
+    public Website(File archive, ClassLoader loader) throws IOException, InvalidWebsiteException {
         this.loader = loader;
         init(archive);
     }
 
-    private void init(File archive) throws IOException {
+    public Website(Collection<Class<?>> classes) throws InvalidWebsiteException {
+        init(classes);
+    }
+
+    private void init(File archive) throws IOException, InvalidWebsiteException {
         Set<Class<?>> classes = new HashSet<Class<?>>();
-        
+
         if (archive.isDirectory())
             spiderDirectory(archive, "", classes);
         else {
@@ -52,12 +56,7 @@ public class Website {
             for (ZipEntry entry : Collections.list(file.entries()))
                 addClass(classes, entry.getName());
         }
-        
-        try {
-            this.routes = RoutingTable.extract(classes);
-        } catch (InvalidWebsiteException ex) {
-            throw new IllegalArgumentException("error in website", ex);
-        }
+        init(classes);
     }
 
     private void spiderDirectory(File root, String path, Set<Class<?>> classes) {
@@ -81,6 +80,10 @@ public class Website {
         } catch (ClassNotFoundException ex) {
             throw new WTFException("A class that is in the archive was not found in the archive!! File a bug report!!");
         }
+    }
+
+    private void init(Collection<Class<?>> classes) throws InvalidWebsiteException {
+        this.routes = RoutingTable.extract(classes);
     }
 
     public Response service(Request request) {
