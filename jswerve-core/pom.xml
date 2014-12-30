@@ -66,12 +66,5 @@
         </dependency>
         
         <!-- to make this build before us -->
-        <dependency>
-            <groupId>com.tbodt.jswerve.examples</groupId>
-            <artifactId>test-website</artifactId>
-            <version>0.1-SNAPSHOT</version>
-            <type>pom</type>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 </project>

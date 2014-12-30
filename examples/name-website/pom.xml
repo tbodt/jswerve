@@ -9,12 +9,17 @@
     </parent>
     
     <artifactId>name-website</artifactId>
-    <packaging>jar</packaging>
+    <packaging>war</packaging>
     
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>jswerve-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>jswerve-servlet</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

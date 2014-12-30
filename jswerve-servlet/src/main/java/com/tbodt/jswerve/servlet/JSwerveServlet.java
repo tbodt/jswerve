@@ -40,14 +40,14 @@ public class JSwerveServlet extends HttpServlet {
                 spiderWar(ctx, path, classes);
             else if (path.endsWith(".class"))
                 try {
-                    classes.add(ctx.getClassLoader().loadClass(path.substring(path.indexOf(".class"))));
+                    classes.add(ctx.getClassLoader().loadClass(path.substring(path.indexOf(".class")).replace('/', '.')));
                 } catch (ClassNotFoundException ex) {
-                    throw new WTFException("class not found! but I saw it!");
+                    throw new WTFException("class" + ex.getMessage() + " not found! but I saw it!");
                 }
     }
 
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        super.service(req, resp);
+        resp.getWriter().println("Working!");
     }
 }
