@@ -22,7 +22,14 @@ package com.tbodt.jswerve;
  * @author Theodore Dubois
  */
 public enum HttpMethod {
-    GET;
+    GET,
+    HEAD,
+    OPTIONS,
+    POST,
+    PUT,
+    PATCH,
+    DELETE,
+    TRACE;
 
     public static HttpMethod forName(String name) throws StatusCodeException {
         try {

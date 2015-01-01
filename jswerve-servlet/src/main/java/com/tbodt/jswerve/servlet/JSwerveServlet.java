@@ -5,12 +5,14 @@
  */
 package com.tbodt.jswerve.servlet;
 
-import com.tbodt.jswerve.WTFException;
-import com.tbodt.jswerve.server.InvalidWebsiteException;
-import com.tbodt.jswerve.server.Website;
+import com.tbodt.jswerve.*;
+import com.tbodt.jswerve.core.Request;
+import com.tbodt.jswerve.core.Website;
+import com.tbodt.jswerve.core.InvalidWebsiteException;
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.Set;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.*;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.*;
@@ -26,7 +28,7 @@ public class JSwerveServlet extends HttpServlet {
     public void init() throws ServletException {
         ServletContext ctx = getServletContext();
         Set<Class<?>> classes = new HashSet<Class<?>>();
-        spiderWar(ctx, "/", classes);
+        spiderWar(ctx, "/WEB-INF/classes", classes);
         try {
             website = new Website(classes);
         } catch (InvalidWebsiteException ex) {
@@ -40,7 +42,9 @@ public class JSwerveServlet extends HttpServlet {
                 spiderWar(ctx, path, classes);
             else if (path.endsWith(".class"))
                 try {
-                    classes.add(ctx.getClassLoader().loadClass(path.substring(path.indexOf(".class")).replace('/', '.')));
+                    classes.add(ctx.getClassLoader().loadClass(
+                            path.substring("/WEB-INF/classes/".length(), path.indexOf(".class"))
+                            .replace('/', '.')));
                 } catch (ClassNotFoundException ex) {
                     throw new WTFException("class" + ex.getMessage() + " not found! but I saw it!");
                 }
@@ -48,6 +52,24 @@ public class JSwerveServlet extends HttpServlet {
 
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        resp.getWriter().println("Working!");
+        HttpMethod method = HttpMethod.valueOf(req.getMethod());
+        URI uri = extractUri(req);
+        Headers headers = translateHeaders(req);
+        Request request = new Request(method, uri, Headers.EMPTY_HEADERS);
+    }
+
+    private URI extractUri(HttpServletRequest req) throws ServletException {
+        try {
+            return new URI(req.getScheme(), req.getServerName(), req.getRequestURI(), req.getQueryString(), null);
+        } catch (URISyntaxException ex) {
+            throw new ServletException("Damn! URI syntax!", ex);
+        }
+    }
+
+    private Headers translateHeaders(HttpServletRequest req) {
+        Headers.Builder builder = new Headers.Builder();
+        for (String headerName : Collections.list(req.getHeaderNames()))
+            builder.setHeader(headerName, req.getHeader(headerName));
+        return builder.build();
     }
 }

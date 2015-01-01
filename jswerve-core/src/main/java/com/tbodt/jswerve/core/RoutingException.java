@@ -14,7 +14,7 @@
  * the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-package com.tbodt.jswerve.server;
+package com.tbodt.jswerve.core;
 
 import com.tbodt.jswerve.StatusCode;
 import com.tbodt.jswerve.StatusCodeException;

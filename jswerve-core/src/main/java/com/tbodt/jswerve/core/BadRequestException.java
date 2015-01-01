@@ -14,11 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.tbodt.jswerve.server;
+package com.tbodt.jswerve.core;
 
 import com.tbodt.jswerve.StatusCode;
 import com.tbodt.jswerve.StatusCodeException;
-import com.tbodt.jswerve.server.Constants;
+import com.tbodt.jswerve.core.Constants;
 
 /**
  *
