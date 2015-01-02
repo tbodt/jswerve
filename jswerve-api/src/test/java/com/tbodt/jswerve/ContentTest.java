@@ -27,7 +27,7 @@ public class ContentTest {
     @Test
     public void testEmptyContent() {
         Content empty = Content.EMPTY;
-        assertEquals(0, empty.getData().remaining());
+        assertEquals(0, empty.getData().length);
         assertNull(empty.getContentType());
     }
 }

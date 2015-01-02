@@ -8,7 +8,6 @@
     <version>0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
     <modules>
-        <module>distribution</module>
         <module>jswerve-maven-plugin</module>
         <module>examples</module>
         <module>jswerve-api</module>
@@ -25,16 +24,6 @@
                     <configuration>
                         <source>1.5</source>
                         <target>1.5</target>
-                    </configuration>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-assembly-plugin</artifactId>
-                    <version>2.4.1</version>
-                    <configuration>
-                        <descriptors>
-                            <descriptor>src/assembly/home.xml</descriptor>
-                        </descriptors>
                     </configuration>
                 </plugin>
             </plugins>

@@ -6,16 +6,15 @@
 package com.tbodt.jswerve.servlet;
 
 import com.tbodt.jswerve.*;
-import com.tbodt.jswerve.core.Request;
-import com.tbodt.jswerve.core.Website;
-import com.tbodt.jswerve.core.InvalidWebsiteException;
+import com.tbodt.jswerve.core.*;
+import com.tbodt.jswerve.util.UrlUtils;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.net.*;
 import java.util.*;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.*;
+import org.apache.commons.io.IOUtils;
 
 /**
  *
@@ -38,7 +37,7 @@ public class JSwerveServlet extends HttpServlet {
 
     private void spiderWar(ServletContext ctx, String start, Set<Class<?>> classes) {
         for (String path : ctx.getResourcePaths(start))
-            if (ctx.getResourcePaths(path) != null)
+            if (ctx.getResourcePaths(path) != null && !ctx.getResourcePaths(path).isEmpty())
                 spiderWar(ctx, path, classes);
             else if (path.endsWith(".class"))
                 try {
@@ -55,12 +54,23 @@ public class JSwerveServlet extends HttpServlet {
         HttpMethod method = HttpMethod.valueOf(req.getMethod());
         URI uri = extractUri(req);
         Headers headers = translateHeaders(req);
-        Request request = new Request(method, uri, Headers.EMPTY_HEADERS);
+        Content content = new Content(IOUtils.toByteArray(req.getInputStream()), req.getContentType());
+        Request request = new Request(method, uri, headers, content);
+        try {
+            Response response = website.service(request);
+            resp.getWriter().println(response.getContent().toString());
+        } catch (StatusCodeException ex) {
+            resp.setStatus(ex.getStatusCode().getCode());
+            ex.printStackTrace(resp.getWriter());
+        }
     }
 
     private URI extractUri(HttpServletRequest req) throws ServletException {
         try {
-            return new URI(req.getScheme(), req.getServerName(), req.getRequestURI(), req.getQueryString(), null);
+            return new URI(req.getScheme(),
+                    UrlUtils.decode(req.getServerName()),
+                    UrlUtils.decode(req.getRequestURI()),
+                    UrlUtils.decode(req.getQueryString()), null);
         } catch (URISyntaxException ex) {
             throw new ServletException("Damn! URI syntax!", ex);
         }

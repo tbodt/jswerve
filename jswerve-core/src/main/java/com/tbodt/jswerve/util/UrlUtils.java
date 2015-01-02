@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Theodore Dubois
+ * Copyright (C) 2015 Theodore Dubois
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,36 +14,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.tbodt.jswerve;
+package com.tbodt.jswerve.util;
 
-import java.nio.charset.Charset;
+import com.tbodt.jswerve.WTFException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 
 /**
  *
  * @author Theodore Dubois
  */
-public final class Content {
-    private final byte[] data;
-    private final String mimeType;
-    
-    public static Content EMPTY = new Content(new byte[0], null);
-
-    public Content(byte[] data, String mimeType) {
-        this.data = data;
-        this.mimeType = mimeType;
+public class UrlUtils {
+    public static String decode(String url) {
+        try {
+            if (url == null)
+                return null;
+            else
+                return URLDecoder.decode(url, "UTF-8");
+        } catch (UnsupportedEncodingException ex) {
+            throw new WTFException("I thought the UTF-8 encoding existed!", ex);
+        }
     }
 
-    public byte[] getData() {
-        return data.clone();
-    }
-
-    public String getContentType() {
-        return mimeType;
-    }
-    
-    private static final Charset UTF_8 = Charset.forName("UTF-8");
-    @Override
-    public String toString() {
-        return new String(data, UTF_8);
-    }
 }

@@ -16,10 +16,8 @@
  */
 package com.tbodt.jswerve.core;
 
-import com.tbodt.jswerve.Headers;
-import com.tbodt.jswerve.HttpMethod;
-import com.tbodt.jswerve.WTFException;
-import java.io.UnsupportedEncodingException;
+import com.tbodt.jswerve.*;
+import com.tbodt.jswerve.util.UrlUtils;
 import java.net.*;
 import java.util.*;
 
@@ -33,21 +31,29 @@ public final class Request {
     private final HttpMethod method;
     private final URI uri;
     private final Headers headers;
+    private final Content body;
 
     private Map<String, String> parameters;
     private Map<String, String> queryParameters;
+    private Map<String, String> postParameters;
     private Map<String, String> pathParameters;
 
     public Request(HttpMethod method, URI uri, Headers headers) {
+        this(method, uri, headers, Content.EMPTY);
+    }
+    
+    public Request(HttpMethod method, URI uri, Headers headers, Content body) {
         this.method = method;
         this.uri = uri;
         this.headers = headers;
+        this.body = body;
     }
 
     public Map<String, String> getParameters() {
         if (parameters == null) {
             Map<String, String> parametersMap = new HashMap<String, String>();
             parametersMap.putAll(getQueryParameters());
+            parametersMap.putAll(getPostParameters());
             parametersMap.putAll(getPathParameters());
             parameters = Collections.unmodifiableMap(parametersMap);
         }
@@ -64,8 +70,16 @@ public final class Request {
         return queryParameters;
     }
 
+    public Map<String, String> getPostParameters() {
+        if (postParameters == null)
+            if (body.getContentType() != null && body.getContentType().equals("application/x-www-form-urlencoded"))
+                postParameters = decodeParameters(body.toString());
+            else
+                postParameters = Collections.emptyMap();
+        return postParameters;
+    }
+
     private static Map<String, String> decodeParameters(String encoded) {
-        try {
             Map<String, String> map = new HashMap<String, String>();
             StringTokenizer tok = new StringTokenizer(encoded, "&");
             while (tok.hasMoreTokens()) {
@@ -73,19 +87,18 @@ public final class Request {
                 int equalIndex = parameter.indexOf("=");
                 if (equalIndex == -1)
                     continue;
-                String key = URLDecoder.decode(parameter.substring(0, equalIndex), "UTF-8");
-                String value = URLDecoder.decode(parameter.substring(equalIndex + 1), "UTF-8");
+                String key = UrlUtils.decode(parameter.substring(0, equalIndex));
+                String value = UrlUtils.decode(parameter.substring(equalIndex + 1));
                 if (key.equals(""))
                     continue;
                 map.put(key, value);
             }
             return Collections.unmodifiableMap(map);
-        } catch (UnsupportedEncodingException ex) {
-            throw new WTFException("I thought the UTF-8 encoding existed!");
-        }
     }
 
     public Map<String, String> getPathParameters() {
+        if (pathParameters == null)
+            return Collections.emptyMap();
         return pathParameters;
     }
 
@@ -103,5 +116,9 @@ public final class Request {
 
     public Headers getHeaders() {
         return headers;
+    }
+
+    public Content getBody() {
+        return body;
     }
 }

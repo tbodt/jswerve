@@ -98,7 +98,7 @@ public class Website {
             throw ex;
         } catch (RuntimeException ex) {
             ex.printStackTrace(System.err);
-            throw new StatusCodeException(StatusCode.INTERNAL_SERVER_ERROR);
+            throw new StatusCodeException(StatusCode.INTERNAL_SERVER_ERROR, ex);
         }
     }
 
