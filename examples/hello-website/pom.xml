@@ -9,5 +9,5 @@
     </parent>
     
     <artifactId>hello-website</artifactId>
-    <packaging>jar</packaging>
+    <packaging>war</packaging>
 </project>
