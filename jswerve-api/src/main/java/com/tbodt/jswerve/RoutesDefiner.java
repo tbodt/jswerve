@@ -78,6 +78,22 @@ public abstract class RoutesDefiner {
         return new RouteInfo(path).via(HttpMethod.GET);
     }
 
+    protected static final RouteInfo post(String path) {
+        return new RouteInfo(path).via(HttpMethod.POST);
+    }
+
+    protected static final RouteInfo put(String path) {
+        return new RouteInfo(path).via(HttpMethod.PUT);
+    }
+
+    protected static final RouteInfo patch(String path) {
+        return new RouteInfo(path).via(HttpMethod.PATCH);
+    }
+
+    protected static final RouteInfo delete(String path) {
+        return new RouteInfo(path).via(HttpMethod.DELETE);
+    }
+
     public List<Route> getRoutes() {
         return Arrays.asList(routes);
     }

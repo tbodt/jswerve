@@ -14,9 +14,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.tbodt.jswerve.core;
+package com.tbodt.jswerve;
 
-import com.tbodt.jswerve.*;
 import com.tbodt.jswerve.util.UrlUtils;
 import java.net.*;
 import java.util.*;

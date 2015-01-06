@@ -36,19 +36,19 @@ public final class Headers implements Iterable<Map.Entry<String, String>> {
         private final Map<String, String> headersMap;
         private boolean built = false;
         
-        public Builder() {
+        private Builder() {
             headersMap = new HashMap<String, String>();
         }
 
-        public Builder(Headers headers) {
+        private Builder(Headers headers) {
             headersMap = new HashMap<String, String>(headers.asMap());
         }
         
-        public Builder setHeader(String name, String value) {
+        public Builder header(String name, String value) {
             headersMap.put(name.toLowerCase(), value);
             return this;
         }
-        
+
         public Builder setHeaders(Headers headers) {
             headersMap.putAll(headers.headersMap);
             return this;
@@ -61,7 +61,15 @@ public final class Headers implements Iterable<Map.Entry<String, String>> {
             return new Headers(headersMap);
         }
     }
-
+    
+    public static Builder builder() {
+        return new Builder();
+    }
+    
+    public Builder getBuilder() {
+        return new Builder(this);
+    }
+    
     public String get(String key) {
         return headersMap.get(key.toLowerCase());
     }

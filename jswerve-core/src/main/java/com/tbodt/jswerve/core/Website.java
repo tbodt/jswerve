@@ -16,6 +16,8 @@
  */
 package com.tbodt.jswerve.core;
 
+import com.tbodt.jswerve.Request;
+import com.tbodt.jswerve.Response;
 import com.tbodt.jswerve.WTFException;
 import com.tbodt.jswerve.*;
 import com.tbodt.jswerve.controller.Controller;
@@ -91,9 +93,9 @@ public class Website {
             Route route = routes.route(request);
             ControllerInfo controllerInfo = ControllerInfo.get(route.getController());
             Controller controller = controllerInfo.instantiate();
-            controller.init(request.getParameters());
+            controller.setRequest(request);
             controllerInfo.invoke(controller, route.getAction());
-            return new Response(StatusCode.OK, Headers.EMPTY_HEADERS, controller.getResponseData());
+            return controller.getResponse();
         } catch (StatusCodeException ex) {
             throw ex;
         } catch (RuntimeException ex) {

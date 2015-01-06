@@ -30,7 +30,4 @@ public final class Inflections {
 
     private Inflections() {
     }
-    static {
-        new Inflections(); // to increase code coverage
-    }
 }

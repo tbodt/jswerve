@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.tbodt.jswerve.core;
+package com.tbodt.jswerve;
 
 import com.tbodt.jswerve.*;
 import java.nio.ByteBuffer;
@@ -29,8 +29,8 @@ public class Response {
     private final Headers headers;
     private final Content body;
 
-    public static final Headers DEFAULT_HEADERS = new Headers.Builder()
-            .setHeader("Connection", "close")
+    public static final Headers DEFAULT_HEADERS = Headers.builder()
+            .header("Connection", "close")
             .build();
 
     public Response(StatusCode status, Headers headers) {
@@ -39,10 +39,10 @@ public class Response {
 
     public Response(StatusCode status, Headers headers, Content body) {
         this.status = status;
-        Headers.Builder builder = new Headers.Builder(headers);
+        Headers.Builder builder = headers.getBuilder();
         builder.setHeaders(headers);
         if (body.getContentType() != null)
-            builder.setHeader("Content-Type", body.getContentType());
+            builder.header("Content-Type", body.getContentType());
         this.headers = builder.build();
         this.body = body;
     }

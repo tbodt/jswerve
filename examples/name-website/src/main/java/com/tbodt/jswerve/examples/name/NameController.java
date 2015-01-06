@@ -5,7 +5,6 @@
  */
 package com.tbodt.jswerve.examples.name;
 
-import com.tbodt.jswerve.Content;
 import com.tbodt.jswerve.controller.Controller;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -15,7 +14,30 @@ import java.io.StringWriter;
  * @author Theodore Dubois
  */
 public class NameController extends Controller {
-    public void displayName() {
+    public void index() {
+        StringWriter sw = new StringWriter();
+        PrintWriter out = new PrintWriter(sw, true);
+        out.println("<!DOCTYPE html>");
+        out.println("<html>");
+        out.println("<head>");
+        out.println("<title>The Name Website</title>");
+        out.println("</head>");
+        out.println("<body>");
+        out.println("<form method=\"POST\" action=\"/\">");
+        out.println("<label for=\"name-field\">Enter your name:</label>");
+        out.println("<input type=\"text\" name=\"name\" id=\"name-field\" /><br />");
+        out.println("<input type=\"submit\" />");
+        out.println("</form>");
+        out.println("</body>");
+        out.println("</html>");
+        renderText(sw.toString(), "text/html");
+    }
+
+    public void submit() {
+        
+    }
+
+    public void hello() {
         StringWriter sw = new StringWriter();
         PrintWriter out = new PrintWriter(sw, true);
         out.println("<!DOCTYPE html>");
@@ -27,6 +49,6 @@ public class NameController extends Controller {
         out.println("Hello world! Your name is " + getParam("name") + ".");
         out.println("</body>");
         out.println("</html>");
-        setResponseData(new Content(sw.toString().getBytes(), "text/html"));
+        renderText(sw.toString(), "text/html");
     }
 }

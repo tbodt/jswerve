@@ -16,7 +16,6 @@
  */
 package com.tbodt.jswerve.util;
 
-import com.tbodt.jswerve.util.Inflections;
 import static org.junit.Assert.*;
 import org.junit.Test;
 

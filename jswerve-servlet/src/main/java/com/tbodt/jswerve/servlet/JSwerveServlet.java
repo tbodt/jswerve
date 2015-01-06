@@ -77,9 +77,9 @@ public class JSwerveServlet extends HttpServlet {
     }
 
     private Headers translateHeaders(HttpServletRequest req) {
-        Headers.Builder builder = new Headers.Builder();
+        Headers.Builder builder = Headers.builder();
         for (String headerName : Collections.list(req.getHeaderNames()))
-            builder.setHeader(headerName, req.getHeader(headerName));
+            builder.header(headerName, req.getHeader(headerName));
         return builder.build();
     }
 }

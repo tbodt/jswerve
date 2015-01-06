@@ -25,7 +25,9 @@ import com.tbodt.jswerve.RoutesDefiner;
 public class Routes extends RoutesDefiner {
     public Routes() {
         super(
-                get("/:name").to(NameController.class, "displayName")
+                get("/").to(NameController.class, "index"),
+                post("/").to(NameController.class, "submit"),
+                get("/:name").to(NameController.class, "hello")
         );
     }
 }

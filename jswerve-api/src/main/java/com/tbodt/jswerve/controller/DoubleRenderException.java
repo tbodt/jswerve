@@ -1,4 +1,4 @@
-/* RoutingException Copyright (C) 2014 Theodore Dubois.
+/* DoubleRenderException Copyright (C) 2015 Theodore Dubois.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,23 +14,16 @@
  * the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-package com.tbodt.jswerve.core;
-
-import com.tbodt.jswerve.Request;
-import com.tbodt.jswerve.StatusCode;
-import com.tbodt.jswerve.StatusCodeException;
+package com.tbodt.jswerve.controller;
 
 /**
  *
  * @author Theodore Dubois
  */
-public class RoutingException extends StatusCodeException {
+public class DoubleRenderException extends RuntimeException {
     /**
-     * Creates a new instance of {@code RoutingException}.
-     * 
-     * @param request the request that couldn't be routed
+     * Creates a new instance of <code>DoubleRenderException</code> without detail message.
      */
-    public RoutingException(Request request) {
-        super(StatusCode.NOT_FOUND);
+    public DoubleRenderException() {
     }
 }

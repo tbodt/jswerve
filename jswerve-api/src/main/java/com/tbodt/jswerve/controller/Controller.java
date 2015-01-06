@@ -16,30 +16,55 @@
  */
 package com.tbodt.jswerve.controller;
 
-import com.tbodt.jswerve.Content;
-import java.util.Map;
+import com.tbodt.jswerve.*;
+import java.nio.charset.Charset;
 
 /**
  *
  * @author Theodore Dubois
  */
 public abstract class Controller {
-    private Map<String, String> parameters;
-    private Content responseData;
+    private Request request;
+    private Response response;
 
-    public void init(Map<String, String> parameters) {
-        this.parameters = parameters;
+    public final Request getRequest() {
+        return request;
+    }
+    
+    public final void setRequest(Request request) {
+        this.request = request;
     }
     
     protected final String getParam(String param) {
-        return parameters.get(param);
+        return request.getParameters().get(param);
     }
     
-    public final Content getResponseData() {
-        return responseData;
+    protected final void renderText(String text) {
+        renderText(text, "text/plain");
     }
-
-    protected final void setResponseData(Content responseData) {
-        this.responseData = responseData;
+    
+    protected final void renderText(String text, String contentType) {
+        renderText(text, contentType, StatusCode.OK);
+    }
+    
+    protected final void renderText(String text, String contentType, StatusCode status) {
+        render(status, Headers.EMPTY_HEADERS, new Content(text.getBytes(Charset.forName("UTF-8")), contentType));
+    }
+    
+    protected final void redirectTo(String path) {
+        redirectTo(path, StatusCode.SEE_OTHER);
+    }
+    protected final void redirectTo(String path, StatusCode status) {
+        render(status, Headers.builder().header("location", path).build(), Content.EMPTY);
+    }
+    
+    private void render(StatusCode status, Headers headers, Content content) {
+        if (response != null)
+            throw new DoubleRenderException();
+        response = new Response(status, headers, content);
+    }
+    
+    public final Response getResponse() {
+        return response;
     }
 }

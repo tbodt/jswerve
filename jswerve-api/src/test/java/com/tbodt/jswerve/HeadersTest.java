@@ -28,20 +28,20 @@ import static org.junit.Assert.*;
 public class HeadersTest {
     @Test
     public void testBuilding() {
-        Headers.Builder builder = new Headers.Builder();
-        builder.setHeader("Content-Type", "text/html");
+        Headers.Builder builder = Headers.builder();
+        builder.header("Content-Type", "text/html");
         Headers headers = builder.build();
         assertEquals("text/html", headers.get("Content-Type"));
 
-        builder = new Headers.Builder(headers);
-        builder.setHeader("Connection", "close");
+        builder = headers.getBuilder();
+        builder.header("Connection", "close");
         headers = builder.build();
         assertEquals("text/html", headers.get("Content-Type"));
         assertEquals("close", headers.get("Connection"));
 
-        builder = new Headers.Builder();
+        builder = Headers.builder();
         builder.setHeaders(headers);
-        builder.setHeader("Content-Length", "more than the atoms in the observable universe");
+        builder.header("Content-Length", "more than the atoms in the observable universe");
         headers = builder.build();
         assertEquals("text/html", headers.get("Content-Type"));
         assertEquals("close", headers.get("Connection"));
@@ -50,16 +50,16 @@ public class HeadersTest {
 
     @Test(expected = IllegalStateException.class)
     public void testBuildingFailure() {
-        Headers.Builder builder = new Headers.Builder();
+        Headers.Builder builder = Headers.builder();
         builder.build();
         builder.build();
     }
 
     @Test
     public void testUsing() {
-        Headers.Builder builder = new Headers.Builder();
-        builder.setHeader("Connection", "close");
-        builder.setHeader("Content-Type", "text/html");
+        Headers.Builder builder = Headers.builder();
+        builder.header("Connection", "close");
+        builder.header("Content-Type", "text/html");
         Headers headers = builder.build();
 
         assertTrue(headers.contains("Connection"));

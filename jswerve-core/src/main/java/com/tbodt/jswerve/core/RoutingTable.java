@@ -16,6 +16,7 @@
  */
 package com.tbodt.jswerve.core;
 
+import com.tbodt.jswerve.Request;
 import com.tbodt.jswerve.Route;
 import com.tbodt.jswerve.*;
 import java.util.*;
