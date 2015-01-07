@@ -28,6 +28,6 @@ public class ContentTest {
     public void testEmptyContent() {
         Content empty = Content.EMPTY;
         assertEquals(0, empty.getData().length);
-        assertNull(empty.getContentType());
+        assertNull(empty.getMimeType());
     }
 }

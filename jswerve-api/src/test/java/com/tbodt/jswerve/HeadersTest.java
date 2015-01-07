@@ -77,8 +77,8 @@ public class HeadersTest {
                 fail("Header key I didn't put there");
         
         Map<String, String> headerValues = new HashMap<String, String>();
-        headerValues.put("connection", "close");
-        headerValues.put("content-type", "text/html");
+        headerValues.put("Connection", "close");
+        headerValues.put("Content-Type", "text/html");
         assertEquals(headerValues, headers.asMap());
     }
 }

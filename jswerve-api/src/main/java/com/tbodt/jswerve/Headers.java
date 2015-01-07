@@ -17,6 +17,7 @@
 package com.tbodt.jswerve;
 
 import java.util.*;
+import org.apache.commons.lang3.text.WordUtils;
 
 /**
  * The HTTP headers.
@@ -45,7 +46,7 @@ public final class Headers implements Iterable<Map.Entry<String, String>> {
         }
         
         public Builder header(String name, String value) {
-            headersMap.put(name.toLowerCase(), value);
+            headersMap.put(capitalizeHeader(name), value);
             return this;
         }
 
@@ -71,11 +72,11 @@ public final class Headers implements Iterable<Map.Entry<String, String>> {
     }
     
     public String get(String key) {
-        return headersMap.get(key.toLowerCase());
+        return headersMap.get(capitalizeHeader(key));
     }
     
     public boolean contains(String key) {
-        return headersMap.containsKey(key.toLowerCase());
+        return headersMap.containsKey(capitalizeHeader(key));
     }
     
     @Override
@@ -85,5 +86,9 @@ public final class Headers implements Iterable<Map.Entry<String, String>> {
     
     public Map<String, String> asMap() {
         return headersMap;
+    }
+    
+    private static String capitalizeHeader(String header) {
+        return WordUtils.capitalize(header, '-');
     }
 }

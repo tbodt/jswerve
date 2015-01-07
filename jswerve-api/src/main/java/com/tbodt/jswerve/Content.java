@@ -16,7 +16,9 @@
  */
 package com.tbodt.jswerve;
 
+import com.tbodt.jswerve.util.UrlUtils;
 import java.nio.charset.Charset;
+import java.util.*;
 
 /**
  *
@@ -25,25 +27,62 @@ import java.nio.charset.Charset;
 public final class Content {
     private final byte[] data;
     private final String mimeType;
-    
+    private final Charset encoding;
+
     public static Content EMPTY = new Content(new byte[0], null);
 
     public Content(byte[] data, String mimeType) {
         this.data = data;
-        this.mimeType = mimeType;
+        if (mimeType == null) {
+            this.mimeType = null;
+            encoding = null;
+        } else if (mimeType.contains(";")) {
+            this.mimeType = mimeType.substring(0, mimeType.indexOf(";")).toLowerCase();
+            Map<String, String> mimeParameters = decodeMimeParameters(mimeType.substring(mimeType.indexOf(";") + 1));
+            encoding = Charset.forName(mimeParameters.get("charset"));
+        } else {
+            this.mimeType = mimeType;
+            encoding = Charset.forName("ISO-8859-1"); // relatively well supported
+        }
+    }
+
+    private static Map<String, String> decodeMimeParameters(String parameters) {
+        Map<String, String> map = new HashMap<String, String>();
+        StringTokenizer tok = new StringTokenizer(parameters, ";");
+        while (tok.hasMoreTokens()) {
+            String parameter = tok.nextToken().trim();
+            int equalIndex = parameter.indexOf("=");
+            if (equalIndex == -1)
+                continue;
+            String key = UrlUtils.decode(parameter.substring(0, equalIndex)).trim().toLowerCase();
+            String value = UrlUtils.decode(parameter.substring(equalIndex + 1));
+            if (key.equals(""))
+                continue;
+            if (value.startsWith("\"") && value.endsWith("\""))
+                value = value.substring(1, value.length() - 1);
+            map.put(key, value);
+        }
+        return Collections.unmodifiableMap(map);
+
     }
 
     public byte[] getData() {
         return data.clone();
     }
 
-    public String getContentType() {
+    public String getMimeType() {
         return mimeType;
     }
-    
-    private static final Charset UTF_8 = Charset.forName("UTF-8");
+
+    public Charset getEncoding() {
+        return encoding;
+    }
+
     @Override
     public String toString() {
-        return new String(data, UTF_8);
+        if (encoding == null)
+            return null;
+        else
+            return new String(data, encoding);
     }
 }

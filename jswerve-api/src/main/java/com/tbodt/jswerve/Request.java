@@ -16,8 +16,9 @@
  */
 package com.tbodt.jswerve;
 
-import com.tbodt.jswerve.util.UrlUtils;
+import java.io.UnsupportedEncodingException;
 import java.net.*;
+import java.nio.charset.Charset;
 import java.util.*;
 
 /**
@@ -40,7 +41,7 @@ public final class Request {
     public Request(HttpMethod method, URI uri, Headers headers) {
         this(method, uri, headers, Content.EMPTY);
     }
-    
+
     public Request(HttpMethod method, URI uri, Headers headers, Content body) {
         this.method = method;
         this.uri = uri;
@@ -63,7 +64,7 @@ public final class Request {
     public Map<String, String> getQueryParameters() {
         if (queryParameters == null)
             if (uri.getQuery() != null)
-                queryParameters = decodeParameters(uri.getQuery());
+                queryParameters = decodeParameters(uri.getQuery(), Charset.forName("UTF-8"));
             else
                 queryParameters = Collections.emptyMap();
         return queryParameters;
@@ -71,14 +72,15 @@ public final class Request {
 
     public Map<String, String> getPostParameters() {
         if (postParameters == null)
-            if (body.getContentType() != null && body.getContentType().equals("application/x-www-form-urlencoded"))
-                postParameters = decodeParameters(body.toString());
+            if (body.getMimeType() != null && body.getMimeType().equals("application/x-www-form-urlencoded"))
+                postParameters = decodeParameters(body.toString(), body.getEncoding());
             else
                 postParameters = Collections.emptyMap();
         return postParameters;
     }
 
-    private static Map<String, String> decodeParameters(String encoded) {
+    private static Map<String, String> decodeParameters(String encoded, Charset charset) {
+        try {
             Map<String, String> map = new HashMap<String, String>();
             StringTokenizer tok = new StringTokenizer(encoded, "&");
             while (tok.hasMoreTokens()) {
@@ -86,13 +88,16 @@ public final class Request {
                 int equalIndex = parameter.indexOf("=");
                 if (equalIndex == -1)
                     continue;
-                String key = UrlUtils.decode(parameter.substring(0, equalIndex));
-                String value = UrlUtils.decode(parameter.substring(equalIndex + 1));
+                String key = URLDecoder.decode(parameter.substring(0, equalIndex), charset.name());
+                String value = URLDecoder.decode(parameter.substring(equalIndex + 1), charset.name());
                 if (key.equals(""))
                     continue;
                 map.put(key, value);
             }
             return Collections.unmodifiableMap(map);
+        } catch (UnsupportedEncodingException ex) {
+            throw new WTFException("unsupported encoding name came from a real charset object!", ex);
+        }
     }
 
     public Map<String, String> getPathParameters() {

@@ -34,7 +34,7 @@ public class NameController extends Controller {
     }
 
     public void submit() {
-        
+        redirectTo("/" + getParam("name"));
     }
 
     public void hello() {

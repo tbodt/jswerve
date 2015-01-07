@@ -41,10 +41,14 @@ public class Response {
         this.status = status;
         Headers.Builder builder = headers.getBuilder();
         builder.setHeaders(headers);
-        if (body.getContentType() != null)
-            builder.header("Content-Type", body.getContentType());
+        if (body.getMimeType() != null)
+            builder.header("Content-Type", body.getMimeType());
         this.headers = builder.build();
         this.body = body;
+    }
+    
+    public StatusCode getStatus() {
+        return status;
     }
     
     public Headers getHeaders() {
