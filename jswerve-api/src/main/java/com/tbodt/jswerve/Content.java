@@ -69,7 +69,7 @@ public final class Content {
     public byte[] getData() {
         return data.clone();
     }
-
+    
     public String getMimeType() {
         return mimeType;
     }
@@ -81,7 +81,7 @@ public final class Content {
     @Override
     public String toString() {
         if (encoding == null)
-            return null;
+            return "";
         else
             return new String(data, encoding);
     }

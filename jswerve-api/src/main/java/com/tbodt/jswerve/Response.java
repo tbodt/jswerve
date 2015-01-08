@@ -16,10 +16,6 @@
  */
 package com.tbodt.jswerve;
 
-import com.tbodt.jswerve.*;
-import java.nio.ByteBuffer;
-import java.util.Map;
-
 /**
  *
  * @author Theodore Dubois
@@ -53,15 +49,6 @@ public class Response {
     
     public Headers getHeaders() {
         return headers;
-    }
-
-    public ByteBuffer toBytes(String httpVersion) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(httpVersion).append(" ").append(status).append("\n");
-        for (Map.Entry<String, String> header : headers)
-            sb.append(header.getKey()).append(": ").append(header.getValue()).append("\n");
-        sb.append("\n");
-        return ByteBuffer.wrap(sb.toString().getBytes());
     }
     
     public Content getContent() {
