@@ -19,6 +19,7 @@ package com.tbodt.jswerve.util;
 import com.tbodt.jswerve.WTFException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 
 /**
  *
@@ -36,4 +37,14 @@ public class UrlUtils {
         }
     }
 
+    public static String encode(String url) {
+        try {
+            if (url == null)
+                return null;
+            else
+                return URLEncoder.encode(url, "UTF-8");
+        } catch (UnsupportedEncodingException ex) {
+            throw new WTFException("I thought the UTF-8 encoding existed!", ex);
+        }
+    }
 }

@@ -64,7 +64,7 @@ public final class Request {
     public Map<String, String> getQueryParameters() {
         if (queryParameters == null)
             if (uri.getQuery() != null)
-                queryParameters = decodeParameters(uri.getQuery(), Charset.forName("UTF-8"));
+                queryParameters = decodeParameters(uri.getQuery());
             else
                 queryParameters = Collections.emptyMap();
         return queryParameters;
@@ -73,13 +73,13 @@ public final class Request {
     public Map<String, String> getPostParameters() {
         if (postParameters == null)
             if (body.getMimeType() != null && body.getMimeType().equals("application/x-www-form-urlencoded"))
-                postParameters = decodeParameters(body.toString(), body.getEncoding());
+                postParameters = decodeParameters(new String(body.getData(), Charset.forName("US-ASCII")));
             else
                 postParameters = Collections.emptyMap();
         return postParameters;
     }
 
-    private static Map<String, String> decodeParameters(String encoded, Charset charset) {
+    private static Map<String, String> decodeParameters(String encoded) {
         try {
             Map<String, String> map = new HashMap<String, String>();
             StringTokenizer tok = new StringTokenizer(encoded, "&");
@@ -88,8 +88,8 @@ public final class Request {
                 int equalIndex = parameter.indexOf("=");
                 if (equalIndex == -1)
                     continue;
-                String key = URLDecoder.decode(parameter.substring(0, equalIndex), charset.name());
-                String value = URLDecoder.decode(parameter.substring(equalIndex + 1), charset.name());
+                String key = URLDecoder.decode(parameter.substring(0, equalIndex), "UTF-8");
+                String value = URLDecoder.decode(parameter.substring(equalIndex + 1), "UTF-8");
                 if (key.equals(""))
                     continue;
                 map.put(key, value);

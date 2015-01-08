@@ -77,12 +77,4 @@ public final class Content {
     public Charset getEncoding() {
         return encoding;
     }
-
-    @Override
-    public String toString() {
-        if (encoding == null)
-            return "";
-        else
-            return new String(data, encoding);
-    }
 }

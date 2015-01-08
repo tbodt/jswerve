@@ -61,7 +61,7 @@ public class JSwerveServlet extends HttpServlet {
             resp.setStatus(response.getStatus().getCode());
             for (Map.Entry<String, String> header : response.getHeaders())
                 resp.setHeader(header.getKey(), header.getValue());
-            resp.getWriter().println(response.getContent().toString());
+            resp.getOutputStream().write(response.getContent().getData());
         } catch (StatusCodeException ex) {
             resp.setStatus(ex.getStatusCode().getCode());
             ex.printStackTrace(resp.getWriter());
