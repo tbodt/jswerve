@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package com.tbodt.jswerve;
 
 /**
@@ -22,21 +21,36 @@ package com.tbodt.jswerve;
  * @author Theodore Dubois
  */
 public enum HttpMethod {
+    /**
+     * The GET HTTP method.
+     */
     GET,
+    /**
+     * The HEAD HTTP method.
+     */
     HEAD,
+    /**
+     * The OPTIONS HTTP method.
+     */
     OPTIONS,
+    /**
+     * The POST HTTP method.
+     */
     POST,
+    /**
+     * The PUT HTTP method.
+     */
     PUT,
+    /**
+     * The PATCH HTTP method.
+     */
     PATCH,
+    /**
+     * The DELETE HTTP method.
+     */
     DELETE,
+    /**
+     * The TRACE HTTP method.
+     */
     TRACE;
-
-    public static HttpMethod forName(String name) throws StatusCodeException {
-        try {
-            return HttpMethod.valueOf(name);
-        } catch (IllegalArgumentException e) {
-            throw new StatusCodeException(StatusCode.NOT_IMPLEMENTED);
-        }
-    }
-
 }

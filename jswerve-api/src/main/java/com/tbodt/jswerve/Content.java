@@ -21,28 +21,34 @@ import java.nio.charset.Charset;
 import java.util.*;
 
 /**
+ * A MIME message. Named {@code Content} because that's shorter.
  *
  * @author Theodore Dubois
  */
 public final class Content {
     private final byte[] data;
     private final String mimeType;
-    private final Charset encoding;
+    private final Map<String, String> mimeParameters;
 
+    /**
+     * Empty content, 0 bytes long and with no MIME type.
+     */
     public static Content EMPTY = new Content(new byte[0], null);
 
+    /**
+     * Construct a {@code Content} with the given data and MIME type. The mime type is parsed for MIME parameters.
+     *
+     * @param data the data
+     * @param mimeType the MIME type
+     */
     public Content(byte[] data, String mimeType) {
         this.data = data;
-        if (mimeType == null) {
-            this.mimeType = null;
-            encoding = null;
-        } else if (mimeType.contains(";")) {
-            this.mimeType = mimeType.substring(0, mimeType.indexOf(";")).toLowerCase();
-            Map<String, String> mimeParameters = decodeMimeParameters(mimeType.substring(mimeType.indexOf(";") + 1));
-            encoding = Charset.forName(mimeParameters.get("charset"));
+        if (mimeType != null && mimeType.contains(";")) {
+            this.mimeType = mimeType.substring(0, mimeType.indexOf(';')).toLowerCase();
+            mimeParameters = decodeMimeParameters(mimeType.substring(mimeType.indexOf(';') + 1));
         } else {
             this.mimeType = mimeType;
-            encoding = Charset.forName("ISO-8859-1"); // relatively well supported
+            mimeParameters = Collections.emptyMap();
         }
     }
 
@@ -51,12 +57,12 @@ public final class Content {
         StringTokenizer tok = new StringTokenizer(parameters, ";");
         while (tok.hasMoreTokens()) {
             String parameter = tok.nextToken().trim();
-            int equalIndex = parameter.indexOf("=");
+            int equalIndex = parameter.indexOf('=');
             if (equalIndex == -1)
                 continue;
             String key = UrlUtils.decode(parameter.substring(0, equalIndex)).trim().toLowerCase();
             String value = UrlUtils.decode(parameter.substring(equalIndex + 1));
-            if (key.equals(""))
+            if (key.length() == 0)
                 continue;
             if (value.startsWith("\"") && value.endsWith("\""))
                 value = value.substring(1, value.length() - 1);
@@ -66,15 +72,42 @@ public final class Content {
 
     }
 
+    /**
+     * If the data is HTML form parameters, parse it as such and return the result. If it is not, return an empty map.
+     * 
+     * @return the data, parsed as HTML form parameters
+     */
+    public Map<String, String> parseFormParameters() {
+        if (mimeType != null && mimeType.equals("application/x-www-form-urlencoded"))
+            return UrlEncodedFormParser.parse(new String(getData(), Charset.forName("US-ASCII")));
+        else
+            return Collections.emptyMap();
+    }
+
+    /**
+     * Return the data. The resulting array can be modified without fear of the apocalypse.
+     *
+     * @return the data
+     */
     public byte[] getData() {
         return data.clone();
     }
-    
+
+    /**
+     * Return the MIME type, with the parameters removed.
+     *
+     * @return the MIME type, with the parameters removed
+     */
     public String getMimeType() {
         return mimeType;
     }
 
-    public Charset getEncoding() {
-        return encoding;
+    /**
+     * Return the MIME parameters.
+     *
+     * @return the MIME parameters
+     */
+    public Map<String, String> getMimeParameters() {
+        return Collections.unmodifiableMap(mimeParameters);
     }
 }
