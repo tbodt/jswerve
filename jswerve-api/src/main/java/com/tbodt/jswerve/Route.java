@@ -22,6 +22,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
+ * A route.
  *
  * @author Theodore Dubois
  */
@@ -38,18 +39,38 @@ public final class Route {
         this.action = action;
     }
 
+    /**
+     * Return the pattern.
+     *
+     * @return the pattern
+     */
     public String[] getPattern() {
         return pattern;
     }
 
+    /**
+     * Return the HTTP methods this route matches.
+     *
+     * @return the HTTP methods this route matches
+     */
     public EnumSet<HttpMethod> getMethods() {
         return methods;
     }
 
+    /**
+     * Return the class of the controller who will service matching requests.
+     *
+     * @return the class of the controller who will service matching requests
+     */
     public Class<? extends Controller> getController() {
         return controller;
     }
 
+    /**
+     * Return the action of the controller that will be invoked.
+     *
+     * @return the action of the controller that will be invoked
+     */
     public String getAction() {
         return action;
     }
@@ -57,6 +78,12 @@ public final class Route {
     private static final Pattern PATH_COMPONENTS = Pattern.compile("[^/]+");
     private static final String[] EMPTY_STRING_ARRAY = new String[0];
 
+    /**
+     * Return the components of a path.
+     *
+     * @param path the path
+     * @return the components of that path
+     */
     public static String[] pathComponents(String path) {
         // This is, unfortunately, more complicated than it needs to be. Which is why it's a static method.
         List<String> components = new ArrayList<String>();

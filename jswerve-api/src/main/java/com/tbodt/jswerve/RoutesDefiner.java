@@ -20,18 +20,28 @@ import com.tbodt.jswerve.controller.Controller;
 import java.util.*;
 
 /**
+ * An abstract class that defines the DSL for creating routes.
  *
  * @author Theodore Dubois
  */
 public abstract class RoutesDefiner {
     private final Route[] routes;
 
+    /**
+     * Creates routes out of the {@code RouteInfo}s.
+     *
+     * @param routesInfo the routes
+     */
     protected RoutesDefiner(RouteInfo... routesInfo) {
         routes = new Route[routesInfo.length];
         for (int i = 0; i < routesInfo.length; i++)
             routes[i] = routesInfo[i].build();
     }
 
+    /**
+     * A builder for routes. If the building methods are called a second time, an
+     * {@code IllegalStateException} is thrown.
+     */
     public static class RouteInfo {
         private final String[] pattern;
         private EnumSet<HttpMethod> methods;
@@ -39,10 +49,17 @@ public abstract class RoutesDefiner {
         private String action;
         private boolean built = false;
 
-        public RouteInfo(String pattern) {
+        private RouteInfo(String pattern) {
             this.pattern = Route.pathComponents(pattern);
         }
 
+        /**
+         * Sets the destination of the route.
+         *
+         * @param controller the controller class
+         * @param action the action in the controller
+         * @return this, for chaining
+         */
         public RouteInfo to(Class<? extends Controller> controller, String action) {
             if (this.controller != null || this.action != null)
                 throw new IllegalStateException("to has already been specified");
@@ -51,6 +68,14 @@ public abstract class RoutesDefiner {
             return this;
         }
 
+        /**
+         * Sets the matching request methods. There are two parameters because that requires at
+         * least one method to be specified.
+         *
+         * @param first the first request method
+         * @param rest the rest of the request methods.
+         * @return this, for chaining
+         */
         public RouteInfo via(HttpMethod first, HttpMethod... rest) {
             if (methods != null)
                 throw new IllegalStateException("Via has already been specified");
@@ -70,30 +95,71 @@ public abstract class RoutesDefiner {
         }
     }
 
+    /**
+     * Return a {@link RouteInfo} that matches the given pattern. You will have to configure the
+     * request methods, by calling {@link RouteInfo#via}.
+     *
+     * @param path the path pattern
+     * @return the {@code RouteInfo} I just mentioned
+     */
     protected static final RouteInfo match(String path) {
         return new RouteInfo(path);
     }
 
+    /**
+     * Return a {@link RouteInfo} that matches the given pattern with a GET request method.
+     *
+     * @param path the path pattern
+     * @return the {@code RouteInfo} I just mentioned
+     */
     protected static final RouteInfo get(String path) {
         return new RouteInfo(path).via(HttpMethod.GET);
     }
 
+    /**
+     * Return a {@link RouteInfo} that matches the given pattern with a POST request method.
+     *
+     * @param path the path pattern
+     * @return the {@code RouteInfo} I just mentioned
+     */
     protected static final RouteInfo post(String path) {
         return new RouteInfo(path).via(HttpMethod.POST);
     }
 
+    /**
+     * Return a {@link RouteInfo} that matches the given pattern with a PUT request method.
+     *
+     * @param path the path pattern
+     * @return the {@code RouteInfo} I just mentioned
+     */
     protected static final RouteInfo put(String path) {
         return new RouteInfo(path).via(HttpMethod.PUT);
     }
 
+    /**
+     * Return a {@link RouteInfo} that matches the given pattern with a PATCH request method.
+     *
+     * @param path the path pattern
+     * @return the {@code RouteInfo} I just mentioned
+     */
     protected static final RouteInfo patch(String path) {
         return new RouteInfo(path).via(HttpMethod.PATCH);
     }
 
+    /**
+     * Return a {@link RouteInfo} that matches the given pattern with a DELETE request method.
+     *
+     * @param path the path pattern
+     * @return the {@code RouteInfo} I just mentioned
+     */
     protected static final RouteInfo delete(String path) {
         return new RouteInfo(path).via(HttpMethod.DELETE);
     }
 
+    /**
+     * Return the routes created by this {@code RoutesDefiner}.
+     * @return the routes created by this {@code RoutesDefiner}
+     */
     public List<Route> getRoutes() {
         return Arrays.asList(routes);
     }

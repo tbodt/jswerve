@@ -20,17 +20,26 @@ import com.tbodt.jswerve.*;
 import java.nio.charset.Charset;
 
 /**
- *
+ * An abstract class for controllers.
+ * 
  * @author Theodore Dubois
  */
 public abstract class Controller {
     private Request request;
     private Response response;
 
+    /**
+     * Return the request that this controller is currently servicing.
+     * @return the request that this controller is currently servicing
+     */
     public final Request getRequest() {
         return request;
     }
     
+    /**
+     * Set the request that this controller is currently servicing.
+     * @param request the new request
+     */
     public final void setRequest(Request request) {
         this.request = request;
     }

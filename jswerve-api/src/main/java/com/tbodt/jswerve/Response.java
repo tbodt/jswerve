@@ -17,7 +17,9 @@
 package com.tbodt.jswerve;
 
 /**
+ * An HTTP response.
  *
+ * @see Request
  * @author Theodore Dubois
  */
 public class Response {
@@ -25,14 +27,23 @@ public class Response {
     private final Headers headers;
     private final Content body;
 
-    public static final Headers DEFAULT_HEADERS = Headers.builder()
-            .header("Connection", "close")
-            .build();
-
+    /**
+     * Construct a response with the given status and headers, and with no body.
+     *
+     * @param status the status
+     * @param headers the headers
+     */
     public Response(StatusCode status, Headers headers) {
         this(status, headers, Content.EMPTY);
     }
 
+    /**
+     * Construct a response with the given status, headers, and body.
+     *
+     * @param status the status
+     * @param headers the headers
+     * @param body the body
+     */
     public Response(StatusCode status, Headers headers, Content body) {
         this.status = status;
         Headers.Builder builder = headers.getBuilder();
@@ -42,16 +53,31 @@ public class Response {
         this.headers = builder.build();
         this.body = body;
     }
-    
+
+    /**
+     * Return the status code.
+     *
+     * @return the status code
+     */
     public StatusCode getStatus() {
         return status;
     }
-    
+
+    /**
+     * Return the headers.
+     *
+     * @return the headers
+     */
     public Headers getHeaders() {
         return headers;
     }
-    
-    public Content getContent() {
+
+    /**
+     * Return the body.
+     *
+     * @return the body
+     */
+    public Content getBody() {
         return body;
     }
 }

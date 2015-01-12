@@ -17,7 +17,8 @@
 package com.tbodt.jswerve;
 
 /**
- *
+ * An HTTP status code.
+ * 
  * @author Theodore Dubois
  */
 public enum StatusCode {
@@ -80,10 +81,18 @@ public enum StatusCode {
         this.message = message;
     }
 
+    /**
+     * Return the code as an integer.
+     * @return the code as an integer
+     */
     public int getCode() {
         return code;
     }
 
+    /**
+     * Return a message for the code.
+     * @return a message for the code
+     */
     public String getMessage() {
         return message;
     }
