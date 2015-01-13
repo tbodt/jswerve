@@ -21,7 +21,7 @@ import java.nio.charset.Charset;
 
 /**
  * An abstract class for controllers.
- * 
+ *
  * @author Theodore Dubois
  */
 public abstract class Controller {
@@ -30,49 +30,92 @@ public abstract class Controller {
 
     /**
      * Return the request that this controller is currently servicing.
+     *
      * @return the request that this controller is currently servicing
      */
     public final Request getRequest() {
         return request;
     }
-    
+
     /**
      * Set the request that this controller is currently servicing.
+     *
      * @param request the new request
      */
     public final void setRequest(Request request) {
         this.request = request;
     }
-    
-    protected final String getParam(String param) {
-        return request.getParameters().get(param);
+
+    /**
+     * Return the request parameter with the given name.
+     *
+     * @param name the name
+     * @return the request parameter with the given name
+     */
+    protected final String getParam(String name) {
+        return request.getParameters().get(name);
     }
-    
+
+    /**
+     * Render the given text, with the text/plain MIME type.
+     *
+     * @param text the text
+     */
     protected final void renderText(String text) {
         renderText(text, "text/plain");
     }
-    
+
+    /**
+     * Render the given text with the given MIME type.
+     *
+     * @param text the text
+     * @param contentType the MIME type
+     */
     protected final void renderText(String text, String contentType) {
         renderText(text, contentType, StatusCode.OK);
     }
-    
+
+    /**
+     * Render the given text with the given MIME type and status code.
+     *
+     * @param text the text
+     * @param contentType the MIME type
+     * @param status the status code
+     */
     protected final void renderText(String text, String contentType, StatusCode status) {
         render(status, Headers.EMPTY_HEADERS, new Content(text.getBytes(Charset.forName("UTF-8")), contentType));
     }
-    
+
+    /**
+     * Render a redirect to the given path with a status of See Other.
+     *
+     * @param path the path
+     */
     protected final void redirectTo(String path) {
         redirectTo(path, StatusCode.SEE_OTHER);
     }
+
+    /**
+     * Render a redirect to the given path with the given status.
+     *
+     * @param path the path
+     * @param status the status
+     */
     protected final void redirectTo(String path, StatusCode status) {
         render(status, Headers.builder().header("location", path).build(), Content.EMPTY);
     }
-    
+
     private void render(StatusCode status, Headers headers, Content content) {
         if (response != null)
             throw new DoubleRenderException();
         response = new Response(status, headers, content);
     }
-    
+
+    /**
+     * Return the rendered response, or {@code null} if a render has not happened yet.
+     *
+     * @return the rendered response, or {@code null} if a render has not happened yet
+     */
     public final Response getResponse() {
         return response;
     }
