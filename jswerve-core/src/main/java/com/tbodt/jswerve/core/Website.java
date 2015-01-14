@@ -16,9 +16,6 @@
  */
 package com.tbodt.jswerve.core;
 
-import com.tbodt.jswerve.Request;
-import com.tbodt.jswerve.Response;
-import com.tbodt.jswerve.WTFException;
 import com.tbodt.jswerve.*;
 import com.tbodt.jswerve.controller.Controller;
 import java.io.*;
@@ -28,6 +25,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 /**
+ * A JSwerve website.
  *
  * @author Theodore Dubois
  */
@@ -35,15 +33,27 @@ public class Website {
     private ClassLoader loader;
     private RoutingTable routes;
 
+    /**
+     * Construct a {@code Website} from a file. This file can be a directory or a JAR file.
+     *
+     * @param file the file
+     * @throws IOException if the file can't be read
+     * @throws InvalidWebsiteException if the website in the file is invalid
+     */
     public Website(File file) throws IOException, InvalidWebsiteException {
         this(file, new URLClassLoader(new URL[] {file.toURI().toURL()}));
     }
 
-    public Website(File archive, ClassLoader loader) throws IOException, InvalidWebsiteException {
+    private Website(File archive, ClassLoader loader) throws IOException, InvalidWebsiteException {
         this.loader = loader;
         init(archive);
     }
 
+    /**
+     * Construct a {@code Website} from a collection of classes.
+     * @param classes the classes
+     * @throws InvalidWebsiteException if the website is invalid
+     */
     public Website(Collection<Class<?>> classes) throws InvalidWebsiteException {
         init(classes);
     }
@@ -78,7 +88,8 @@ public class Website {
     private void addClass(Set<Class<?>> classes, String name) {
         try {
             if (name.endsWith(".class"))
-                classes.add(loader.loadClass(name.substring(0, name.indexOf(".class")).replace('/', '.')));
+                classes.add(loader.loadClass(name.substring(0, name.indexOf(".class"))
+                        .replace('/', '.')));
         } catch (ClassNotFoundException ex) {
             throw new WTFException("A class that is in the archive was not found in the archive!! File a bug report!!");
         }

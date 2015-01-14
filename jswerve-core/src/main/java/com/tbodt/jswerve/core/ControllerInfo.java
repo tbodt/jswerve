@@ -16,15 +16,14 @@
  */
 package com.tbodt.jswerve.core;
 
-import com.tbodt.jswerve.WTFException;
-import com.tbodt.jswerve.StatusCode;
-import com.tbodt.jswerve.StatusCodeException;
+import com.tbodt.jswerve.*;
 import com.tbodt.jswerve.controller.Controller;
 import java.lang.reflect.*;
 import java.util.*;
 
 /**
- *
+ * Information about a controller, including the class and the actions.
+ * 
  * @author Theodore Dubois
  */
 public final class ControllerInfo {
@@ -33,6 +32,11 @@ public final class ControllerInfo {
     
     private static final Map<Class<? extends Controller>, ControllerInfo> cache = new HashMap<Class<? extends Controller>, ControllerInfo>();
 
+    /**
+     * Return the singleton {@code ControllerInfo} for the given class.
+     * @param controllerClass the class
+     * @return the singleton {@code ControllerInfo} for the given class
+     */
     public static ControllerInfo get(Class<? extends Controller> controllerClass) {
         if (!cache.containsKey(controllerClass))
             cache.put(controllerClass, new ControllerInfo(controllerClass));
@@ -48,16 +52,27 @@ public final class ControllerInfo {
         this.actions = Collections.unmodifiableMap(actionsMap);
     }
     
+    /**
+     * Instantiate the controller represented by this controller info.
+     * 
+     * @return a new controller with the right class
+     */
     public Controller instantiate() {
         try {
             return controllerClass.newInstance();
         } catch (InstantiationException ex) {
-            throw new RuntimeException(ex);
+            throw new WTFException("It is TOO weird!!!", ex);
         } catch (IllegalAccessException ex) {
-            throw new RuntimeException(ex);
+            throw new WTFException("I checked! It's public!", ex);
         }
     }
     
+    /**
+     * Invoke the action on a controller, if it has the right class.
+     * 
+     * @param controller the controller
+     * @param action the action
+     */
     public void invoke(Controller controller, String action) {
         if (!controllerClass.isInstance(controller))
             throw new IllegalArgumentException("controller is not the right class");
@@ -78,6 +93,11 @@ public final class ControllerInfo {
         }
     }
 
+    /**
+     * Return the class this is a controller info for.
+     * 
+     * @return the class this is a controller info for
+     */
     public Class<? extends Controller> getControllerClass() {
         return controllerClass;
     }

@@ -16,8 +16,6 @@
  */
 package com.tbodt.jswerve.core;
 
-import com.tbodt.jswerve.Request;
-import com.tbodt.jswerve.Route;
 import com.tbodt.jswerve.*;
 import java.util.*;
 
@@ -49,10 +47,25 @@ public final class RoutingTable {
         }
     }
 
+    /**
+     * Return a new {@code RoutingTable} by finding the class in the classes that implements
+     * {@link RoutesDefiner} and using it to define the routes.
+     *
+     * @param classes the classes in which to look for {@link RoutesDefiner}
+     * @return a new {@code RoutingTable} from that {@link RoutesDefiner}
+     * @throws InvalidWebsiteException if no {@link RoutesDefiner} could be found, or more than one,
+     * or it could not be instantiated
+     */
     public static RoutingTable extract(Collection<? extends Class<?>> classes) throws InvalidWebsiteException {
         return new RoutingTable(classes);
     }
 
+    /**
+     * Return the first route that matches the given request.
+     *
+     * @param request the request
+     * @return the first route that matches the given request
+     */
     public Route route(Request request) {
         for (Route route : routes)
             if (route.getMethods().contains(request.getMethod())
