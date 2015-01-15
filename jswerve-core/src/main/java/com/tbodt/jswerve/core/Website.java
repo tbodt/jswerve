@@ -51,6 +51,7 @@ public class Website {
 
     /**
      * Construct a {@code Website} from a collection of classes.
+     *
      * @param classes the classes
      * @throws InvalidWebsiteException if the website is invalid
      */
@@ -99,6 +100,12 @@ public class Website {
         this.routes = RoutingTable.extract(classes);
     }
 
+    /**
+     * Service the request and return a response.
+     *
+     * @param request the request
+     * @return the response
+     */
     public Response service(Request request) {
         try {
             Route route = routes.route(request);
@@ -115,6 +122,11 @@ public class Website {
         }
     }
 
+    /**
+     * Return the class loader.
+     *
+     * @return the class loader
+     */
     public ClassLoader getClassLoader() {
         return loader;
     }
