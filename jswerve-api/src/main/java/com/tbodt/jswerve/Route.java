@@ -75,6 +75,28 @@ public final class Route {
         return action;
     }
 
+    /**
+     * Whether the path matches this route.
+     *
+     * @param path the path
+     * @return whether the path matches this route
+     */
+    public boolean matchesPath(String path) {
+        int i, j;
+        Map<String, String> parameters = new HashMap<String, String>();
+        String[] pathComponents = Route.pathComponents(path);
+        for (i = 0, j = 0; i < pattern.length && j < pathComponents.length; i++, j++) {
+            String patternComponent = pattern[i];
+            String pathComponent = pathComponents[j];
+            if (patternComponent.startsWith(":")) {
+                if (!patternComponent.equals(":"))
+                    parameters.put(patternComponent.substring(1), pathComponent);
+            } else if (!patternComponent.equals(pathComponent))
+                return false;
+        }
+        return i == pattern.length && j == pathComponents.length;
+    }
+
     private static final Pattern PATH_COMPONENTS = Pattern.compile("[^/]+");
     private static final String[] EMPTY_STRING_ARRAY = new String[0];
 

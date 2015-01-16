@@ -61,6 +61,15 @@ public final class RoutingTable {
     }
 
     /**
+     * Return the routes in this routing table.
+     *
+     * @return the routes in this routing table
+     */
+    public List<Route> getRoutes() {
+        return routes;
+    }
+
+    /**
      * Return the first route that matches the given request.
      *
      * @param request the request

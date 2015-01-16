@@ -130,4 +130,13 @@ public class Website {
     public ClassLoader getClassLoader() {
         return loader;
     }
+
+    /**
+     * Return the routing table.
+     *
+     * @return the routing table
+     */
+    public RoutingTable getRoutingTable() {
+        return routes;
+    }
 }

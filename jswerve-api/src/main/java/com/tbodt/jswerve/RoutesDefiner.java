@@ -161,6 +161,6 @@ public abstract class RoutesDefiner {
      * @return the routes created by this {@code RoutesDefiner}
      */
     public List<Route> getRoutes() {
-        return Arrays.asList(routes);
+        return Collections.unmodifiableList(Arrays.asList(routes));
     }
 }

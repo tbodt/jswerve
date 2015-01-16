@@ -51,10 +51,14 @@ public class JSwerveServlet extends HttpServlet {
 
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        if (req.getMethod().equals("OPTIONS"))
+            serviceOptions(req, resp);
+
         HttpMethod method = HttpMethod.valueOf(req.getMethod());
         URI uri = extractUri(req);
         Headers headers = translateHeaders(req);
-        Content content = new Content(IOUtils.toByteArray(req.getInputStream()), req.getContentType());
+        Content content = new Content(IOUtils.toByteArray(req.getInputStream()), req
+                .getContentType());
         Request request = new Request(method, uri, headers, content);
         try {
             Response response = website.service(request);
@@ -65,6 +69,26 @@ public class JSwerveServlet extends HttpServlet {
         } catch (StatusCodeException ex) {
             resp.setStatus(ex.getStatusCode().getCode());
             ex.printStackTrace(resp.getWriter());
+        }
+    }
+
+    private void serviceOptions(HttpServletRequest req, HttpServletResponse resp) throws ServletException {
+        EnumSet methods = EnumSet.noneOf(HttpMethod.class);
+        RoutingTable routingTable = website.getRoutingTable();
+        String path = extractUri(req).getPath();
+        for (Route route : routingTable.getRoutes())
+            if (route.matchesPath(path))
+                methods.addAll(route.getMethods());
+
+        if (!methods.isEmpty()) {
+            StringBuilder allowResponse = new StringBuilder();
+            Iterator i = methods.iterator();
+            while (i.hasNext()) {
+                allowResponse.append(i.next());
+                if (i.hasNext())
+                    allowResponse.append(",");
+            }
+            resp.setHeader("Allow", allowResponse.toString());
         }
     }
 

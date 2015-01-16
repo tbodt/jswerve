@@ -30,10 +30,6 @@ public enum HttpMethod {
      */
     HEAD,
     /**
-     * The OPTIONS HTTP method.
-     */
-    OPTIONS,
-    /**
      * The POST HTTP method.
      */
     POST,
