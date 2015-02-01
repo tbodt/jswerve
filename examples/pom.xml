@@ -42,6 +42,11 @@
                         <failOnMissingWebXml>false</failOnMissingWebXml>
                     </configuration>
                 </plugin>
+                <plugin>
+                    <groupId>org.eclipse.jetty</groupId>
+                    <artifactId>jetty-maven-plugin</artifactId>
+                    <version>9.3.0.M1</version>
+                </plugin>
                 <!-- I haven't figured out testing for websites, so skip code coverage -->
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
