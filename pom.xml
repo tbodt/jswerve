@@ -8,7 +8,6 @@
     <version>0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
     <modules>
-        <module>jswerve-maven-plugin</module>
         <module>examples</module>
         <module>jswerve-api</module>
         <module>jswerve-core</module>
