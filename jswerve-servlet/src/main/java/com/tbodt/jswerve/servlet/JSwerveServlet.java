@@ -51,8 +51,10 @@ public class JSwerveServlet extends HttpServlet {
 
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        if (req.getMethod().equals("OPTIONS"))
+        if (req.getMethod().equals("OPTIONS")) {
             serviceOptions(req, resp);
+            return;
+        }
 
         HttpMethod method = HttpMethod.valueOf(req.getMethod());
         URI uri = extractUri(req);
