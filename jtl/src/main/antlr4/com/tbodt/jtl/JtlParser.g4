@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 theodore
+ * Copyright (C) 2015 Theodore Dubois
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,4 +15,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-grammar Jtl;
+parser grammar JtlParser;
+
+options {
+    tokenVocab = JtlLexer;
+}
+
+template: (text | embed | code)* EOF;
+text: TEXT+;
+embed: '<+' CODE* '+>';
+code: '<{' CODE* '}>';
