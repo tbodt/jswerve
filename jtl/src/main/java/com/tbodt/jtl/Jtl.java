@@ -16,8 +16,11 @@
  */
 package com.tbodt.jtl;
 
+import java.io.IOException;
+import java.io.Reader;
 import java.util.List;
 import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
@@ -31,8 +34,12 @@ import org.apache.commons.lang3.StringEscapeUtils;
  * @author theodore
  */
 public final class Jtl {
-    public static String generateCode(String jtl) {
-        JtlParser parser = new JtlParser(new CommonTokenStream(new JtlLexer(new ANTLRInputStream(jtl))));
+    public static String generateCode(Reader jtl) throws IOException {
+        return generateCode(new ANTLRInputStream(jtl));
+    }
+
+    private static String generateCode(CharStream jtl) {
+        JtlParser parser = new JtlParser(new CommonTokenStream(new JtlLexer(jtl)));
         ParseTree tree = parser.template();
         ParseTreeWalker walker = new ParseTreeWalker();
         final StringBuilder builder = new StringBuilder();

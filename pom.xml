@@ -13,7 +13,8 @@
         <module>jswerve-core</module>
         <module>jswerve-servlet</module>
         <module>jtl</module>
-    </modules>
+    <module>jswerve-maven-plugin</module>
+  </modules>
 
     <build>
         <pluginManagement>
