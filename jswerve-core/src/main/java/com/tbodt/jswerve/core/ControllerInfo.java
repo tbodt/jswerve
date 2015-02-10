@@ -23,13 +23,13 @@ import java.util.*;
 
 /**
  * Information about a controller, including the class and the actions.
- * 
+ *
  * @author Theodore Dubois
  */
 public final class ControllerInfo {
     private final Class<? extends Controller> controllerClass;
     private final Map<String, Method> actions;
-    
+
     private static final Map<Class<? extends Controller>, ControllerInfo> cache = new HashMap<Class<? extends Controller>, ControllerInfo>();
 
     /**
@@ -42,7 +42,7 @@ public final class ControllerInfo {
             cache.put(controllerClass, new ControllerInfo(controllerClass));
         return cache.get(controllerClass);
     }
-    
+
     private ControllerInfo(Class<? extends Controller> controllerClass) {
         this.controllerClass = controllerClass;
         Map<String, Method> actionsMap = new HashMap<String, Method>();
@@ -51,10 +51,10 @@ public final class ControllerInfo {
                 actionsMap.put(action.getName(), action);
         this.actions = Collections.unmodifiableMap(actionsMap);
     }
-    
+
     /**
      * Instantiate the controller represented by this controller info.
-     * 
+     *
      * @return a new controller with the right class
      */
     public Controller instantiate() {
@@ -66,10 +66,10 @@ public final class ControllerInfo {
             throw new WTFException("I checked! It's public!", ex);
         }
     }
-    
+
     /**
      * Invoke the action on a controller, if it has the right class.
-     * 
+     *
      * @param controller the controller
      * @param action the action
      */
@@ -95,7 +95,7 @@ public final class ControllerInfo {
 
     /**
      * Return the class this is a controller info for.
-     * 
+     *
      * @return the class this is a controller info for
      */
     public Class<? extends Controller> getControllerClass() {

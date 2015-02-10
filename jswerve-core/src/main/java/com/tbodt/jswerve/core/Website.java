@@ -55,7 +55,7 @@ public class Website {
      * @param classes the classes
      * @throws InvalidWebsiteException if the website is invalid
      */
-    public Website(Collection<Class<?>> classes) throws InvalidWebsiteException {
+    public Website(Set<Class<?>> classes) throws InvalidWebsiteException {
         init(classes);
     }
 
@@ -75,7 +75,7 @@ public class Website {
     private void spiderDirectory(File root, String path, Set<Class<?>> classes) {
         for (File file : new File(root, path).listFiles()) {
             String relativePath;
-            if (path.equals(""))
+            if (path.length() == 0)
                 relativePath = file.getName();
             else
                 relativePath = path + File.separator + file.getName();
@@ -96,8 +96,9 @@ public class Website {
         }
     }
 
-    private void init(Collection<Class<?>> classes) throws InvalidWebsiteException {
+    private void init(Set<Class<?>> classes) throws InvalidWebsiteException {
         this.routes = RoutingTable.extract(classes);
+        TemplateInfo.fillCache(classes);
     }
 
     /**

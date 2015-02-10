@@ -26,7 +26,8 @@ import java.util.*;
 public final class RoutingTable {
     private final List<Route> routes;
 
-    private RoutingTable(Collection<? extends Class<?>> classes) throws InvalidWebsiteException {
+    @SuppressWarnings("unchecked")
+    private RoutingTable(Collection<Class<?>> classes) throws InvalidWebsiteException {
         Class<? extends RoutesDefiner> definerClass = null;
         for (Class<?> klass : classes)
             if (RoutesDefiner.class.isAssignableFrom(klass))
@@ -56,7 +57,7 @@ public final class RoutingTable {
      * @throws InvalidWebsiteException if no {@link RoutesDefiner} could be found, or more than one,
      * or it could not be instantiated
      */
-    public static RoutingTable extract(Collection<? extends Class<?>> classes) throws InvalidWebsiteException {
+    public static RoutingTable extract(Collection<Class<?>> classes) throws InvalidWebsiteException {
         return new RoutingTable(classes);
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 theodore
+ * Copyright (C) 2015 Theodore Dubois
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ import org.apache.commons.lang3.StringEscapeUtils;
 /**
  * A class with static methods that parse and generate code for JTL templates.
  *
- * @author theodore
+ * @author Theodore Dubois
  */
 public final class Jtl {
     public static String generateCode(Reader jtl) throws IOException {

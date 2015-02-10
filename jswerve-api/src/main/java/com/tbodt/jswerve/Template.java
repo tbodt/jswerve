@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 theodore
+ * Copyright (C) 2015 Theodore Dubois
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,9 +17,16 @@
 package com.tbodt.jswerve;
 
 /**
+ * A template.
  *
- * @author theodore
+ * @author Theodore Dubois
  */
 public interface Template {
+
+    /**
+     * Renders the template and returns the result.
+     *
+     * @return the result of rendering the template
+     */
     String render();
 }
