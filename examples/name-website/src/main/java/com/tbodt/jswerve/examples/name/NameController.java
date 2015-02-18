@@ -15,22 +15,7 @@ import java.io.StringWriter;
  */
 public class NameController extends Controller {
     public void index() {
-        StringWriter sw = new StringWriter();
-        PrintWriter out = new PrintWriter(sw, true);
-        out.println("<!DOCTYPE html>");
-        out.println("<html>");
-        out.println("<head>");
-        out.println("<title>The Name Website</title>");
-        out.println("</head>");
-        out.println("<body>");
-        out.println("<form method=\"POST\" action=\"/\">");
-        out.println("<label for=\"name-field\">Enter your name:</label>");
-        out.println("<input type=\"text\" name=\"name\" id=\"name-field\" /><br />");
-        out.println("<input type=\"submit\" />");
-        out.println("</form>");
-        out.println("</body>");
-        out.println("</html>");
-        renderText(sw.toString(), "text/html");
+        renderAction("index");
     }
 
     public void submit() {

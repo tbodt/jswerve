@@ -3,8 +3,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <artifactId>jswerve</artifactId>
         <groupId>com.tbodt.jswerve</groupId>
+        <artifactId>jswerve-parent</artifactId>
         <version>0.1-SNAPSHOT</version>
     </parent>
 

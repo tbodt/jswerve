@@ -16,7 +16,6 @@
  */
 package com.tbodt.jswerve;
 
-import com.tbodt.jswerve.*;
 import java.nio.charset.Charset;
 
 /**
@@ -27,6 +26,7 @@ import java.nio.charset.Charset;
 public abstract class Controller {
     private Request request;
     private Response response;
+    private String template;
 
     /**
      * Return the request that this controller is currently servicing.
@@ -86,6 +86,10 @@ public abstract class Controller {
         render(status, Headers.EMPTY_HEADERS, new Content(text.getBytes(Charset.forName("UTF-8")), contentType));
     }
 
+    protected final void renderAction(String action) {
+
+    }
+
     /**
      * Render a redirect to the given path with a status of See Other.
      *
@@ -106,7 +110,7 @@ public abstract class Controller {
     }
 
     private void render(StatusCode status, Headers headers, Content content) {
-        if (response != null)
+        if (template != null || response != null)
             throw new DoubleRenderException();
         response = new Response(status, headers, content);
     }

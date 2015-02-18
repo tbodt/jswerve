@@ -3,18 +3,17 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.tbodt.jswerve</groupId>
-    <artifactId>jswerve</artifactId>
-    <name>JSwerve</name>
+    <artifactId>jswerve-parent</artifactId>
+    <name>JSwerve Parent</name>
     <version>0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
     <modules>
         <module>examples</module>
-        <module>jswerve-api</module>
-        <module>jswerve-core</module>
         <module>jswerve-servlet</module>
         <module>jtl</module>
-    <module>jswerve-maven-plugin</module>
-  </modules>
+        <module>jswerve-maven-plugin</module>
+        <module>jswerve</module>
+    </modules>
 
     <build>
         <pluginManagement>

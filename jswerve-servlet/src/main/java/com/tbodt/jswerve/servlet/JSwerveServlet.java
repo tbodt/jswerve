@@ -5,9 +5,6 @@
  */
 package com.tbodt.jswerve.servlet;
 
-import com.tbodt.jswerve.*;
-import com.tbodt.jswerve.core.*;
-import com.tbodt.jswerve.util.UrlUtils;
 import java.io.IOException;
 import java.net.*;
 import java.util.*;
