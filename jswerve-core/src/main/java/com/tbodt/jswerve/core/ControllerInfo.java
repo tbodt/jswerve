@@ -29,6 +29,7 @@ import java.util.*;
 public final class ControllerInfo {
     private final Class<? extends Controller> controllerClass;
     private final Map<String, Method> actions;
+    private final Map<String, TemplateInfo> templates;
 
     private static final Map<Class<? extends Controller>, ControllerInfo> cache = new HashMap<Class<? extends Controller>, ControllerInfo>();
 
@@ -45,11 +46,17 @@ public final class ControllerInfo {
 
     private ControllerInfo(Class<? extends Controller> controllerClass) {
         this.controllerClass = controllerClass;
+
         Map<String, Method> actionsMap = new HashMap<String, Method>();
         for (Method action : controllerClass.getMethods())
             if (Modifier.isPublic(action.getModifiers()) && action.getParameterTypes().length == 0 && action.getReturnType() == void.class)
                 actionsMap.put(action.getName(), action);
         this.actions = Collections.unmodifiableMap(actionsMap);
+
+        Map<String, TemplateInfo> templatesMap = new HashMap<String, TemplateInfo>();
+        for (TemplateInfo template : TemplateInfo.templatesForController(controllerClass))
+            templatesMap.put(template.getName(), template);
+        this.templates = Collections.unmodifiableMap(templatesMap);
     }
 
     /**

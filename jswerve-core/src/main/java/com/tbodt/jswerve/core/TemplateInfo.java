@@ -32,7 +32,6 @@ import java.util.Set;
 public final class TemplateInfo {
     private final Class<? extends Template> templateClass;
     private final String name;
-    private final String format;
     private final Template templateInstance;
 
     private static final Map<Class<? extends Template>, TemplateInfo> templates = new HashMap<Class<? extends Template>, TemplateInfo>();
@@ -72,15 +71,6 @@ public final class TemplateInfo {
         return name;
     }
 
-    /**
-     * Return the format.
-     *
-     * @return the format
-     */
-    public String getFormat() {
-        return format;
-    }
-
     static void fillCache(Set<Class<?>> allClasses) throws InvalidWebsiteException {
         for (Class<?> klass : allClasses)
             if (Template.class.isAssignableFrom(klass)) {
@@ -104,9 +94,6 @@ public final class TemplateInfo {
             throw new InvalidWebsiteException("template constructor threw an exception");
         }
 
-        String className = templateClass.getSimpleName();
-        int underscoreIndex = className.lastIndexOf('_');
-        name = className.substring(0, underscoreIndex).replace('_', '.');
-        format = className.substring(underscoreIndex + 1);
+        name = templateClass.getSimpleName();
     }
 }
