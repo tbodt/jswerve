@@ -6,7 +6,7 @@ jdk:
   - oraclejdk8
 
 install: true
-script: mvn cobertura:cobertura
+script: mvn install cobertura:cobertura
 after_success: mvn coveralls:report
 
 sudo: false
