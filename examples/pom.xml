@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    
+
     <parent>
         <groupId>com.tbodt.jswerve</groupId>
         <artifactId>jswerve</artifactId>
         <version>0.1-SNAPSHOT</version>
     </parent>
-    
+
     <artifactId>examples</artifactId>
     <packaging>pom</packaging>
-    
+
     <modules>
         <module>hello-website</module>
         <module>name-website</module>
     </modules>
-    
+
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -25,7 +25,7 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-    
+
     <build>
         <pluginManagement>
             <plugins>
@@ -46,17 +46,6 @@
                     <groupId>org.eclipse.jetty</groupId>
                     <artifactId>jetty-maven-plugin</artifactId>
                     <version>9.3.0.M1</version>
-                </plugin>
-                <!-- I haven't figured out testing for websites, so skip code coverage -->
-                <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>cobertura-maven-plugin</artifactId>
-                    <version>2.6</version>
-                    <configuration>
-                        <format>xml</format>
-                        <maxmem>256m</maxmem>
-                        <aggregate>true</aggregate>
-                    </configuration>
                 </plugin>
             </plugins>
         </pluginManagement>

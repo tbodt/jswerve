@@ -5,14 +5,7 @@ jdk:
   - oraclejdk7
   - oraclejdk8
 
-install: true
-script: mvn install cobertura:cobertura
-after_success: mvn coveralls:report
-
 sudo: false
 cache:
   directories:
     - $HOME/.m2
-
-notifications:
-  email: false
