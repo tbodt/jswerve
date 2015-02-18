@@ -5,7 +5,7 @@
  */
 package com.tbodt.jswerve.examples.name;
 
-import com.tbodt.jswerve.controller.Controller;
+import com.tbodt.jswerve.Controller;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 

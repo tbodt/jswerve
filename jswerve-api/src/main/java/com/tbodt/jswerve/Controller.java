@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.tbodt.jswerve.controller;
+package com.tbodt.jswerve;
 
 import com.tbodt.jswerve.*;
 import java.nio.charset.Charset;

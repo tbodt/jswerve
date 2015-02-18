@@ -16,7 +16,6 @@
  */
 package com.tbodt.jswerve;
 
-import com.tbodt.jswerve.controller.Controller;
 import java.util.*;
 import static org.junit.Assert.*;
 import org.junit.Test;

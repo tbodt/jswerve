@@ -17,7 +17,7 @@
 package com.tbodt.jswerve.core;
 
 import com.tbodt.jswerve.Template;
-import com.tbodt.jswerve.controller.Controller;
+import com.tbodt.jswerve.Controller;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.HashSet;

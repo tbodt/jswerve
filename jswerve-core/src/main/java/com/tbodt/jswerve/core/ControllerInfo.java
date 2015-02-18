@@ -17,7 +17,7 @@
 package com.tbodt.jswerve.core;
 
 import com.tbodt.jswerve.*;
-import com.tbodt.jswerve.controller.Controller;
+import com.tbodt.jswerve.Controller;
 import java.lang.reflect.*;
 import java.util.*;
 
