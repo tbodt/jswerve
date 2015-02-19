@@ -99,6 +99,10 @@ public final class ControllerInfo {
                 throw new StatusCodeException(StatusCode.INTERNAL_SERVER_ERROR, why);
         }
     }
+    
+    public TemplateInfo getTemplate(String name, String format) {
+        return templates.get(name + "_" + format);
+    }
 
     /**
      * Return the class this is a controller info for.

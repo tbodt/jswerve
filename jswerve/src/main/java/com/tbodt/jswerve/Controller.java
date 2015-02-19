@@ -16,6 +16,8 @@
  */
 package com.tbodt.jswerve;
 
+import com.tbodt.jswerve.core.ControllerInfo;
+import com.tbodt.jswerve.core.TemplateInfo;
 import java.nio.charset.Charset;
 
 /**
@@ -87,7 +89,9 @@ public abstract class Controller {
     }
 
     protected final void renderAction(String action) {
-
+        ControllerInfo info = ControllerInfo.get(getClass());
+        TemplateInfo template = info.getTemplate(action, "html");
+        render(StatusCode.OK, Headers.EMPTY_HEADERS, new Content(template.render().getBytes(Charset.forName("UTF-8")), "text/html"));
     }
 
     /**
