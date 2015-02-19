@@ -14,7 +14,7 @@
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>jswerve-api</artifactId>
+            <artifactId>jswerve</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
