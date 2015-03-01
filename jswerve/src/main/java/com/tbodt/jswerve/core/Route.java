@@ -14,8 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.tbodt.jswerve;
+package com.tbodt.jswerve.core;
 
+import com.tbodt.jswerve.Controller;
+import com.tbodt.jswerve.HttpMethod;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -31,7 +33,7 @@ public final class Route {
     private final Class<? extends Controller> controller;
     private final String action;
 
-    Route(String[] pattern, EnumSet<HttpMethod> methods, Class<? extends Controller> controller, String action) {
+    public Route(String[] pattern, EnumSet<HttpMethod> methods, Class<? extends Controller> controller, String action) {
         this.pattern = pattern;
         this.methods = methods;
         this.controller = controller;
