@@ -6,6 +6,8 @@
 package com.tbodt.jswerve.examples.name;
 
 import com.tbodt.jswerve.Controller;
+import static com.tbodt.jswerve.RouteBuilders.*;
+import com.tbodt.jswerve.RouteBuilders.RouteInfo;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
@@ -14,6 +16,12 @@ import java.io.StringWriter;
  * @author Theodore Dubois
  */
 public class NameController extends Controller {
+    public static final RouteInfo[] ROUTES = {
+        get("/").to(NameController.class, "index"),
+        post("/").to(NameController.class, "submit"),
+        get("/:name").to(NameController.class, "hello")
+    };
+
     public void index() {
         renderAction("index");
     }

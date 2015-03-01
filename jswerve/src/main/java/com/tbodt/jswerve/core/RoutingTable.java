@@ -17,6 +17,8 @@
 package com.tbodt.jswerve.core;
 
 import com.tbodt.jswerve.*;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.*;
 
 /**
@@ -28,34 +30,41 @@ public final class RoutingTable {
 
     @SuppressWarnings("unchecked")
     private RoutingTable(Collection<Class<?>> classes) throws InvalidWebsiteException {
-        Class<? extends RoutesDefiner> definerClass = null;
+        List<Route> routesList = new ArrayList<Route>();
+        // look through all the classes for fields that look like this:
+        // public static final RouteInfo[] ROUTES = { ... };
+        // or maybe
+        // public static final RouteInfo[] SOME_ROUTES = { ... };
+        // public static final RouteInfo[] OTHER_ROUTES = { ... };
+        // Build the RouteInfo and add it to the routes list.
         for (Class<?> klass : classes)
-            if (RoutesDefiner.class.isAssignableFrom(klass))
-                if (definerClass == null)
-                    definerClass = (Class<? extends RoutesDefiner>) klass;
-                else
-                    throw new InvalidWebsiteException("more than one RoutesDefiner");
-
-        if (definerClass == null)
-            throw new InvalidWebsiteException("no RoutesDefiner");
-
-        try {
-            routes = definerClass.newInstance().getRoutes();
-        } catch (InstantiationException ex) {
-            throw new InvalidWebsiteException("no no-arg constructor in RoutesDefiner");
-        } catch (IllegalAccessException ex) {
-            throw new InvalidWebsiteException("no public no-arg constructor in RoutesDefiner");
-        }
+            for (Field field : klass.getFields()) {
+                int modifiers = field.getModifiers();
+                if (field.getType() == RouteBuilders.RouteInfo[].class
+                    && field.getName().endsWith("ROUTES")
+                    && Modifier.isPublic(modifiers)
+                    && Modifier.isStatic(modifiers))
+                    try {
+                        RouteBuilders.RouteInfo[] routeInfos = (RouteBuilders.RouteInfo[]) field.get(null);
+                        for (RouteBuilders.RouteInfo routeInfo : routeInfos)
+                            routesList.add(routeInfo.build());
+                    } catch (IllegalArgumentException ex) {
+                        throw new RuntimeException(ex);
+                    } catch (IllegalAccessException ex) {
+                        throw new RuntimeException(ex);
+                    }
+            }
+        routes = Collections.unmodifiableList(routesList);
     }
 
     /**
-     * Return a new {@code RoutingTable} by finding the class in the classes that implements
-     * {@link RoutesDefiner} and using it to define the routes.
+     * Return a new {@code RoutingTable} by finding the class in the classes
+     * that implements {@link RoutesDefiner} and using it to define the routes.
      *
      * @param classes the classes in which to look for {@link RoutesDefiner}
      * @return a new {@code RoutingTable} from that {@link RoutesDefiner}
-     * @throws InvalidWebsiteException if no {@link RoutesDefiner} could be found, or more than one,
-     * or it could not be instantiated
+     * @throws InvalidWebsiteException if no {@link RoutesDefiner} could be
+     * found, or more than one, or it could not be instantiated
      */
     public static RoutingTable extract(Collection<Class<?>> classes) throws InvalidWebsiteException {
         return new RoutingTable(classes);
@@ -79,7 +88,7 @@ public final class RoutingTable {
     public Route route(Request request) {
         for (Route route : routes)
             if (route.getMethods().contains(request.getMethod())
-                    && pathsMatch(request.getUri().getPath(), route.getPattern(), request))
+                && pathsMatch(request.getUri().getPath(), route.getPattern(), request))
                 return route;
         throw new RoutingException(request);
     }
